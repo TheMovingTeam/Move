@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TestA</string>
+    <string name="home">Home</string>
+    <string name="lines">Lines</string>
+    <string name="map">Map</string>
+    <string name="search">Search</string>
+    <string name="favouriteStops">Favourite stops</string>
+</resources>
