@@ -1,4 +1,4 @@
-package com.example.testa.ui.theme
+package io.github.azakidev.move.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

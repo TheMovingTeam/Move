@@ -1,4 +1,4 @@
-package com.example.testa
+package com.example.move
 
 import org.junit.Test
 

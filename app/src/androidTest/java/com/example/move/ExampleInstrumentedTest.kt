@@ -1,4 +1,4 @@
-package com.example.testa
+package com.example.move
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

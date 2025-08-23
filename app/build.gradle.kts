@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.testa"
+    namespace = "io.github.azakidev.move"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.testa"
+        applicationId = "io.github.azakidev.move"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
