@@ -8,5 +8,5 @@ import io.github.azakidev.move.R
 
 class SheetStopModel: ViewModel() {
     var showBottomSheet by mutableStateOf(false)
-    var sheetStop by mutableStateOf(StopItem(0, R.drawable.nathofjoy, "None", 0))
+    var sheetStop by mutableStateOf(StopItem(0, R.drawable.nathofjoy, "StopName", 0))
 }
