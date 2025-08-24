@@ -5,30 +5,41 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.azakidev.move.ui.pages.*
-import io.github.azakidev.move.ui.theme.TestATheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.azakidev.move.data.SheetStopModel
+import io.github.azakidev.move.ui.pages.HomePage
+import io.github.azakidev.move.ui.pages.LinesPage
+import io.github.azakidev.move.ui.pages.MapPage
+import io.github.azakidev.move.ui.pages.StopPage
+import io.github.azakidev.move.ui.theme.MoveTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TestATheme {
+            MoveTheme {
                 AppNavigator()
             }
         }
@@ -45,10 +56,15 @@ enum class AppDestinations(
     MAP(R.string.map, Icons.Default.LocationOn, R.string.map)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun AppNavigator() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
+    val sheetState = rememberModalBottomSheetState()
+    val sheetModel = viewModel<SheetStopModel>()
+
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -67,9 +83,21 @@ fun AppNavigator() {
         }
     ) {
         when (currentDestination) {
-            AppDestinations.HOME -> HomePage()
-            AppDestinations.LINES -> LinesPage()
+            AppDestinations.HOME -> HomePage(sheetModel)
+            AppDestinations.LINES -> LinesPage(sheetModel)
             AppDestinations.MAP -> MapPage()
         }
+    }
+
+    if (sheetModel.showBottomSheet) {
+        ModalBottomSheet(
+            modifier = Modifier.fillMaxHeight(),
+            onDismissRequest = { sheetModel.showBottomSheet = false },
+            sheetState = sheetState,
+            dragHandle = { },
+            content = {
+                StopPage(sheetModel)
+            }
+        )
     }
 }

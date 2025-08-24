@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

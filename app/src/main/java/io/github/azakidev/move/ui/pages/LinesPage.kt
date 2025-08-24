@@ -16,13 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
+import io.github.azakidev.move.data.SheetStopModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-@Preview
-fun LinesPage() {
+@Composable @Preview
+fun LinesPage(
+    sheetModel: SheetStopModel = SheetStopModel()
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,5 +59,4 @@ fun LinesPage() {
             )
         }
     )
-
 }
