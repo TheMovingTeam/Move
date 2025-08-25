@@ -26,7 +26,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.azakidev.move.data.SheetStopModel
+import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LinesPage
 import io.github.azakidev.move.ui.pages.MapPage
@@ -62,8 +63,10 @@ enum class AppDestinations(
 fun AppNavigator() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
+    val model = viewModel<MoveModel>()
+
     val sheetState = rememberModalBottomSheetState()
-    val sheetModel = viewModel<SheetStopModel>()
+    val sheetModel = viewModel<SheetStopViewModel>()
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -83,8 +86,8 @@ fun AppNavigator() {
         }
     ) {
         when (currentDestination) {
-            AppDestinations.HOME -> HomePage(sheetModel)
-            AppDestinations.LINES -> LinesPage(sheetModel)
+            AppDestinations.HOME -> HomePage(model, sheetModel)
+            AppDestinations.LINES -> LinesPage(model, sheetModel)
             AppDestinations.MAP -> MapPage()
         }
     }
@@ -96,7 +99,7 @@ fun AppNavigator() {
             sheetState = sheetState,
             dragHandle = { },
             content = {
-                StopPage(sheetModel)
+                StopPage(model, sheetModel)
             }
         )
     }

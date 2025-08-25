@@ -4,9 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import io.github.azakidev.move.R
 
-class SheetStopModel: ViewModel() {
+class SheetStopViewModel: ViewModel() {
     var showBottomSheet by mutableStateOf(false)
-    var sheetStop by mutableStateOf(StopItem(0, R.drawable.nathofjoy, "StopName", 0))
+    var sheetStop by mutableStateOf(StopItem())
 }
