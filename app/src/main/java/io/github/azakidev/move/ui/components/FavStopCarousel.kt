@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,10 +38,9 @@ import io.github.azakidev.move.data.StopItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
 fun FavStopCarousel(
-    model: MoveModel = MoveModel(),
-    sheetModel: SheetStopViewModel = SheetStopViewModel()
+    model: MoveModel,
+    sheetModel: SheetStopViewModel
 ) {
     if (model.favouriteStops.count() != 0) {
         HorizontalCenteredHeroCarousel(
@@ -87,6 +87,13 @@ fun FavStopCarousel(
                         ),
                     verticalArrangement = Arrangement.Bottom,
                 ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 16.dp, bottom = 8.dp),
+                        text = item.stopName,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     item.lineTimes.forEach {
                         val line = model.lines.find { lineItem -> lineItem.lineId == it.lineId }
                         val lineName = line?.lineName ?: "DefaultLine"
@@ -130,4 +137,14 @@ fun FavStopCarousel(
             )
         }
     }
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Composable
+@Preview
+fun FavStopCarouselPreview() {
+    val model: MoveModel = MoveModel()
+    model.favouriteStops = listOf(1, 2, 3, 4, 5)
+    val sheetModel: SheetStopViewModel = SheetStopViewModel()
+    FavStopCarousel(model, sheetModel)
 }

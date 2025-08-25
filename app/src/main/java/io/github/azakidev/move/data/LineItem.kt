@@ -4,7 +4,7 @@ data class LineItem (
     val lineId: Int = 0,
 
     val lineName: String = "DefaultLine",
-    val lineEmblem: String = "D",
+    val lineEmblem: String = "DL",
 
-    val stops: List<Int> = listOf(1, 2, 3, 4, 5)
+    val stops: List<Int> = listOf()
 )

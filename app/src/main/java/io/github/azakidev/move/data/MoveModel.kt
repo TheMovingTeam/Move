@@ -8,13 +8,13 @@ class MoveModel: ViewModel() {
         LineItem(
             lineId = 1,
             lineName = "Line 1",
-            lineEmblem = "L1",
+            lineEmblem = "01",
             stops = listOf(1, 3, 5)
         ),
         LineItem(
             lineId = 2,
             lineName = "Line 2",
-            lineEmblem = "6",
+            lineEmblem = "02",
             stops = listOf(2, 3, 4)
         ),
         LineItem(
@@ -23,12 +23,66 @@ class MoveModel: ViewModel() {
             lineEmblem = "03",
             stops = listOf(1, 2, 4, 5)
         ),
+        LineItem(
+            lineId = 4,
+            lineName = "Line 4",
+            lineEmblem = "04",
+            stops = listOf(2, 4, 5)
+        ),
+        LineItem(
+            lineId = 5,
+            lineName = "Line 5",
+            lineEmblem = "05",
+            stops = listOf(1, 2, 3, 4, 5)
+        ),
+        LineItem(
+            lineId = 6,
+            lineName = "Line 6",
+            lineEmblem = "06",
+            stops = listOf(1, 4, 5)
+        ),
+        LineItem(
+            lineId = 1,
+            lineName = "Line 1",
+            lineEmblem = "01",
+            stops = listOf(1, 3, 5)
+        ),
+        LineItem(
+            lineId = 2,
+            lineName = "Line 2",
+            lineEmblem = "02",
+            stops = listOf(2, 3, 4)
+        ),
+        LineItem(
+            lineId = 3,
+            lineName = "Line 3",
+            lineEmblem = "03",
+            stops = listOf(1, 2, 4, 5)
+        ),
+        LineItem(
+            lineId = 4,
+            lineName = "Line 4",
+            lineEmblem = "04",
+            stops = listOf(2, 4, 5)
+        ),
+        LineItem(
+            lineId = 5,
+            lineName = "Line 5",
+            lineEmblem = "05",
+            stops = listOf(1, 2, 3, 4, 5)
+        ),
+        LineItem(
+            lineId = 6,
+            lineName = "Line 6",
+            lineEmblem = "06",
+            stops = listOf(1, 4, 5)
+        ),
     )
 
     var stops: List<StopItem> = listOf(
         StopItem(
             stopId = 1,
-            stopName = "Them",
+            stopName = "First Station",
             image = R.drawable.nathofjoy,
             lineTimes = listOf(
                 LineTime(
@@ -39,7 +93,7 @@ class MoveModel: ViewModel() {
         ),
         StopItem(
             stopId = 2,
-            stopName = "Painting",
+            stopName = "Second Station",
             image = R.drawable.heart_of_sea,
             lineTimes = listOf(
                 LineTime(
@@ -54,7 +108,7 @@ class MoveModel: ViewModel() {
         ),
         StopItem(
             stopId = 3,
-            stopName = "They",
+            stopName = "Third Station",
             image = R.drawable.nathofjoy,
             lineTimes = listOf(
                 LineTime(
@@ -65,7 +119,7 @@ class MoveModel: ViewModel() {
         ),
         StopItem(
             stopId = 4,
-            stopName = "Place",
+            stopName = "Fourth Station",
             image = R.drawable.heart_of_sea,
             lineTimes = listOf(
                 LineTime(

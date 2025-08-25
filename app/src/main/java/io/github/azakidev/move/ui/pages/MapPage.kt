@@ -3,12 +3,14 @@ package io.github.azakidev.move.ui.pages
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material3.AppBarWithSearch
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -30,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,34 +52,26 @@ import org.osmdroid.util.GeoPoint
 @Composable
 @Preview
 fun MapPage() {
-
     val context = LocalContext.current.applicationContext
-
     var cameraState by remember {
         mutableStateOf(
             CameraState(
                 CameraProperty(
-                    geoPoint = GeoPoint(0.0, 0.0),
-                    zoom = 14.0
+                    geoPoint = GeoPoint(0.0, 0.0), zoom = 14.0
                 )
             )
         )
     }
-
     LaunchedEffect(cameraState.zoom) {
         val zoom = cameraState.zoom
         val geoPoint = cameraState.geoPoint
         cameraState = CameraState(
             CameraProperty(
-                geoPoint = geoPoint,
-                zoom = zoom
+                geoPoint = geoPoint, zoom = zoom
             )
         )
     }
-
-    var mapProperties by remember {
-        mutableStateOf(DefaultMapProperties)
-    }
+    var mapProperties by remember { mutableStateOf(DefaultMapProperties) }
 
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -92,17 +87,15 @@ fun MapPage() {
     }
 
     SideEffect {
-        mapProperties = mapProperties
-            .copy(tileSources = TileSourceFactory.MAPNIK)
+        mapProperties = mapProperties.copy(tileSources = TileSourceFactory.MAPNIK)
             .copy(isEnableRotationGesture = false)
-            .copy(zoomButtonVisibility = ZoomButtonVisibility.NEVER)
-            .copy(isFlingEnable = true)
-            .copy(isAnimating = false)
-            .copy(minZoomLevel = 5.0)
+            .copy(zoomButtonVisibility = ZoomButtonVisibility.NEVER).copy(isFlingEnable = true)
+            .copy(isAnimating = false).copy(minZoomLevel = 5.0)
     }
-    Scaffold (
+    Scaffold(
         topBar = {
             AppBarWithSearch(
+                modifier = Modifier.padding(bottom = 8.dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
@@ -110,37 +103,33 @@ fun MapPage() {
                 ),
                 scrollBehavior = null
             )
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier
-                    .size(64.dp),
+                modifier = Modifier.padding(8.dp),
+                onClick = { Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show() },
+                shape = FloatingActionButtonDefaults.largeShape,
                 containerColor = MaterialTheme.colorScheme.primary,
-                onClick = { Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT ).show() },
-                shape = CircleShape,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                content = {
-                    Icon(
-                        modifier = Modifier
-                            .size(FloatingActionButtonDefaults.MediumIconSize),
-                        imageVector = Icons.Filled.GpsFixed,
-                        contentDescription = stringResource(id = R.string.search)
-                    )
-                }
-            )
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
+                    imageVector = Icons.Filled.GpsFixed,
+                    contentDescription = stringResource(id = R.string.search)
+                )
+            }
         },
-        content = { paddingValues ->
-                Surface (
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    OpenStreetMap(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraState = cameraState,
-                        properties = mapProperties
-                    )
-                }
+    ) { paddingValues ->
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            OpenStreetMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraState = cameraState,
+                properties = mapProperties
+            )
         }
-    )
-
+    }
 }
 

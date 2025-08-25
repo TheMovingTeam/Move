@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,20 +70,12 @@ fun LineEntry(item: LineItem) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LineEntryPreview() {
-    LineEntry(
-        item = LineItem()
-    )
-}
-
 @Composable
 fun StopEntries(
     model: MoveModel,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
-    isExpanded: Boolean = true
+    isExpanded: Boolean
 ) {
     // Opening Animation
     val expandTransition = remember {
@@ -167,30 +160,14 @@ fun StopEntries(
     }
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview
-@Composable
-fun StopEntryPreview() {
-    val model = MoveModel()
-    val sheetModel = SheetStopViewModel()
-    StopEntries(
-        model = model,
-        sheetModel = sheetModel,
-        lineItem = LineItem(),
-        isExpanded = true
-    )
-}
-
 @Composable
 fun LineRow(
     model: MoveModel,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
-    isExpanded: Boolean = false
+    expanded: MutableState<Boolean>
 ) {
-    val expanded = remember { mutableStateOf(isExpanded) }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,15 +193,16 @@ fun LineRow(
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun ExpandableContainerViewPreview() {
     val model = MoveModel()
     val sheetModel = SheetStopViewModel()
+    val expanded = remember { mutableStateOf(true) }
     LineRow(
         model = model,
         sheetModel = sheetModel,
         lineItem = model.lines[0],
-        isExpanded = true
+        expanded = expanded
     )
 }
