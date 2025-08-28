@@ -46,7 +46,7 @@ fun StopPage(
     sheetModel: SheetStopViewModel = SheetStopViewModel()
 ) {
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
-    if (sheetModel.sheetStop.stopId in model.favouriteStops) {
+    if (sheetModel.sheetStop.id in model.favouriteStops) {
         icon = Icons.Default.Favorite
     }
     Column {
@@ -60,7 +60,7 @@ fun StopPage(
                 modifier = Modifier
                     .padding(bottom = 16.dp),
                 contentScale = ContentScale.Crop,
-                contentDescription = sheetModel.sheetStop.stopName,
+                contentDescription = sheetModel.sheetStop.name,
             )
             Box(
                 modifier = Modifier
@@ -78,7 +78,7 @@ fun StopPage(
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.BottomStart),
-                    text = sheetModel.sheetStop.stopName,
+                    text = sheetModel.sheetStop.name,
                     style = MaterialTheme.typography.displayMedium
                 )
                 Button(
@@ -92,11 +92,11 @@ fun StopPage(
                     shape = CircleShape,
                     contentPadding = PaddingValues(0.dp),
                     onClick = {
-                        if (sheetModel.sheetStop.stopId !in model.favouriteStops) {
-                            model.favouriteStops += sheetModel.sheetStop.stopId
+                        if (sheetModel.sheetStop.id !in model.favouriteStops) {
+                            model.favouriteStops += sheetModel.sheetStop.id
                             icon = Icons.Default.Favorite
                         } else {
-                            model.favouriteStops -= sheetModel.sheetStop.stopId
+                            model.favouriteStops -= sheetModel.sheetStop.id
                             icon = Icons.Default.FavoriteBorder
                         }
                     }
@@ -114,8 +114,8 @@ fun StopPage(
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
             sheetModel.sheetStop.lineTimes.forEach {
-                val line = model.lines.find { lineItem -> lineItem.lineId == it.lineId }
-                val lineName = line?.lineName ?: "DefaultLine"
+                val line = model.lines.find { lineItem -> lineItem.id == it.lineId }
+                val lineName = line?.name ?: "DefaultLine"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween

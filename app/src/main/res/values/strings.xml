@@ -6,4 +6,8 @@
     <string name="search">Search</string>
     <string name="favouriteStops">Favourite stops</string>
     <string name="noStops">No stops have been added</string>
+    <string name="settings">Settings</string>
+    <string name="providerSource">Provider source</string>
+    <string name="providerTitle">Providers</string>
+    <string name="qrScanFab">Scan</string>
 </resources>

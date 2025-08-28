@@ -20,10 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +37,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.shapeFromId
 
 
 @Composable
@@ -52,19 +51,19 @@ fun LineEntry(item: LineItem) {
             modifier = Modifier
                 .padding(8.dp)
                 .size(48.dp)
-                .clip(shape = MaterialShapes.Cookie9Sided.toShape())
+                .clip(shape = shapeFromId(item.id))
                 .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = item.lineEmblem,
+                text = item.emblem,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = item.lineName,
+            text = item.name,
             style = MaterialTheme.typography.titleLarge,
         )
     }
@@ -109,7 +108,7 @@ fun StopEntries(
 
             var count = 0
             lineItem.stops.forEach { i ->
-                val stopItem = model.stops.find { stopItem -> stopItem.stopId == i } ?: StopItem()
+                val stopItem = model.stops.find { stopItem -> stopItem.id == i } ?: StopItem()
                 val shape = when (count) {
                     0 -> {
                         RoundedCornerShape(
@@ -146,7 +145,7 @@ fun StopEntries(
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Text(
-                        text = stopItem.stopName,
+                        text = stopItem.name,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier

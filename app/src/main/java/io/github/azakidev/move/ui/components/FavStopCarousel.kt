@@ -42,9 +42,14 @@ fun FavStopCarousel(
     model: MoveModel,
     sheetModel: SheetStopViewModel
 ) {
-    if (model.favouriteStops.count() != 0) {
+    val favStops = mutableListOf<StopItem>()
+    model.favouriteStops.forEach { i ->
+        val stop = model.stops.find { stopItem -> i == stopItem.id } ?: StopItem()
+        if (stop != StopItem()) { favStops.add(stop) }
+    }
+    if ( favStops.count() != 0) {
         HorizontalCenteredHeroCarousel(
-            state = rememberCarouselState { model.favouriteStops.count() },
+            state = rememberCarouselState { favStops.count() },
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -52,7 +57,7 @@ fun FavStopCarousel(
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) { i ->
-            val item = model.stops.find { stopItem -> stopItem.stopId == model.favouriteStops[i] } ?: StopItem()
+            val item = favStops[i]
             Box(
                 modifier = Modifier
                     .height(208.dp)
@@ -71,7 +76,7 @@ fun FavStopCarousel(
                     modifier = Modifier
                         .height(205.dp),
                     painter = painterResource(id = item.image),
-                    contentDescription = item.stopName,
+                    contentDescription = item.name,
                     contentScale = ContentScale.Crop,
                 )
                 Column(
@@ -90,13 +95,13 @@ fun FavStopCarousel(
                     Text(
                         modifier = Modifier
                             .padding(start = 16.dp, bottom = 8.dp),
-                        text = item.stopName,
+                        text = item.name,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     item.lineTimes.forEach {
-                        val line = model.lines.find { lineItem -> lineItem.lineId == it.lineId }
-                        val lineName = line?.lineName ?: "DefaultLine"
+                        val line = model.lines.find { lineItem -> lineItem.id == it.lineId }
+                        val lineName = line?.name ?: "DefaultLine"
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -143,8 +148,23 @@ fun FavStopCarousel(
 @Composable
 @Preview
 fun FavStopCarouselPreview() {
-    val model: MoveModel = MoveModel()
-    model.favouriteStops = listOf(1, 2, 3, 4, 5)
-    val sheetModel: SheetStopViewModel = SheetStopViewModel()
+    val model = MoveModel()
+    model.stops = listOf(
+        StopItem(id = 1, name = "Stop 1"),
+        StopItem(id = 2, name = "Stop 2"),
+    )
+    model.favouriteStops = listOf(1, 2)
+    val sheetModel = SheetStopViewModel()
+    FavStopCarousel(model, sheetModel)
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Composable
+@Preview
+fun FavStopCarouselEmptyPreview() {
+    val model = MoveModel()
+    model.stops = listOf()
+    model.favouriteStops = listOf(1, 2)
+    val sheetModel = SheetStopViewModel()
     FavStopCarousel(model, sheetModel)
 }

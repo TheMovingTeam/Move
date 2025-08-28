@@ -5,52 +5,142 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.EaseInCirc
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.entry
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LinesPage
 import io.github.azakidev.move.ui.pages.MapPage
+import io.github.azakidev.move.ui.pages.ProvidersPage
+import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val model = viewModel<MoveModel>()
+
+            val backStack = rememberSaveable { mutableStateListOf<Any>(MainView) }
             MoveTheme {
-                AppNavigator()
+                NavDisplay(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                    backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
+                    transitionSpec = {
+                        // Slide in from right when navigating forward
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
+                            targetScale = 0.9f,
+                            transformOrigin = TransformOrigin(0f, 0.5f),
+                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                        )
+                    },
+                    popTransitionSpec = {
+                        // Slide in from left when navigating back
+                        scaleIn(
+                            initialScale = 0.9f,
+                            transformOrigin = TransformOrigin(0f, 0.5f),
+                            animationSpec = tween(500)
+                        ) togetherWith slideOutHorizontally(
+                            animationSpec = tween(500)
+                        ) { it }
+                    },
+                    predictivePopTransitionSpec = {
+                        // Slide in from left when navigating back
+                        scaleIn(
+                            initialScale = 0.9f,
+                            transformOrigin = TransformOrigin(0f, 0.5f),
+                            animationSpec = tween(200)
+                        ) togetherWith scaleOut(
+                            targetScale = 0.9f,
+                            transformOrigin = TransformOrigin(0f, 0.5f),
+                            animationSpec = tween(200)
+                        ) + slideOutHorizontally(
+                            animationSpec = tween(200, easing = EaseInCirc),
+                            targetOffsetX = { it }
+                        )
+
+                    },
+                    entryProvider = entryProvider {
+                        entry<MainView> {
+                            AppNavigator(model, backStack)
+                        }
+                        entry<Providers> {
+                            ProvidersPage(model, backStack)
+                        }
+                        entry<Settings> {
+                            SettingsPage(model, backStack)
+                        }
+                        entry<QrScanner> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.background),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    "Under construction",
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                        }
+                    },
+                )
             }
         }
     }
 }
 
 enum class AppDestinations(
-    @StringRes val label: Int,
-    val icon: ImageVector,
-    @StringRes val contentDescription: Int
+    @StringRes val label: Int, val icon: ImageVector, @StringRes val contentDescription: Int
 ) {
     HOME(R.string.home, Icons.Default.Home, R.string.home),
     LINES(R.string.lines, Icons.AutoMirrored.Filled.ArrowForward, R.string.lines),
@@ -59,12 +149,14 @@ enum class AppDestinations(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun AppNavigator() {
+fun AppNavigator(
+    model: MoveModel, backStack: SnapshotStateList<Any>
+) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
-    val model = viewModel<MoveModel>()
-
+    model.fetchProviders()
+    model.fetchInfo()
+    
     val sheetState = rememberModalBottomSheetState()
     val sheetModel = viewModel<SheetStopViewModel>()
 
@@ -74,19 +166,17 @@ fun AppNavigator() {
                 item(
                     icon = {
                         Icon(
-                            it.icon,
-                            stringResource(it.contentDescription)
+                            imageVector = it.icon,
+                            contentDescription = stringResource(it.contentDescription)
                         )
                     },
                     label = { Text(stringResource(it.label)) },
                     selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+                    onClick = { currentDestination = it })
             }
-        }
-    ) {
+        }) {
         when (currentDestination) {
-            AppDestinations.HOME -> HomePage(model, sheetModel)
+            AppDestinations.HOME -> HomePage(model, sheetModel, backStack)
             AppDestinations.LINES -> LinesPage(model, sheetModel)
             AppDestinations.MAP -> MapPage()
         }
@@ -100,7 +190,14 @@ fun AppNavigator() {
             dragHandle = { },
             content = {
                 StopPage(model, sheetModel)
-            }
-        )
+            })
     }
+}
+
+@Composable
+@Preview
+fun AppNavigatorPreview() {
+    val model = viewModel<MoveModel>()
+    val backStack = remember { mutableStateListOf<Any>(MainView) }
+    AppNavigator(model, backStack)
 }

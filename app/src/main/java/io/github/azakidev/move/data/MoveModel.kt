@@ -1,144 +1,80 @@
 package io.github.azakidev.move.data
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
-import io.github.azakidev.move.R
+import java.net.URL
+import kotlinx.serialization.json.Json
+import kotlin.concurrent.thread
 
 class MoveModel: ViewModel() {
-    var lines: List<LineItem> = listOf(
-        LineItem(
-            lineId = 1,
-            lineName = "Line 1",
-            lineEmblem = "01",
-            stops = listOf(1, 3, 5)
-        ),
-        LineItem(
-            lineId = 2,
-            lineName = "Line 2",
-            lineEmblem = "02",
-            stops = listOf(2, 3, 4)
-        ),
-        LineItem(
-            lineId = 3,
-            lineName = "Line 3",
-            lineEmblem = "03",
-            stops = listOf(1, 2, 4, 5)
-        ),
-        LineItem(
-            lineId = 4,
-            lineName = "Line 4",
-            lineEmblem = "04",
-            stops = listOf(2, 4, 5)
-        ),
-        LineItem(
-            lineId = 5,
-            lineName = "Line 5",
-            lineEmblem = "05",
-            stops = listOf(1, 2, 3, 4, 5)
-        ),
-        LineItem(
-            lineId = 6,
-            lineName = "Line 6",
-            lineEmblem = "06",
-            stops = listOf(1, 4, 5)
-        ),
-        LineItem(
-            lineId = 1,
-            lineName = "Line 1",
-            lineEmblem = "01",
-            stops = listOf(1, 3, 5)
-        ),
-        LineItem(
-            lineId = 2,
-            lineName = "Line 2",
-            lineEmblem = "02",
-            stops = listOf(2, 3, 4)
-        ),
-        LineItem(
-            lineId = 3,
-            lineName = "Line 3",
-            lineEmblem = "03",
-            stops = listOf(1, 2, 4, 5)
-        ),
-        LineItem(
-            lineId = 4,
-            lineName = "Line 4",
-            lineEmblem = "04",
-            stops = listOf(2, 4, 5)
-        ),
-        LineItem(
-            lineId = 5,
-            lineName = "Line 5",
-            lineEmblem = "05",
-            stops = listOf(1, 2, 3, 4, 5)
-        ),
-        LineItem(
-            lineId = 6,
-            lineName = "Line 6",
-            lineEmblem = "06",
-            stops = listOf(1, 4, 5)
-        ),
-    )
-
-    var stops: List<StopItem> = listOf(
-        StopItem(
-            stopId = 1,
-            stopName = "First Station",
-            image = R.drawable.nathofjoy,
-            lineTimes = listOf(
-                LineTime(
-                    lineId = 3,
-                    nextTime = 5
-                ),
-            )
-        ),
-        StopItem(
-            stopId = 2,
-            stopName = "Second Station",
-            image = R.drawable.heart_of_sea,
-            lineTimes = listOf(
-                LineTime(
-                    lineId = 2,
-                    nextTime = 4
-                ),
-                LineTime(
-                    lineId = 1,
-                    nextTime = 4
-                ),
-            )
-        ),
-        StopItem(
-            stopId = 3,
-            stopName = "Third Station",
-            image = R.drawable.nathofjoy,
-            lineTimes = listOf(
-                LineTime(
-                    lineId = 1,
-                    nextTime = 3
-                ),
-            )
-        ),
-        StopItem(
-            stopId = 4,
-            stopName = "Fourth Station",
-            image = R.drawable.heart_of_sea,
-            lineTimes = listOf(
-                LineTime(
-                    lineId = 2,
-                    nextTime = 2
-                ),
-            )
-        ),
-        StopItem(
-            stopId = 5,
-            stopName = "Dalf station",
-            image = R.drawable.nathofjoy,
-            lineTimes = listOf(
-                LineTime(
-                    lineId = 3,
-                    nextTime = 1
-                ),
-            )
-        )
-    )
+    var providerRepo: MutableState<String> = mutableStateOf("http://192.168.0.17:3000")
+    var providers: List<ProviderItem> = mutableListOf()
+    var savedProviders: List<Int> = mutableListOf(1)
+    var lines: List<LineItem> = listOf()
+    var stops: List<StopItem> = listOf()
     var favouriteStops: List<Int> = listOf()
+
+    fun fetchProviders() {
+        this@MoveModel.providers = listOf()
+        thread {
+            val providerListJson =
+                try {
+                    URL("${providerRepo.value}/providers.json").readText()
+                } catch (e: Exception) {
+                    return@thread
+                }
+            val response = Json.decodeFromString<ProviderListResponse>(providerListJson)
+
+            response.providers.forEach { provider ->
+                thread {
+                    val providerMetadata =
+                        try {
+                            URL("${providerRepo.value}/${provider}/metadata.json").readText()
+                        } catch (e: Exception) {
+                            return@thread
+                        }
+                    val providerItem = Json.decodeFromString<ProviderItem>(providerMetadata)
+                    this@MoveModel.providers += providerItem
+                }
+            }
+        }
+    }
+
+    fun fetchInfo() {
+        this@MoveModel.lines = listOf()
+        this@MoveModel.stops = listOf()
+        this.savedProviders.forEach { id ->
+            val provider = providers.find { providerItem -> providerItem.id == id} ?: ProviderItem()
+            thread {
+                val providerListJson =
+                    try {
+                        URL("${providerRepo.value}/${provider.name}/lines.json").readText()
+                    } catch (e: Exception) {
+                        return@thread
+                    }
+                val response = Json.decodeFromString<LineResponse>(providerListJson)
+
+                this@MoveModel.lines += response.lines
+            }
+
+            thread {
+                val providerListJson =
+                    try {
+                        URL("${providerRepo.value}/${provider.name}/stops.json").readText()
+                    } catch (e: Exception) {
+                        return@thread
+                    }
+                val response = Json.decodeFromString<StopResponse>(providerListJson)
+
+                response.stops.forEach { stopItem ->
+                    stopItem.lines.forEach { n ->
+                        stopItem.lineTimes += LineTime(lineId = n, nextTime = stopItem.id)
+                        this@MoveModel.stops += stopItem
+                    }
+                }
+            }
+        }
+    }
 }
