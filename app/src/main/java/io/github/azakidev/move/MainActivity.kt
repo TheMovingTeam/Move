@@ -5,11 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.EaseInCirc
-import androidx.compose.animation.core.EaseInCubic
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -35,12 +31,9 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -48,8 +41,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
@@ -69,7 +64,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val model = viewModel<MoveModel>()
 
-            val backStack = rememberSaveable { mutableStateListOf<Any>(MainView) }
+            val backStack = rememberNavBackStack(MainView)
             MoveTheme {
                 NavDisplay(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),
@@ -150,7 +145,7 @@ enum class AppDestinations(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigator(
-    model: MoveModel, backStack: SnapshotStateList<Any>
+    model: MoveModel, backStack: NavBackStack
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
@@ -198,6 +193,6 @@ fun AppNavigator(
 @Preview
 fun AppNavigatorPreview() {
     val model = viewModel<MoveModel>()
-    val backStack = remember { mutableStateListOf<Any>(MainView) }
+    val backStack = rememberNavBackStack(MainView)
     AppNavigator(model, backStack)
 }

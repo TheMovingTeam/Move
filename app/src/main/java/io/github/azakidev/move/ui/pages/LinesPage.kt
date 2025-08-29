@@ -3,7 +3,9 @@ package io.github.azakidev.move.ui.pages
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,11 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.LineRow
@@ -66,45 +71,60 @@ fun LinesPage(
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(rememberScrollState())
-                .padding(padding)
-                .background(MaterialTheme.colorScheme.background),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            var count = 0
-            model.lines.forEach { item ->
-                val expanded = remember { mutableStateOf(false) }
-                val shape = when (count) {
-                    0 -> {
-                        RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = 4.dp,
-                            bottomEnd = 4.dp,
-                        )
-                    }
+        if (model.lines.count() != 0) {
+            Column(
+                modifier = Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                var count = 0
+                model.lines.forEach { item ->
+                    val expanded = remember { mutableStateOf(false) }
+                    val shape = when (count) {
+                        0 -> {
+                            RoundedCornerShape(
+                                topStart = 16.dp,
+                                topEnd = 16.dp,
+                                bottomStart = 4.dp,
+                                bottomEnd = 4.dp,
+                            )
+                        }
 
-                    model.lines.count() - 1 -> {
-                        RoundedCornerShape(
-                            topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp
-                        )
-                    }
+                        model.lines.count() - 1 -> {
+                            RoundedCornerShape(
+                                topStart = 4.dp,
+                                topEnd = 4.dp,
+                                bottomStart = 16.dp,
+                                bottomEnd = 16.dp
+                            )
+                        }
 
-                    else -> {
-                        MaterialTheme.shapes.extraSmall
+                        else -> {
+                            MaterialTheme.shapes.extraSmall
+                        }
                     }
+                    LineRow(
+                        model = model,
+                        sheetModel = sheetModel,
+                        lineItem = item,
+                        shape = shape,
+                        expanded = expanded,
+                    )
+                    count++
                 }
-                LineRow(
-                    model = model,
-                    sheetModel = sheetModel,
-                    lineItem = item,
-                    shape = shape,
-                    expanded = expanded,
+            }
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.noLines),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-                count++
             }
         }
     }

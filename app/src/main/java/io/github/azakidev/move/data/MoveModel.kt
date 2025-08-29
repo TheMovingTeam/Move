@@ -2,10 +2,10 @@ package io.github.azakidev.move.data
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import java.net.URL
 import kotlinx.serialization.json.Json
+import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
 class MoveModel: ViewModel() {
@@ -76,5 +76,27 @@ class MoveModel: ViewModel() {
                 }
             }
         }
+    }
+
+    fun tryRepo(url: String): Boolean {
+        val isValid = LinkedBlockingDeque<Boolean>()
+        thread {
+            val providerListJson =
+                try {
+                    URL("${url}/providers.json").readText()
+                } catch (e: Exception) {
+                    isValid.add(false)
+                    return@thread
+                }
+            try {
+                Json.decodeFromString<ProviderListResponse>(providerListJson)
+                isValid.add(true)
+                return@thread
+            } catch (e: Exception) {
+                isValid.add(false)
+                return@thread
+            }
+        }
+        return isValid.take()
     }
 }

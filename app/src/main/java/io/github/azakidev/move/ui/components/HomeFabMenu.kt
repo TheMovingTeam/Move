@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -24,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,6 +36,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.Providers
 import io.github.azakidev.move.QrScanner
@@ -51,7 +51,7 @@ data class FabEntry(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeFabMenu(
-    backStack: SnapshotStateList<Any>,
+    backStack: NavBackStack,
     initialState: Boolean = false
 ) {
     val listState = rememberLazyListState()
@@ -132,12 +132,12 @@ fun HomeFabMenu(
 
 @Composable @Preview
 fun HomeFabMenuPreview() {
-    val backStack = remember { mutableStateListOf<Any>(MainView) }
+    val backStack = rememberNavBackStack(MainView)
     HomeFabMenu(backStack)
 }
 
 @Composable @Preview
 fun HomeFabMenuExpandedPreview() {
-    val backStack = remember { mutableStateListOf<Any>(MainView) }
+    val backStack = rememberNavBackStack(MainView)
     HomeFabMenu(backStack, true)
 }

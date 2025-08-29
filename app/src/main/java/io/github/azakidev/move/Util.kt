@@ -21,10 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
-internal data object MainView
-internal data object Settings
-internal data object Providers
-internal data object QrScanner
+@Serializable
+internal data object MainView: NavKey
+@Serializable
+internal data object Settings: NavKey
+@Serializable
+internal data object Providers: NavKey
+@Serializable
+internal data object QrScanner: NavKey
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
