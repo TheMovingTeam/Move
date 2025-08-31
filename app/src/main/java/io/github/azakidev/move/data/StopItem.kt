@@ -21,9 +21,6 @@ data class StopItem(
     fun setTimeTable(times: List<LineTime>) {
         _lineTimes.value = times
     }
-    fun addTime(time: LineTime) {
-        _lineTimes.value += time
-    }
 }
 @Serializable
 data class StopResponse (

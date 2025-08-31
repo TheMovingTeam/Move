@@ -146,11 +146,12 @@ class MoveModel: ViewModel() {
                 }
             val times = parseTimes(response, provider)
             var count = 0
-            stopItem.setTimeTable(listOf())
+            val timeList = mutableListOf<LineTime>()
             stopItem.lines.forEach { i ->
-                stopItem.addTime(LineTime(i, times[count]))
+                timeList.add(LineTime(i, times[count]))
                 count++
             }
+            stopItem.setTimeTable(timeList)
         }
     }
 }
