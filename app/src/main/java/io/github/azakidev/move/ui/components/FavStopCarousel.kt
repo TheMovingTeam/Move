@@ -35,6 +35,18 @@ import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.LineTime
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,14 +54,31 @@ fun FavStopCarousel(
     model: MoveModel,
     sheetModel: SheetStopViewModel
 ) {
-    val favStops = mutableListOf<StopItem>()
-    model.favouriteStops.forEach { i ->
-        val stop = model.stops.find { stopItem -> i == stopItem.id } ?: StopItem()
-        if (stop != StopItem()) { favStops.add(stop) }
+    val favStops = MutableStateFlow<List<StopItem>>(listOf())
+
+    model.favouriteStops.collectAsState().value.forEach { i ->
+        val stop = model.stops.value.find { stopItem -> i == stopItem.id } ?: StopItem()
+        var shouldLoad by remember { mutableStateOf(true) }
+        if (model.savedProviders.contains(stop.provider)) {
+            shouldLoad = true
+            favStops.value += stop
+            val timer = Timer().schedule(delay = 500, period = 15000, action = {
+                model.fetchTimes(stop)
+            })
+            if (shouldLoad) {
+                timer.run()
+            } else {
+                timer.cancel()
+            }
+        }
     }
-    if ( favStops.count() != 0) {
+
+
+
+
+    if (favStops.collectAsState().value.count() != 0) {
         HorizontalCenteredHeroCarousel(
-            state = rememberCarouselState { favStops.count() },
+            state = rememberCarouselState { favStops.value.count() },
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -57,7 +86,7 @@ fun FavStopCarousel(
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) { i ->
-            val item = favStops[i]
+            val item = favStops.collectAsState().value[i]
             Box(
                 modifier = Modifier
                     .height(208.dp)
@@ -99,8 +128,8 @@ fun FavStopCarousel(
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    item.lineTimes.forEach {
-                        val line = model.lines.find { lineItem -> lineItem.id == it.lineId }
+                    item.lineTimes.collectAsState().value.forEach {
+                        val line = model.lines.value.find { lineItem -> lineItem.id == it.lineId }
                         val lineName = line?.name ?: "DefaultLine"
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -144,27 +173,54 @@ fun FavStopCarousel(
     }
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 @Preview
 fun FavStopCarouselPreview() {
-    val model = MoveModel()
-    model.stops = listOf(
-        StopItem(id = 1, name = "Stop 1"),
-        StopItem(id = 2, name = "Stop 2"),
+    val model = viewModel<MoveModel>()
+    model.setStops(
+        listOf(
+            StopItem(id = 1, name = "Stop 1", provider = 1),
+            StopItem(id = 2, name = "Stop 2", provider = 1),
+        )
     )
-    model.favouriteStops = listOf(1, 2)
-    val sheetModel = SheetStopViewModel()
+    model.setFavStops(
+        listOf(1,2)
+    )
+    val sheetModel = viewModel<SheetStopViewModel>()
     FavStopCarousel(model, sheetModel)
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
+
 @Composable
 @Preview
 fun FavStopCarouselEmptyPreview() {
-    val model = MoveModel()
-    model.stops = listOf()
-    model.favouriteStops = listOf(1, 2)
-    val sheetModel = SheetStopViewModel()
+    val model = viewModel<MoveModel>()
+    model.setStops(
+        listOf(
+            StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2)),
+            StopItem(id = 2, name = "Stop 2", lines = listOf(2, 3)),
+        )
+    )
+    model.setLines(
+        listOf(
+            LineItem(id = 1),
+            LineItem(id = 2),
+            LineItem(id = 3),
+        )
+    )
+    model.stops.collectAsState().value.first().setTimeTable(
+        listOf(
+            LineTime(1, 2),
+            LineTime(2, 4)
+        )
+    )
+    model.stops.collectAsState().value.last().setTimeTable(
+        listOf(
+            LineTime(2, 2),
+            LineTime(3, 4)
+        )
+    )
+    model.setFavStops(listOf(1,2))
+    val sheetModel = viewModel<SheetStopViewModel>()
     FavStopCarousel(model, sheetModel)
 }

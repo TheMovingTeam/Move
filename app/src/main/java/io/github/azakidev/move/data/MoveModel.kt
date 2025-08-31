@@ -3,21 +3,28 @@ package io.github.azakidev.move.data
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import io.github.azakidev.move.parseTimes
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.net.URL
 import kotlinx.serialization.json.Json
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
 class MoveModel: ViewModel() {
-    var providerRepo: MutableState<String> = mutableStateOf("http://192.168.0.17:3000")
-    var providers: List<ProviderItem> = mutableListOf()
+    var providerRepo: MutableState<String> = mutableStateOf("https://raw.githubusercontent.com/Azakidev/Providers/refs/heads/main")
+    private val _providers: MutableStateFlow<List<ProviderItem>> = MutableStateFlow(listOf())
+    var providers = _providers.asStateFlow()
     var savedProviders: List<Int> = mutableListOf(1)
-    var lines: List<LineItem> = listOf()
-    var stops: List<StopItem> = listOf()
-    var favouriteStops: List<Int> = listOf()
+    private val _lines: MutableStateFlow<List<LineItem>> = MutableStateFlow(listOf())
+    var lines = _lines.asStateFlow()
+    private val _stops: MutableStateFlow<List<StopItem>> = MutableStateFlow(listOf() )
+    var stops = _stops.asStateFlow()
+    private val _favouriteStops: MutableStateFlow<List<Int>> = MutableStateFlow(listOf(1, 3, 5))
+    var favouriteStops = _favouriteStops.asStateFlow()
 
     fun fetchProviders() {
-        this@MoveModel.providers = listOf()
+        this@MoveModel._providers.value = listOf()
         thread {
             val providerListJson =
                 try {
@@ -36,17 +43,17 @@ class MoveModel: ViewModel() {
                             return@thread
                         }
                     val providerItem = Json.decodeFromString<ProviderItem>(providerMetadata)
-                    this@MoveModel.providers += providerItem
+                    this@MoveModel._providers.value += providerItem
                 }
             }
         }
     }
 
     fun fetchInfo() {
-        this@MoveModel.lines = listOf()
-        this@MoveModel.stops = listOf()
+        this@MoveModel._lines.value = listOf()
+        this@MoveModel._stops.value = listOf()
         this.savedProviders.forEach { id ->
-            val provider = providers.find { providerItem -> providerItem.id == id} ?: ProviderItem()
+            val provider = providers.value.find { providerItem -> providerItem.id == id} ?: ProviderItem()
             thread {
                 val providerListJson =
                     try {
@@ -55,8 +62,10 @@ class MoveModel: ViewModel() {
                         return@thread
                     }
                 val response = Json.decodeFromString<LineResponse>(providerListJson)
-
-                this@MoveModel.lines += response.lines
+                response.lines.forEach { lineItem ->
+                    lineItem.provider = id
+                    this@MoveModel._lines.value += lineItem
+                }
             }
 
             thread {
@@ -69,13 +78,35 @@ class MoveModel: ViewModel() {
                 val response = Json.decodeFromString<StopResponse>(providerListJson)
 
                 response.stops.forEach { stopItem ->
-                    stopItem.lines.forEach { n ->
-                        stopItem.lineTimes += LineTime(lineId = n, nextTime = stopItem.id)
-                        this@MoveModel.stops += stopItem
-                    }
+                    stopItem.provider = id
+                    this@MoveModel._stops.value += stopItem
                 }
             }
         }
+    }
+
+    fun setProviders(providers: List<ProviderItem>) {
+        this._providers.value = providers
+    }
+
+    fun setStops(stops: List<StopItem>) {
+        this._stops.value = stops
+    }
+
+    fun setLines(lines: List<LineItem>) {
+        this._lines.value = lines
+    }
+
+    fun setFavStops(stops: List<Int>) {
+        this._favouriteStops.value = stops
+    }
+
+    fun addFavStop(stop: Int) {
+        this._favouriteStops.value += stop
+    }
+
+    fun removeFavStop(stop: Int) {
+        this._favouriteStops.value -= stop
     }
 
     fun tryRepo(url: String): Boolean {
@@ -98,5 +129,28 @@ class MoveModel: ViewModel() {
             }
         }
         return isValid.take()
+    }
+
+    fun fetchTimes(stopItem: StopItem) {
+        val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider} ?: ProviderItem()
+        if (!provider.capabilities.contains("Time")) {
+            return
+        }
+        val url = provider.timeSource.replace("@stop", stopItem.id.toString())
+        thread {
+            val response =
+                try {
+                    URL(url).readText()
+                } catch (e: Exception) {
+                    return@thread
+                }
+            val times = parseTimes(response, provider)
+            var count = 0
+            stopItem.setTimeTable(listOf())
+            stopItem.lines.forEach { i ->
+                stopItem.addTime(LineTime(i, times[count]))
+                count++
+            }
+        }
     }
 }

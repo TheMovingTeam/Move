@@ -100,6 +100,9 @@ fun SettingsPage(
                             ) {
                                 model.providerRepo.value = state.text.toString()
                                 print(model.providerRepo.value)
+
+                                model.fetchProviders()
+                                model.fetchInfo()
                             } else {
                                 Toast
                                     .makeText(context, invalidText, Toast.LENGTH_SHORT)

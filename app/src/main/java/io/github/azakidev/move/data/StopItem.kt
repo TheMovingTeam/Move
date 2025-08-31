@@ -2,56 +2,30 @@ package io.github.azakidev.move.data
 
 import androidx.annotation.DrawableRes
 import io.github.azakidev.move.R
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class StopItem(
     val id: Int = 0,
     val name: String = "DefaultStop",
+    var provider: Int = 0,
+
     @DrawableRes val image: Int = R.drawable.nathofjoy,
-    val lines: Array<Int> = arrayOf(),
+    val lines: List<Int> = listOf(),
 
-    var lineTimes: List<LineTime> = listOf(),
+    private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf()),
 ) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StopItem
-
-        if (id != other.id) return false
-        if (image != other.image) return false
-        if (name != other.name) return false
-        if (!lines.contentEquals(other.lines)) return false
-        if (lineTimes != other.lineTimes) return false
-
-        return true
+    val lineTimes = _lineTimes.asStateFlow()
+    fun setTimeTable(times: List<LineTime>) {
+        _lineTimes.value = times
     }
-
-    override fun hashCode(): Int {
-        var result = id
-        result = 31 * result + image
-        result = 31 * result + name.hashCode()
-        result = 31 * result + lines.contentHashCode()
-        result = 31 * result + lineTimes.hashCode()
-        return result
+    fun addTime(time: LineTime) {
+        _lineTimes.value += time
     }
 }
-
 @Serializable
 data class StopResponse (
-    val stops: Array<StopItem>
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StopResponse
-
-        return stops.contentEquals(other.stops)
-    }
-
-    override fun hashCode(): Int {
-        return stops.contentHashCode()
-    }
-}
+    val stops: List<StopItem>
+)

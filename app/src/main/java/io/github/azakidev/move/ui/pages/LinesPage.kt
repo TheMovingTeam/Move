@@ -71,7 +71,7 @@ fun LinesPage(
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
         },
     ) { padding ->
-        if (model.lines.count() != 0) {
+        if (model.lines.value.count() != 0) {
             Column(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -81,7 +81,7 @@ fun LinesPage(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 var count = 0
-                model.lines.forEach { item ->
+                model.lines.value.forEach { item ->
                     val expanded = remember { mutableStateOf(false) }
                     val shape = when (count) {
                         0 -> {
@@ -93,7 +93,7 @@ fun LinesPage(
                             )
                         }
 
-                        model.lines.count() - 1 -> {
+                        model.lines.value.count() - 1 -> {
                             RoundedCornerShape(
                                 topStart = 4.dp,
                                 topEnd = 4.dp,

@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entry
@@ -60,75 +62,81 @@ import io.github.azakidev.move.ui.theme.MoveTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
         setContent {
             val model = viewModel<MoveModel>()
+            model.fetchProviders()
+            model.fetchInfo()
 
             val backStack = rememberNavBackStack(MainView)
             MoveTheme {
-                NavDisplay(
+                Surface(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    transitionSpec = {
-                        // Slide in from right when navigating forward
-                        slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
-                            targetScale = 0.9f,
-                            transformOrigin = TransformOrigin(0f, 0.5f),
-                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
-                        )
-                    },
-                    popTransitionSpec = {
-                        // Slide in from left when navigating back
-                        scaleIn(
-                            initialScale = 0.9f,
-                            transformOrigin = TransformOrigin(0f, 0.5f),
-                            animationSpec = tween(500)
-                        ) togetherWith slideOutHorizontally(
-                            animationSpec = tween(500)
-                        ) { it }
-                    },
-                    predictivePopTransitionSpec = {
-                        // Slide in from left when navigating back
-                        scaleIn(
-                            initialScale = 0.9f,
-                            transformOrigin = TransformOrigin(0f, 0.5f),
-                            animationSpec = tween(200)
-                        ) togetherWith scaleOut(
-                            targetScale = 0.9f,
-                            transformOrigin = TransformOrigin(0f, 0.5f),
-                            animationSpec = tween(200)
-                        ) + slideOutHorizontally(
-                            animationSpec = tween(200, easing = EaseInCirc),
-                            targetOffsetX = { it }
-                        )
+                ) {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { backStack.removeLastOrNull() },
+                        transitionSpec = {
+                            // Slide in from right when navigating forward
+                            slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
+                                targetScale = 0.9f,
+                                transformOrigin = TransformOrigin(0f, 0.5f),
+                                animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                            )
+                        },
+                        popTransitionSpec = {
+                            // Slide in from left when navigating back
+                            scaleIn(
+                                initialScale = 0.9f,
+                                transformOrigin = TransformOrigin(0f, 0.5f),
+                                animationSpec = tween(500)
+                            ) togetherWith slideOutHorizontally(
+                                animationSpec = tween(500)
+                            ) { it }
+                        },
+                        predictivePopTransitionSpec = {
+                            // Slide in from left when navigating back
+                            scaleIn(
+                                initialScale = 0.9f,
+                                transformOrigin = TransformOrigin(0f, 0.5f),
+                                animationSpec = tween(200)
+                            ) togetherWith scaleOut(
+                                targetScale = 0.9f,
+                                transformOrigin = TransformOrigin(0f, 0.5f),
+                                animationSpec = tween(200)
+                            ) + slideOutHorizontally(
+                                animationSpec = tween(200, easing = EaseInCirc),
+                                targetOffsetX = { it }
+                            )
 
-                    },
-                    entryProvider = entryProvider {
-                        entry<MainView> {
-                            AppNavigator(model, backStack)
-                        }
-                        entry<Providers> {
-                            ProvidersPage(model, backStack)
-                        }
-                        entry<Settings> {
-                            SettingsPage(model, backStack)
-                        }
-                        entry<QrScanner> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.background),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    "Under construction",
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
+                        },
+                        entryProvider = entryProvider {
+                            entry<MainView> {
+                                AppNavigator(model, backStack)
                             }
-                        }
-                    },
-                )
+                            entry<Providers> {
+                                ProvidersPage(model, backStack)
+                            }
+                            entry<Settings> {
+                                SettingsPage(model, backStack)
+                            }
+                            entry<QrScanner> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.background),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        "Under construction",
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -139,7 +147,7 @@ enum class AppDestinations(
 ) {
     HOME(R.string.home, Icons.Default.Home, R.string.home),
     LINES(R.string.lines, Icons.AutoMirrored.Filled.ArrowForward, R.string.lines),
-    MAP(R.string.map, Icons.Default.LocationOn, R.string.map)
+//    MAP(R.string.map, Icons.Default.LocationOn, R.string.map)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,9 +156,6 @@ fun AppNavigator(
     model: MoveModel, backStack: NavBackStack
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-
-    model.fetchProviders()
-    model.fetchInfo()
     
     val sheetState = rememberModalBottomSheetState()
     val sheetModel = viewModel<SheetStopViewModel>()
@@ -173,7 +178,7 @@ fun AppNavigator(
         when (currentDestination) {
             AppDestinations.HOME -> HomePage(model, sheetModel, backStack)
             AppDestinations.LINES -> LinesPage(model, sheetModel)
-            AppDestinations.MAP -> MapPage()
+//            AppDestinations.MAP -> MapPage()
         }
     }
 
@@ -183,9 +188,9 @@ fun AppNavigator(
             onDismissRequest = { sheetModel.showBottomSheet = false },
             sheetState = sheetState,
             dragHandle = { },
-            content = {
-                StopPage(model, sheetModel)
-            })
+        ) {
+        StopPage(model = model, sheetModel = sheetModel)
+        }
     }
 }
 

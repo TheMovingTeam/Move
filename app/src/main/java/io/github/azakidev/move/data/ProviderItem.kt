@@ -11,8 +11,20 @@ data class ProviderItem(
     val versionMinor: Int = 0,
 
     val lastUpdated: Int = 0,
-    val capabilities: List<String> = listOf()
+    val capabilities: List<String> = listOf(),
+
+    val timeSource: String = "",
+    val timeFormat: TimeFormat = TimeFormat()
 )
+
+@Serializable
+data class TimeFormat(
+    val type: TimeType = TimeType.IntArray
+)
+
+enum class TimeType {
+    IntArray
+}
 
 @Serializable
 data class ProviderListResponse(

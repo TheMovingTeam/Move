@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
@@ -45,6 +46,7 @@ fun HomePage(
     model: MoveModel, sheetModel: SheetStopViewModel,
     backStack: NavBackStack
 ) {
+    model.fetchInfo()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -110,8 +112,8 @@ fun HomePage(
 @Composable
 @Preview
 fun HomePagePreview() {
-    val model = MoveModel()
-    val sheetModel = SheetStopViewModel()
+    val model = viewModel<MoveModel>()
+    val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
     HomePage(model, sheetModel, backStack)
 }

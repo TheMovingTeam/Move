@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,6 +47,7 @@ import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.ProviderItem
 import java.util.Timer
 import kotlin.concurrent.schedule
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,11 +56,12 @@ fun ProvidersPage(
     backStack: NavBackStack,
 ) {
 
-    var shouldLoad by rememberSaveable { mutableStateOf(model.providers.count() == 0) }
+    var shouldLoad by rememberSaveable { mutableStateOf(model.providers.value.count() == 0) }
 
     val timer = Timer().schedule(delay = 1000, period = 5000, action = {
-        if (model.providers.count() == 0) {
+        if (model.providers.value.count() == 0) {
             model.fetchProviders()
+            model.fetchInfo()
         } else {
             Timer().schedule(delay = 1000, action = {
                 shouldLoad = false
@@ -108,7 +109,7 @@ fun ProvidersPage(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     var count = 0
-                    items(model.providers.count()) { i ->
+                    items(model.providers.value.count()) { i ->
                         var shape = when (count) {
                             0 -> {
                                 RoundedCornerShape(
@@ -119,7 +120,7 @@ fun ProvidersPage(
                                 )
                             }
 
-                            model.providers.count() - 1 -> {
+                            model.providers.collectAsState().value.count() - 1 -> {
                                 RoundedCornerShape(
                                     topStart = 2.dp,
                                     topEnd = 2.dp,
@@ -134,12 +135,12 @@ fun ProvidersPage(
                         }
                         count++
 
-                        if (model.providers.count() == 1) {
+                        if (model.providers.collectAsState().value.count() == 1) {
                             shape = MaterialTheme.shapes.medium
                         }
 
                         var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
-                        if (model.providers[i].id in model.savedProviders) {
+                        if (model.providers.collectAsState().value[i].id in model.savedProviders) {
                             icon = Icons.Default.Favorite
                         }
 
@@ -152,18 +153,18 @@ fun ProvidersPage(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = model.providers[i].name,
+                                text = model.providers.collectAsState().value[i].name,
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(12.dp),
                             )
                             IconButton(
                                 onClick = {
-                                    if (model.providers[i].id !in model.savedProviders) {
+                                    if (model.providers.value[i].id !in model.savedProviders) {
                                         icon = Icons.Default.Favorite
-                                        model.savedProviders += model.providers[i].id
+                                        model.savedProviders += model.providers.value[i].id
                                     } else {
                                         icon = Icons.Default.FavoriteBorder
-                                        model.savedProviders -= model.providers[i].id
+                                        model.savedProviders -= model.providers.value[i].id
                                     }
                                     model.fetchInfo()
                                 }
@@ -195,7 +196,7 @@ fun ProvidersPage(
 @Preview
 fun ProvidersPagePreview() {
     val model = viewModel<MoveModel>()
-    model.providers = listOf(ProviderItem(), ProviderItem(), ProviderItem())
+    model.setProviders(listOf(ProviderItem(), ProviderItem(), ProviderItem()))
     val backStack = rememberNavBackStack(MainView)
     ProvidersPage(model, backStack)
 }

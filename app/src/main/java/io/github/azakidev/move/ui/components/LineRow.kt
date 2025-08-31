@@ -2,7 +2,6 @@
 
 package io.github.azakidev.move.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -37,7 +36,8 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.shapeFromId
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
@@ -108,7 +108,7 @@ fun StopEntries(
 
             var count = 0
             lineItem.stops.forEach { i ->
-                val stopItem = model.stops.find { stopItem -> stopItem.id == i } ?: StopItem()
+                val stopItem = model.stops.value.find { stopItem -> stopItem.id == i } ?: StopItem()
                 val shape = when (count) {
                     0 -> {
                         RoundedCornerShape(
@@ -191,17 +191,46 @@ fun LineRow(
     }
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
 @Preview
 @Composable
-fun ExpandableContainerViewPreview() {
-    val model = MoveModel()
-    val sheetModel = SheetStopViewModel()
+fun LineRowPreview() {
+    val model = viewModel<MoveModel>()
+    model.setStops(
+        listOf(
+            StopItem(id = 1, name = "Stop 1"),
+            StopItem(id = 2, name = "Stop 2"),
+            StopItem(id = 3, name = "Stop 3")
+        )
+    )
+    model.setLines(listOf(LineItem(stops = listOf(1, 2, 3))))
+    val sheetModel = viewModel<SheetStopViewModel>()
+    val expanded = remember { mutableStateOf(false) }
+    LineRow(
+        model = model,
+        sheetModel = sheetModel,
+        lineItem = model.lines.collectAsState().value.first(),
+        expanded = expanded
+    )
+}
+
+@Preview
+@Composable
+fun LineRowExpandedPreview() {
+    val model = viewModel<MoveModel>()
+    model.setStops(
+        listOf(
+            StopItem(id = 1, name = "Stop 1"),
+            StopItem(id = 2, name = "Stop 2"),
+            StopItem(id = 3, name = "Stop 3")
+        )
+    )
+    model.setLines(listOf(LineItem(stops = listOf(1, 2, 3))))
+    val sheetModel = viewModel<SheetStopViewModel>()
     val expanded = remember { mutableStateOf(true) }
     LineRow(
         model = model,
         sheetModel = sheetModel,
-        lineItem = model.lines[0],
+        lineItem = model.lines.collectAsState().value.first(),
         expanded = expanded
     )
 }
