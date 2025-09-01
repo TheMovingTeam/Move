@@ -57,6 +57,8 @@ import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
@@ -67,7 +69,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val model = viewModel<MoveModel>()
             model.fetchProviders()
-            model.fetchInfo()
+            val timer = Timer().schedule(delay = 1000, action = {
+                model.fetchInfo()
+            })
+            timer.run()
 
             val backStack = rememberNavBackStack(MainView)
             MoveTheme {

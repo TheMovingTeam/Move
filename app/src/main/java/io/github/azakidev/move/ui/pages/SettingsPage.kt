@@ -102,6 +102,7 @@ fun SettingsPage(
                                 print(model.providerRepo.value)
 
                                 model.fetchProviders()
+                                model.flushInfo()
                                 model.fetchInfo()
                             } else {
                                 Toast

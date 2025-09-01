@@ -41,29 +41,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun LineEntry(item: LineItem) {
+fun LineEntry(line: LineItem) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        EmblemShape(
             modifier = Modifier
                 .padding(8.dp)
-                .size(48.dp)
-                .clip(shape = shapeFromId(item.id))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = item.emblem,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
+                .size(48.dp),
+            line = line
+        )
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = item.name,
+            text = line.name,
             style = MaterialTheme.typography.titleLarge,
         )
     }
@@ -180,7 +172,7 @@ fun LineRow(
             ),
     ) {
         Column {
-            LineEntry(item = lineItem)
+            LineEntry(line = lineItem)
             StopEntries(
                 model = model,
                 sheetModel = sheetModel,

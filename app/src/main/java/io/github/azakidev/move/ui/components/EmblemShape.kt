@@ -15,24 +15,64 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
+import io.github.azakidev.move.data.LineItem
+import androidx.core.graphics.toColorInt
+
+@Composable
+fun EmblemShape(
+    line: LineItem, modifier: Modifier = Modifier
+) {
+    val color = when (line.color) {
+        null -> MaterialTheme.colorScheme.primary
+        else -> {
+            Color(line.color.toColorInt())
+        }
+    }
+    var textColor = if (color.value != MaterialTheme.colorScheme.primary.value) {
+        if (ColorUtils.calculateContrast(
+                Color.White.toColorLong().toColorInt(), color.toColorLong().toColorInt()
+            ) < 1.4f
+        ) {
+            Color.Black
+        } else {
+            Color.White
+        }
+    } else {
+        MaterialTheme.colorScheme.onPrimary
+    }
+
+    Box(
+        modifier = modifier
+            .clip(shape = shapeFromId(line.id))
+            .background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = line.emblem, style = MaterialTheme.typography.titleLarge, color = textColor
+        )
+    }
+}
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun shapeFromId(id:Int): Shape {
-    return when(id % 24) {
-        0  -> MaterialShapes.Cookie12Sided.toShape()
-        1  -> MaterialShapes.Square.toShape()
-        2  -> MaterialShapes.Arrow.toShape()
-        3  -> MaterialShapes.Cookie9Sided.toShape()
-        4  -> MaterialShapes.Pill.toShape()
-        5  -> MaterialShapes.Flower.toShape()
-        6  -> MaterialShapes.Slanted.toShape()
-        7  -> MaterialShapes.Sunny.toShape()
-        8  -> MaterialShapes.Diamond.toShape()
-        9  -> MaterialShapes.Gem.toShape()
+fun shapeFromId(id: Int): Shape {
+    return when (id % 24) {
+        0 -> MaterialShapes.Cookie12Sided.toShape()
+        1 -> MaterialShapes.Square.toShape()
+        2 -> MaterialShapes.Arrow.toShape()
+        3 -> MaterialShapes.Cookie9Sided.toShape()
+        4 -> MaterialShapes.Pill.toShape()
+        5 -> MaterialShapes.Flower.toShape()
+        6 -> MaterialShapes.Slanted.toShape()
+        7 -> MaterialShapes.Sunny.toShape()
+        8 -> MaterialShapes.Diamond.toShape()
+        9 -> MaterialShapes.Gem.toShape()
         10 -> MaterialShapes.Cookie4Sided.toShape()
         11 -> MaterialShapes.Arch.toShape(45)
         12 -> MaterialShapes.Clover4Leaf.toShape()
@@ -51,10 +91,11 @@ fun shapeFromId(id:Int): Shape {
     }
 }
 
-@Composable @Preview
+@Composable
+@Preview
 fun ShapePreview() {
     Row {
-        Column{
+        Column {
             (0..11).forEach { i ->
                 Box(
                     modifier = Modifier
@@ -65,14 +106,14 @@ fun ShapePreview() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = i.toString(),
+                        text = "L$i",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
         }
-        Column{
+        Column {
             (12..23).forEach { i ->
                 Box(
                     modifier = Modifier
@@ -83,7 +124,7 @@ fun ShapePreview() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = i.toString(),
+                        text = "L$i",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

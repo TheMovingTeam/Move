@@ -61,7 +61,6 @@ fun ProvidersPage(
     val timer = Timer().schedule(delay = 1000, period = 5000, action = {
         if (model.providers.value.count() == 0) {
             model.fetchProviders()
-            model.fetchInfo()
         } else {
             Timer().schedule(delay = 1000, action = {
                 shouldLoad = false
@@ -166,6 +165,7 @@ fun ProvidersPage(
                                         icon = Icons.Default.FavoriteBorder
                                         model.savedProviders -= model.providers.value[i].id
                                     }
+                                    model.flushInfo()
                                     model.fetchInfo()
                                 }
                             ) {

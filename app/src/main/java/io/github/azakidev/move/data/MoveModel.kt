@@ -12,7 +12,7 @@ import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
 class MoveModel: ViewModel() {
-    var providerRepo: MutableState<String> = mutableStateOf("https://raw.githubusercontent.com/Azakidev/Providers/refs/heads/main")
+    var providerRepo: MutableState<String> = mutableStateOf("https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main")
     private val _providers: MutableStateFlow<List<ProviderItem>> = MutableStateFlow(listOf())
     var providers = _providers.asStateFlow()
     var savedProviders: List<Int> = mutableListOf(1)
@@ -50,8 +50,6 @@ class MoveModel: ViewModel() {
     }
 
     fun fetchInfo() {
-        this@MoveModel._lines.value = listOf()
-        this@MoveModel._stops.value = listOf()
         this.savedProviders.forEach { id ->
             val provider = providers.value.find { providerItem -> providerItem.id == id} ?: ProviderItem()
             thread {
@@ -62,10 +60,12 @@ class MoveModel: ViewModel() {
                         return@thread
                     }
                 val response = Json.decodeFromString<LineResponse>(providerListJson)
+                val lines = mutableListOf<LineItem>()
                 response.lines.forEach { lineItem ->
                     lineItem.provider = id
-                    this@MoveModel._lines.value += lineItem
+                    lines += lineItem
                 }
+                this@MoveModel._lines.value += lines.subtract(this@MoveModel._lines.value)
             }
 
             thread {
@@ -76,13 +76,19 @@ class MoveModel: ViewModel() {
                         return@thread
                     }
                 val response = Json.decodeFromString<StopResponse>(providerListJson)
-
+                val stops = mutableListOf<StopItem>()
                 response.stops.forEach { stopItem ->
                     stopItem.provider = id
-                    this@MoveModel._stops.value += stopItem
+                    stops += stopItem
                 }
+                this@MoveModel._stops.value += stops.subtract(this@MoveModel._stops.value)
             }
         }
+    }
+
+    fun flushInfo() {
+        this._lines.value = listOf()
+        this._stops.value = listOf()
     }
 
     fun setProviders(providers: List<ProviderItem>) {

@@ -36,6 +36,7 @@ import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -71,7 +72,7 @@ fun LinesPage(
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
         },
     ) { padding ->
-        if (model.lines.value.count() != 0) {
+        if (model.lines.collectAsState().value.count() != 0) {
             Column(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -81,7 +82,7 @@ fun LinesPage(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 var count = 0
-                model.lines.value.forEach { item ->
+                model.lines.collectAsState().value.forEach { item ->
                     val expanded = remember { mutableStateOf(false) }
                     val shape = when (count) {
                         0 -> {

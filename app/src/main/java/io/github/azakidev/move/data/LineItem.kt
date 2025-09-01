@@ -1,7 +1,5 @@
 package io.github.azakidev.move.data
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,11 +11,8 @@ data class LineItem (
     val emblem: String = "DL",
 
     val stops: List<Int> = listOf(),
-) {
-    var expanded: MutableState<Boolean> = mutableStateOf(false)
-    var placement:Int = -1
-}
-
+    val color: String? = null
+)
 @Serializable
 data class LineResponse (
     val lines: Array<LineItem>

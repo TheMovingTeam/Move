@@ -1,6 +1,5 @@
 package io.github.azakidev.move.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,17 +35,13 @@ import io.github.azakidev.move.data.MoveModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
 import kotlin.concurrent.schedule
+import kotlin.concurrent.thread
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,23 +53,22 @@ fun FavStopCarousel(
 
     model.favouriteStops.collectAsState().value.forEach { i ->
         val stop = model.stops.value.find { stopItem -> i == stopItem.id } ?: StopItem()
-        var shouldLoad by remember { mutableStateOf(true) }
         if (model.savedProviders.contains(stop.provider)) {
-            shouldLoad = true
             favStops.value += stop
-            val timer = Timer().schedule(delay = 500, period = 15000, action = {
+            val fastTimer = Timer().schedule(delay = 1000, period = 1000, action = {
                 model.fetchTimes(stop)
             })
-            if (shouldLoad) {
-                timer.run()
+            val slowTimer = Timer().schedule(delay = 1000, period = 15000, action = {
+                model.fetchTimes(stop)
+            })
+            if (stop.lineTimes.collectAsState().value.isEmpty()) {
+                fastTimer.run()
             } else {
-                timer.cancel()
+                fastTimer.cancel()
+                slowTimer.run()
             }
         }
     }
-
-
-
 
     if (favStops.collectAsState().value.count() != 0) {
         HorizontalCenteredHeroCarousel(

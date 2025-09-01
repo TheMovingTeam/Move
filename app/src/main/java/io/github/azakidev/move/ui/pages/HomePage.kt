@@ -46,7 +46,6 @@ fun HomePage(
     model: MoveModel, sheetModel: SheetStopViewModel,
     backStack: NavBackStack
 ) {
-    model.fetchInfo()
     Scaffold(
         topBar = {
             TopAppBar(
