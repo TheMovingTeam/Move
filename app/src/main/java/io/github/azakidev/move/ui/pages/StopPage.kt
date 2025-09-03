@@ -67,7 +67,7 @@ fun StopPage(
         icon = Icons.Default.Favorite
     }
 
-    val fastTimer = Timer().schedule(delay = 1000, period = 1000, action = {
+    Timer().schedule(delay = 1000, period = 1000, action = {
         if (!sheetModel.showBottomSheet) {
             this.cancel()
         }
@@ -75,19 +75,13 @@ fun StopPage(
             this.cancel()
         }
         model.fetchTimes(sheetModel.sheetStop)
-    })
-    val slowTimer = Timer().schedule(delay = 1000, period = 15000, action = {
+    }).run()
+    Timer().schedule(delay = 1000, period = 15000, action = {
+        if (!sheetModel.showBottomSheet) {
+            this.cancel()
+        }
         model.fetchTimes(sheetModel.sheetStop)
-
-    })
-
-    fastTimer.run()
-    slowTimer.run()
-
-    if (!sheetModel.showBottomSheet) {
-        fastTimer.cancel()
-        slowTimer.cancel()
-    }
+    }).run()
 
     val onClick = {
         if (sheetModel.sheetStop.id !in model.favouriteStops.value) {
