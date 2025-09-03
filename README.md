@@ -10,7 +10,7 @@ It also includes the format for requesting ETAs and how to parse the response so
 
 ## Roadmap
 ### MVP
-- [ ] User data storage
+- [x] User data storage
 - [ ] Cache lines and stop data
 - [ ] Finalize UI
 - [ ] Finalize data specification
@@ -18,6 +18,7 @@ It also includes the format for requesting ETAs and how to parse the response so
 - [ ] Implement first provider
 ### Planned
 - [ ] QR Scanner
+- [ ] Onboarding experience
 - [ ] Map routes
 - [ ] Document and publish specification
 - [ ] Journey page when on a trip
