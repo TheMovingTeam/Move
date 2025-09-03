@@ -63,7 +63,7 @@ fun LineEntry(line: LineItem) {
 
 @Composable
 fun StopEntries(
-    model: MoveViewModel,
+    stops: List<StopItem>,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     isExpanded: Boolean
@@ -100,7 +100,7 @@ fun StopEntries(
 
             var count = 0
             lineItem.stops.forEach { i ->
-                val stopItem = model.stops.value.find { stopItem -> stopItem.id == i } ?: StopItem()
+                val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
                 val shape = when (count) {
                     0 -> {
                         RoundedCornerShape(
@@ -153,7 +153,7 @@ fun StopEntries(
 
 @Composable
 fun LineRow(
-    model: MoveViewModel,
+    stops: List<StopItem>,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
@@ -174,7 +174,7 @@ fun LineRow(
         Column {
             LineEntry(line = lineItem)
             StopEntries(
-                model = model,
+                stops = stops,
                 sheetModel = sheetModel,
                 lineItem = lineItem,
                 isExpanded = expanded.value
@@ -186,21 +186,17 @@ fun LineRow(
 @Preview
 @Composable
 fun LineRowPreview() {
-    val model = viewModel<MoveViewModel>()
-    model.setStops(
-        listOf(
+    val stops = listOf(
             StopItem(id = 1, name = "Stop 1"),
             StopItem(id = 2, name = "Stop 2"),
             StopItem(id = 3, name = "Stop 3")
         )
-    )
-    model.setLines(listOf(LineItem(stops = listOf(1, 2, 3))))
     val sheetModel = viewModel<SheetStopViewModel>()
     val expanded = remember { mutableStateOf(false) }
     LineRow(
-        model = model,
+        stops = stops,
         sheetModel = sheetModel,
-        lineItem = model.lines.collectAsState().value.first(),
+        lineItem = LineItem(stops = listOf(1, 2, 3)),
         expanded = expanded
     )
 }
@@ -208,21 +204,17 @@ fun LineRowPreview() {
 @Preview
 @Composable
 fun LineRowExpandedPreview() {
-    val model = viewModel<MoveViewModel>()
-    model.setStops(
-        listOf(
-            StopItem(id = 1, name = "Stop 1"),
-            StopItem(id = 2, name = "Stop 2"),
-            StopItem(id = 3, name = "Stop 3")
-        )
+    val stops = listOf(
+        StopItem(id = 1, name = "Stop 1"),
+        StopItem(id = 2, name = "Stop 2"),
+        StopItem(id = 3, name = "Stop 3")
     )
-    model.setLines(listOf(LineItem(stops = listOf(1, 2, 3))))
     val sheetModel = viewModel<SheetStopViewModel>()
     val expanded = remember { mutableStateOf(true) }
     LineRow(
-        model = model,
+        stops = stops,
         sheetModel = sheetModel,
-        lineItem = model.lines.collectAsState().value.first(),
+        lineItem = LineItem(stops = listOf(1, 2, 3)),
         expanded = expanded
     )
 }

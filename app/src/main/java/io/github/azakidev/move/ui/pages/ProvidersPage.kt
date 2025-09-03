@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import io.github.azakidev.move.data.ProviderItem
 import java.util.Timer
 import kotlin.concurrent.schedule
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,14 +58,13 @@ fun ProvidersPage(
     model: MoveViewModel,
     backStack: NavBackStack,
 ) {
-
-    var shouldLoad by rememberSaveable { mutableStateOf(model.providers.value.count() == 0) }
+    var shouldLoad = model.providers.collectAsState().value.count() == 0
 
     val timer = Timer().schedule(delay = 1000, period = 5000, action = {
         if (model.providers.value.count() == 0) {
             model.fetchProviders()
         } else {
-            Timer().schedule(delay = 1000, action = {
+            Timer().schedule(delay = 500, action = {
                 shouldLoad = false
             })
         }
@@ -75,9 +76,12 @@ fun ProvidersPage(
         timer.cancel()
     }
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     Scaffold(
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = {
                     Text(
                         text = stringResource(R.string.providerTitle)
@@ -110,7 +114,9 @@ fun ProvidersPage(
         ) {
             if (!shouldLoad) {
                 LazyColumn(
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
+                    modifier = Modifier
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        .padding(start = 8.dp, end = 8.dp, top = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     var count = 0
@@ -145,7 +151,7 @@ fun ProvidersPage(
                         }
 
                         var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
-                        if (model.providers.collectAsState().value[i].id in model.savedProviders) {
+                        if (model.providers.collectAsState().value[i].id in model.savedProviders.collectAsState().value) {
                             icon = Icons.Default.Favorite
                         }
 
@@ -164,15 +170,13 @@ fun ProvidersPage(
                             )
                             IconButton(
                                 onClick = {
-                                    if (model.providers.value[i].id !in model.savedProviders) {
+                                    if (model.providers.value[i].id !in model.savedProviders.value) {
                                         icon = Icons.Default.Favorite
-                                        model.savedProviders += model.providers.value[i].id
+                                        model.addSavedProvider(model.providers.value[i].id)
                                     } else {
                                         icon = Icons.Default.FavoriteBorder
-                                        model.savedProviders -= model.providers.value[i].id
+                                        model.removeSavedProvider(model.providers.value[i].id)
                                     }
-                                    model.flushInfo()
-                                    model.fetchInfo()
                                 }
                             ) {
                                 Icon(

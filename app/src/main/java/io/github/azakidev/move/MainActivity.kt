@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppDestinations(
-    @StringRes val label: Int, val icon: ImageVector, @StringRes val contentDescription: Int
+    @param:StringRes val label: Int, val icon: ImageVector, @param:StringRes val contentDescription: Int
 ) {
     HOME(R.string.home, Icons.Default.Home, R.string.home),
     LINES(R.string.lines, Icons.AutoMirrored.Filled.ArrowForward, R.string.lines),

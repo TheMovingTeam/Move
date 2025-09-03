@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
+import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +41,16 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import io.github.azakidev.move.R
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
+import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.ui.components.EmblemShape
 import java.util.Timer
@@ -53,168 +61,218 @@ import kotlin.concurrent.schedule
 fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    shouldFetch: Boolean = true
 ) {
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
     if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {
         icon = Icons.Default.Favorite
     }
 
-    var shouldLoad by remember { mutableStateOf(shouldFetch) }
-
     val fastTimer = Timer().schedule(delay = 1000, period = 1000, action = {
+        if (!sheetModel.showBottomSheet) {
+            this.cancel()
+        }
+        if (!sheetModel.sheetStop.lineTimes.value.isEmpty()) {
+            this.cancel()
+        }
         model.fetchTimes(sheetModel.sheetStop)
     })
     val slowTimer = Timer().schedule(delay = 1000, period = 15000, action = {
         model.fetchTimes(sheetModel.sheetStop)
+
     })
 
-    if (shouldLoad) {
-        if (sheetModel.sheetStop.lineTimes.collectAsState().value.isEmpty()) {
-            fastTimer.run()
-        } else {
-            fastTimer.cancel()
-            slowTimer.run()
-        }
-    } else {
+    fastTimer.run()
+    slowTimer.run()
+
+    if (!sheetModel.showBottomSheet) {
         fastTimer.cancel()
         slowTimer.cancel()
     }
 
+    val onClick = {
+        if (sheetModel.sheetStop.id !in model.favouriteStops.value) {
+            model.addFavStop(sheetModel.sheetStop.id)
+            icon = Icons.Default.Favorite
+        } else {
+            model.removeFavStop(sheetModel.sheetStop.id)
+            icon = Icons.Default.FavoriteBorder
+        }
+    }
+
+    val provider =
+        model.providers.collectAsState().value.find { it -> it.id == sheetModel.sheetStop.id }
+            ?: ProviderItem()
+    val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
+
     Column {
+        StopBanner(
+            imgUrl = url,
+            icon = icon,
+            onClick = onClick,
+            sheetModel = sheetModel
+        )
+        StopTimes(
+            modifier = Modifier
+                .padding(16.dp),
+            lineItems = model.lines.collectAsState().value,
+            sheetModel = sheetModel
+        )
+    }
+}
+
+@Composable
+fun StopBanner(
+    imgUrl: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    sheetModel: SheetStopViewModel
+) {
+    Box(
+        modifier = Modifier
+            .height(308.dp)
+            .fillMaxWidth()
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imgUrl)
+                .crossfade(true)
+                .build(),
+            placeholder = painterResource(R.drawable.placeholderstop),
+            error = painterResource(R.drawable.placeholderstop),
+            contentScale = ContentScale.Crop,
+            contentDescription = sheetModel.sheetStop.name,
+        )
         Box(
             modifier = Modifier
-                .height(308.dp)
-                .fillMaxWidth()
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.surfaceContainer
+                        )
+                    )
+                ),
         ) {
-            Image(
-                painter = painterResource(sheetModel.sheetStop.image),
+            Text(
                 modifier = Modifier
-                    .padding(bottom = 16.dp),
-                contentScale = ContentScale.Crop,
-                contentDescription = sheetModel.sheetStop.name,
+                    .padding(16.dp)
+                    .align(Alignment.BottomStart),
+                text = sheetModel.sheetStop.name,
+                style = MaterialTheme.typography.displayMedium
             )
+            Button(
+                modifier = Modifier
+                    .padding(end = 12.dp, bottom = 16.dp)
+                    .size(50.dp)
+                    .align(Alignment.BottomEnd),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = CircleShape,
+                contentPadding = PaddingValues(0.dp),
+                onClick = onClick
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun StopBannerPreview() {
+    val sheetModel = viewModel<SheetStopViewModel>()
+    StopBanner(
+        imgUrl = "",
+        icon = Icons.Default.Favorite,
+        onClick = {},
+        sheetModel = sheetModel
+    )
+}
+
+@Composable
+fun StopTimes(
+    modifier: Modifier = Modifier,
+    lineItems: List<LineItem>,
+    sheetModel: SheetStopViewModel
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        var count = 0
+        sheetModel.sheetStop.lineTimes.collectAsState().value.forEach {
+            val line =
+                lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+
+            var shape = when (count) {
+                0 -> {
+                    RoundedCornerShape(
+                        topStart = 8.dp,
+                        topEnd = 8.dp,
+                        bottomStart = 2.dp,
+                        bottomEnd = 2.dp,
+                    )
+                }
+
+                sheetModel.sheetStop.lineTimes.collectAsState().value.count() - 1 -> {
+                    RoundedCornerShape(
+                        topStart = 2.dp,
+                        topEnd = 2.dp,
+                        bottomStart = 8.dp,
+                        bottomEnd = 8.dp
+                    )
+                }
+
+                else -> {
+                    MaterialTheme.shapes.extraSmall
+                }
+            }
+            count++
+
+            if (sheetModel.sheetStop.lineTimes.collectAsState().value.count() == 1) {
+                shape = RoundedCornerShape(8.dp)
+            }
+
             Box(
                 modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.surfaceContainer
-                            )
-                        )
-                    ),
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             ) {
-                Text(
+                Row(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.BottomStart),
-                    text = sheetModel.sheetStop.name,
-                    style = MaterialTheme.typography.displayMedium
-                )
-                Button(
-                    modifier = Modifier
-                        .padding(end = 12.dp, bottom = 16.dp)
-                        .size(50.dp)
-                        .align(Alignment.BottomEnd),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp),
-                    onClick = {
-                        if (sheetModel.sheetStop.id !in model.favouriteStops.value) {
-                            model.addFavStop(sheetModel.sheetStop.id)
-                            icon = Icons.Default.Favorite
-                        } else {
-                            model.removeFavStop(sheetModel.sheetStop.id)
-                            icon = Icons.Default.FavoriteBorder
-                        }
-                    }
+                        .fillMaxWidth()
+                        .padding(end = 16.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .clip(shape),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        EmblemShape(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(48.dp),
+                            line = line
+                        )
+                        Text(
+                            text = line.name
+                        )
+                    }
+                    Text(
+                        text = it.nextTime.toString() + " " + "min."
                     )
                 }
             }
-        }
-        Column(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            var count = 0
-            sheetModel.sheetStop.lineTimes.collectAsState().value.forEach {
-                val line =
-                    model.lines.value.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
-                var shape = when (count) {
-                    0 -> {
-                        RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 2.dp,
-                            bottomEnd = 2.dp,
-                        )
-                    }
-
-                    sheetModel.sheetStop.lineTimes.collectAsState().value.count() - 1 -> {
-                        RoundedCornerShape(
-                            topStart = 2.dp,
-                            topEnd = 2.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    }
-
-                    else -> {
-                        MaterialTheme.shapes.extraSmall
-                    }
-                }
-                count++
-
-                if (sheetModel.sheetStop.lineTimes.collectAsState().value.count() == 1) {
-                    shape = RoundedCornerShape(8.dp)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .clip(shape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end =16.dp)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .clip(shape),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            EmblemShape(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .size(48.dp),
-                                line = line
-                            )
-                            Text(
-                                text = line.name
-                            )
-                        }
-                        Text(
-                            text = it.nextTime.toString() + " " + "min."
-                        )
-                    }
-                }
-
-            }
         }
     }
 }
@@ -222,53 +280,48 @@ fun StopPage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun StopPagePreview() {
-    val model = viewModel<MoveViewModel>()
+fun StopTimesPreview(
+    modifier: Modifier = Modifier,
+) {
     val sheetModel = viewModel<SheetStopViewModel>()
-    model.setStops(
-        listOf(
-            StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2, 3)),
-        )
+    val lineItems = listOf(
+        LineItem(id = 1),
+        LineItem(id = 2),
+        LineItem(id = 3),
     )
-    model.setLines(
-        listOf(
-            LineItem(id = 1),
-        )
-    )
-    model.stops.collectAsState().value.first().setTimeTable(
-        listOf(
-            LineTime(1, 2),
-        )
-    )
-    sheetModel.sheetStop = model.stops.collectAsState().value.first()
-    StopPage(model, sheetModel, false)
-}
+    val stop = StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2, 3))
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Preview
-fun StopPageMultiplePreview() {
-    val model = viewModel<MoveViewModel>()
-    val sheetModel = viewModel<SheetStopViewModel>()
-    model.setStops(
-        listOf(
-            StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2, 3)),
-        )
-    )
-    model.setLines(
-        listOf(
-            LineItem(id = 1),
-            LineItem(id = 2),
-            LineItem(id = 3),
-        )
-    )
-    model.stops.collectAsState().value.first().setTimeTable(
+    stop.setTimeTable(
         listOf(
             LineTime(1, 2),
             LineTime(2, 4),
             LineTime(3, 5),
         )
     )
-    sheetModel.sheetStop = model.stops.collectAsState().value.first()
-    StopPage(model, sheetModel, false)
+
+    sheetModel.sheetStop = stop
+
+    StopTimes(
+        modifier = modifier,
+        lineItems = lineItems,
+        sheetModel = sheetModel
+    )
+}
+
+@Composable
+@Preview
+fun StopPagePreview() {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(
+                topStart = 24.dp,
+                topEnd = 24.dp
+            ))
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        StopBannerPreview()
+        StopTimesPreview(
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }

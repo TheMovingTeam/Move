@@ -41,8 +41,7 @@ import io.github.azakidev.move.ui.components.HomeFabMenu
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
-    model: MoveViewModel, sheetModel: SheetStopViewModel,
-    backStack: NavBackStack
+    model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack
 ) {
     Scaffold(
         topBar = {
@@ -67,15 +66,13 @@ fun HomePage(
                     IconButton(
                         onClick = {
                             backStack.add(Settings)
-                        }
-                    ) {
+                        }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.settings)
                         )
                     }
-                }
-            )
+                })
         },
         floatingActionButton = {
             HomeFabMenu(backStack)

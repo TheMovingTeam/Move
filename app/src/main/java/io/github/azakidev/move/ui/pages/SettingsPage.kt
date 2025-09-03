@@ -12,6 +12,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -33,10 +35,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,6 +65,8 @@ fun SettingsPage(
     val context = LocalContext.current
     val invalidText = stringResource(R.string.providerInvalid)
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     val enterTransition = remember {
         slideInHorizontally(
             initialOffsetX = { it / 2 },
@@ -71,7 +78,6 @@ fun SettingsPage(
             animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         )
     }
-
     val exitTransition = remember {
         slideOutHorizontally(
             targetOffsetX = { it / 2 },
@@ -86,6 +92,10 @@ fun SettingsPage(
     Scaffold(
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ),
                 title = {
                     Text(
                         text = stringResource(R.string.settings)
@@ -100,21 +110,6 @@ fun SettingsPage(
                         ),
                         onClick = {
                             backStack.removeLastOrNull()
-                            if (URLUtil.isValidUrl(state.text.toString()) && model.tryRepo(
-                                    state.text.toString()
-                                )
-                            ) {
-                                model.providerRepo.value = state.text.toString()
-                                print(model.providerRepo.value)
-
-                                model.fetchProviders()
-                                model.flushInfo()
-                                model.fetchInfo()
-                            } else {
-                                Toast
-                                    .makeText(context, invalidText, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
                         }
                     ) {
                         Icon(
@@ -130,6 +125,7 @@ fun SettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
@@ -141,11 +137,29 @@ fun SettingsPage(
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-                        text = stringResource(R.string.providerSource),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                            text = stringResource(R.string.providerSource),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        IconButton(
+                            onClick = {
+                                state.edit {
+                                    replace(0, state.text.length, "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main")
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Restore,
+                                contentDescription = null
+                            )
+                        }
+                    }
                     OutlinedTextField(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -170,8 +184,8 @@ fun SettingsPage(
                                                 state.text.toString()
                                             )
                                         ) {
-                                            model.providerRepo.value = state.text.toString()
-                                            print(model.providerRepo.value)
+                                            model.saveRepo(state.text.toString())
+                                            model.flushInfo()
                                         } else {
                                             Toast
                                                 .makeText(
@@ -192,12 +206,6 @@ fun SettingsPage(
                         }
                     )
                 }
-            }
-            items(50) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    text = it.toString()
-                )
             }
         }
     }

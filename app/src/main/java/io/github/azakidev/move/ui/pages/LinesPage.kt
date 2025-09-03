@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,9 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.StopItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -73,69 +77,166 @@ fun LinesPage(
         },
     ) { padding ->
         if (model.lines.collectAsState().value.count() != 0) {
-            Column(
+            LineList(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .verticalScroll(rememberScrollState())
                     .padding(padding)
                     .background(MaterialTheme.colorScheme.background),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                var count = 0
-                model.lines.collectAsState().value.forEach { item ->
-                    val expanded = remember { mutableStateOf(false) }
-                    val shape = when (count) {
-                        0 -> {
-                            RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp,
-                                bottomStart = 4.dp,
-                                bottomEnd = 4.dp,
-                            )
-                        }
-
-                        model.lines.value.count() - 1 -> {
-                            RoundedCornerShape(
-                                topStart = 4.dp,
-                                topEnd = 4.dp,
-                                bottomStart = 16.dp,
-                                bottomEnd = 16.dp
-                            )
-                        }
-
-                        else -> {
-                            MaterialTheme.shapes.extraSmall
-                        }
-                    }
-                    LineRow(
-                        model = model,
-                        sheetModel = sheetModel,
-                        lineItem = item,
-                        shape = shape,
-                        expanded = expanded,
-                    )
-                    count++
-                }
-            }
+                lineItems = model.lines.collectAsState().value,
+                stopItems = model.stops.collectAsState().value,
+                sheetModel = sheetModel
+            )
         } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.noLines),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+            EmptyLines(
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LineList(
+    modifier: Modifier = Modifier,
+    lineItems: List<LineItem>,
+    stopItems: List<StopItem>,
+    sheetModel: SheetStopViewModel
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        var count = 0
+        lineItems.forEach { item ->
+            val expanded = remember { mutableStateOf(false) }
+            val shape = when (count) {
+                0 -> {
+                    RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomStart = 4.dp,
+                        bottomEnd = 4.dp,
+                    )
+                }
+
+                lineItems.count() - 1 -> {
+                    RoundedCornerShape(
+                        topStart = 4.dp,
+                        topEnd = 4.dp,
+                        bottomStart = 16.dp,
+                        bottomEnd = 16.dp
+                    )
+                }
+
+                else -> {
+                    MaterialTheme.shapes.extraSmall
+                }
+            }
+            LineRow(
+                stops = stopItems,
+                sheetModel = sheetModel,
+                lineItem = item,
+                shape = shape,
+                expanded = expanded,
+            )
+            count++
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 @Preview
 fun LinesPagePreview() {
-    val model = MoveViewModel()
-    val sheetModel = SheetStopViewModel()
-    LinesPage(model, sheetModel)
+    val textFieldState = rememberTextFieldState()
+    val searchBarState = rememberSearchBarState()
+    val scope = rememberCoroutineScope()
+
+    val inputField = @Composable {
+        SearchBarDefaults.InputField(
+            searchBarState = searchBarState,
+            textFieldState = textFieldState,
+            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
+            placeholder = { Text("Where to go...") },
+        )
+    }
+    val lineItems = listOf(
+        LineItem(id = 1),
+        LineItem(id = 2),
+        LineItem(id = 3),
+    )
+    val sheetModel = viewModel<SheetStopViewModel>()
+    Scaffold(
+        topBar = {
+            AppBarWithSearch(
+                modifier = Modifier.padding(bottom = 8.dp),
+                state = searchBarState,
+                inputField = inputField,
+                colors = SearchBarDefaults.appBarWithSearchColors(
+                    appBarContainerColor = Color.Transparent
+                ),
+            )
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
+        },
+    ) { paddingValues -> 
+        LineList(
+            modifier = Modifier.padding(paddingValues),
+            lineItems = lineItems,
+            stopItems = emptyList(),
+            sheetModel = sheetModel
+        )
+    }
+}
+
+@Composable
+fun EmptyLines(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.noLines),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable @Preview
+fun EmptyLinesPreview() {
+    val textFieldState = rememberTextFieldState()
+    val searchBarState = rememberSearchBarState()
+    val scope = rememberCoroutineScope()
+
+    val inputField = @Composable {
+        SearchBarDefaults.InputField(
+            searchBarState = searchBarState,
+            textFieldState = textFieldState,
+            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
+            placeholder = { Text("Where to go...") },
+        )
+    }
+    Scaffold(
+        topBar = {
+            AppBarWithSearch(
+                modifier = Modifier.padding(bottom = 8.dp),
+                state = searchBarState,
+                inputField = inputField,
+                colors = SearchBarDefaults.appBarWithSearchColors(
+                    appBarContainerColor = Color.Transparent
+                ),
+            )
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
+        },
+    ) { paddingValues ->
+        EmptyLines(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        )
+    }
 }

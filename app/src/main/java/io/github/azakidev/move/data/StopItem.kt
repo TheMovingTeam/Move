@@ -12,11 +12,10 @@ data class StopItem(
     val name: String = "DefaultStop",
     var provider: Int = 0,
 
-    @DrawableRes val image: Int = R.drawable.nathofjoy,
     val lines: List<Int> = listOf(),
 
-    private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf()),
 ) {
+    private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())
     val lineTimes = _lineTimes.asStateFlow()
     fun setTimeTable(times: List<LineTime>) {
         _lineTimes.value = times
