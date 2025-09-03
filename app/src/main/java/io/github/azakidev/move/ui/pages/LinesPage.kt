@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
@@ -41,7 +41,7 @@ import androidx.compose.runtime.collectAsState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LinesPage(
-    model: MoveModel, sheetModel: SheetStopViewModel
+    model: MoveViewModel, sheetModel: SheetStopViewModel
 ) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -135,7 +135,7 @@ fun LinesPage(
 @Composable
 @Preview
 fun LinesPagePreview() {
-    val model = MoveModel()
+    val model = MoveViewModel()
     val sheetModel = SheetStopViewModel()
     LinesPage(model, sheetModel)
 }

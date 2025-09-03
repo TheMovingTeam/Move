@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -48,11 +47,10 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LinesPage
-import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
@@ -67,9 +65,9 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         setContent {
-            val model = viewModel<MoveModel>()
+            val model = viewModel<MoveViewModel>()
             model.fetchProviders()
-            val timer = Timer().schedule(delay = 1000, action = {
+            val timer = Timer().schedule(delay = 5000, action = {
                 model.fetchInfo()
             })
             timer.run()
@@ -158,7 +156,7 @@ enum class AppDestinations(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigator(
-    model: MoveModel, backStack: NavBackStack
+    model: MoveViewModel, backStack: NavBackStack
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     
@@ -202,7 +200,7 @@ fun AppNavigator(
 @Composable
 @Preview
 fun AppNavigatorPreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     val backStack = rememberNavBackStack(MainView)
     AppNavigator(model, backStack)
 }

@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
@@ -40,37 +40,57 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
+import java.util.TimerTask
 import kotlin.concurrent.schedule
-import kotlin.concurrent.thread
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavStopCarousel(
-    model: MoveModel,
+    model: MoveViewModel,
     sheetModel: SheetStopViewModel
 ) {
     val favStops = MutableStateFlow<List<StopItem>>(listOf())
 
-    model.favouriteStops.collectAsState().value.forEach { i ->
-        val stop = model.stops.value.find { stopItem -> i == stopItem.id } ?: StopItem()
+    model.favouriteStops.collectAsState().value.forEach {
+        val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
+
         if (model.savedProviders.contains(stop.provider)) {
             favStops.value += stop
-            val fastTimer = Timer().schedule(delay = 1000, period = 1000, action = {
-                model.fetchTimes(stop)
-            })
-            val slowTimer = Timer().schedule(delay = 1000, period = 15000, action = {
-                model.fetchTimes(stop)
-            })
-            if (stop.lineTimes.collectAsState().value.isEmpty()) {
-                fastTimer.run()
-            } else {
-                fastTimer.cancel()
-                slowTimer.run()
+
+            slowTimer(model, stop).run()
+
+            if (stop.lineTimes.value.isEmpty()) {
+                fastTimer(model, stop).run()
             }
         }
     }
 
+    val reloadTimer = Timer().schedule(delay = 500, period = 5000, action = {
+        model.favouriteStops.value.forEach {
+            val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
+
+            if (model.savedProviders.contains(stop.provider)) {
+                favStops.value += stop
+
+                val timer = slowTimer(model, stop)
+                timer.run()
+
+                if (favStops.value.count() != 0) {
+                    timer.cancel()
+                }
+
+                if (stop.lineTimes.value.isEmpty()) {
+                    fastTimer(model, stop).run()
+                }
+            }
+        }
+        if (favStops.value.count() != 0) {
+            this.cancel()
+        }
+    })
+
     if (favStops.collectAsState().value.count() != 0) {
+        reloadTimer.cancel()
         HorizontalCenteredHeroCarousel(
             state = rememberCarouselState { favStops.value.count() },
             modifier = Modifier
@@ -149,6 +169,7 @@ fun FavStopCarousel(
             }
         }
     } else {
+        reloadTimer.run()
         Box(
             modifier = Modifier
                 .height(208.dp)
@@ -167,10 +188,39 @@ fun FavStopCarousel(
     }
 }
 
+fun slowTimer(
+    model: MoveViewModel,
+    stopItem: StopItem
+): TimerTask {
+    return Timer().schedule(
+        delay = 1000,
+        period = 30000,
+        action = {
+            model.fetchTimes(stopItem)
+        }
+    )
+}
+
+fun fastTimer(
+    model: MoveViewModel,
+    stop: StopItem
+): TimerTask {
+    return Timer().schedule(
+        delay = 1000,
+        period = 5000,
+        action = {
+            model.fetchTimes(stop)
+            if (!stop.lineTimes.value.isEmpty()) {
+                this.cancel()
+            }
+        }
+    )
+}
+
 @Composable
 @Preview
 fun FavStopCarouselPreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     model.setStops(
         listOf(
             StopItem(id = 1, name = "Stop 1", provider = 1),
@@ -178,7 +228,7 @@ fun FavStopCarouselPreview() {
         )
     )
     model.setFavStops(
-        listOf(1,2)
+        listOf(1, 2)
     )
     val sheetModel = viewModel<SheetStopViewModel>()
     FavStopCarousel(model, sheetModel)
@@ -188,7 +238,7 @@ fun FavStopCarouselPreview() {
 @Composable
 @Preview
 fun FavStopCarouselEmptyPreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     model.setStops(
         listOf(
             StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2)),
@@ -214,7 +264,7 @@ fun FavStopCarouselEmptyPreview() {
             LineTime(3, 4)
         )
     )
-    model.setFavStops(listOf(1,2))
+    model.setFavStops(listOf(1, 2))
     val sheetModel = viewModel<SheetStopViewModel>()
     FavStopCarousel(model, sheetModel)
 }

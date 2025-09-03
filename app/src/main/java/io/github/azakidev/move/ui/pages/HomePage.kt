@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -35,7 +33,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
 import io.github.azakidev.move.Settings
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.HomeFabMenu
@@ -43,7 +41,7 @@ import io.github.azakidev.move.ui.components.HomeFabMenu
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
-    model: MoveModel, sheetModel: SheetStopViewModel,
+    model: MoveViewModel, sheetModel: SheetStopViewModel,
     backStack: NavBackStack
 ) {
     Scaffold(
@@ -111,7 +109,7 @@ fun HomePage(
 @Composable
 @Preview
 fun HomePagePreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
     HomePage(model, sheetModel, backStack)

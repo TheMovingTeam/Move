@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
@@ -63,7 +63,7 @@ fun LineEntry(line: LineItem) {
 
 @Composable
 fun StopEntries(
-    model: MoveModel,
+    model: MoveViewModel,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     isExpanded: Boolean
@@ -153,7 +153,7 @@ fun StopEntries(
 
 @Composable
 fun LineRow(
-    model: MoveModel,
+    model: MoveViewModel,
     sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
@@ -186,7 +186,7 @@ fun LineRow(
 @Preview
 @Composable
 fun LineRowPreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     model.setStops(
         listOf(
             StopItem(id = 1, name = "Stop 1"),
@@ -208,7 +208,7 @@ fun LineRowPreview() {
 @Preview
 @Composable
 fun LineRowExpandedPreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     model.setStops(
         listOf(
             StopItem(id = 1, name = "Stop 1"),

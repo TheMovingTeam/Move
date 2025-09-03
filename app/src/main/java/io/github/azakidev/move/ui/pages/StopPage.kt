@@ -35,7 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -45,16 +45,13 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.ui.components.EmblemShape
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import java.util.Timer
-import kotlin.collections.plus
 import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StopPage(
-    model: MoveModel,
+    model: MoveViewModel,
     sheetModel: SheetStopViewModel,
     shouldFetch: Boolean = true
 ) {
@@ -226,7 +223,7 @@ fun StopPage(
 @Composable
 @Preview
 fun StopPagePreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     val sheetModel = viewModel<SheetStopViewModel>()
     model.setStops(
         listOf(
@@ -251,7 +248,7 @@ fun StopPagePreview() {
 @Composable
 @Preview
 fun StopPageMultiplePreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     val sheetModel = viewModel<SheetStopViewModel>()
     model.setStops(
         listOf(

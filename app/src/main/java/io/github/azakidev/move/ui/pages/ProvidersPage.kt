@@ -20,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +44,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -52,7 +53,7 @@ import androidx.compose.runtime.collectAsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProvidersPage(
-    model: MoveModel,
+    model: MoveViewModel,
     backStack: NavBackStack,
 ) {
 
@@ -84,6 +85,11 @@ fun ProvidersPage(
                 },
                 navigationIcon = {
                     IconButton(
+                        shape = IconButtonDefaults.standardShape,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
                         onClick = {
                             backStack.removeLastOrNull()
                         }
@@ -195,7 +201,7 @@ fun ProvidersPage(
 @Composable
 @Preview
 fun ProvidersPagePreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     model.setProviders(listOf(ProviderItem(), ProviderItem(), ProviderItem()))
     val backStack = rememberNavBackStack(MainView)
     ProvidersPage(model, backStack)

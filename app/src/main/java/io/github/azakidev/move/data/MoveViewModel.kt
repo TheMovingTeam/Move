@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
-class MoveModel: ViewModel() {
+class MoveViewModel: ViewModel() {
     var providerRepo: MutableState<String> = mutableStateOf("https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main")
     private val _providers: MutableStateFlow<List<ProviderItem>> = MutableStateFlow(listOf())
     var providers = _providers.asStateFlow()
@@ -24,7 +24,7 @@ class MoveModel: ViewModel() {
     var favouriteStops = _favouriteStops.asStateFlow()
 
     fun fetchProviders() {
-        this@MoveModel._providers.value = listOf()
+        this@MoveViewModel._providers.value = listOf()
         thread {
             val providerListJson =
                 try {
@@ -43,7 +43,7 @@ class MoveModel: ViewModel() {
                             return@thread
                         }
                     val providerItem = Json.decodeFromString<ProviderItem>(providerMetadata)
-                    this@MoveModel._providers.value += providerItem
+                    this@MoveViewModel._providers.value += providerItem
                 }
             }
         }
@@ -65,7 +65,7 @@ class MoveModel: ViewModel() {
                     lineItem.provider = id
                     lines += lineItem
                 }
-                this@MoveModel._lines.value += lines.subtract(this@MoveModel._lines.value)
+                this@MoveViewModel._lines.value += lines.subtract(this@MoveViewModel._lines.value)
             }
 
             thread {
@@ -81,7 +81,7 @@ class MoveModel: ViewModel() {
                     stopItem.provider = id
                     stops += stopItem
                 }
-                this@MoveModel._stops.value += stops.subtract(this@MoveModel._stops.value)
+                this@MoveViewModel._stops.value += stops.subtract(this@MoveViewModel._stops.value)
             }
         }
     }

@@ -11,11 +11,11 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.OutlinedTextField
@@ -45,12 +46,12 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.MoveModel
+import io.github.azakidev.move.data.MoveViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsPage(
-    model: MoveModel,
+    model: MoveViewModel,
     backStack: NavBackStack
 ) {
     val state = rememberTextFieldState(
@@ -61,7 +62,7 @@ fun SettingsPage(
 
     val enterTransition = remember {
         slideInHorizontally(
-            initialOffsetX = { it/2 },
+            initialOffsetX = { it / 2 },
             animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         ) + fadeIn(
             animationSpec = MotionScheme.expressive().defaultEffectsSpec()
@@ -73,7 +74,7 @@ fun SettingsPage(
 
     val exitTransition = remember {
         slideOutHorizontally(
-            targetOffsetX = { it/2 },
+            targetOffsetX = { it / 2 },
             animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         ) + fadeOut(
             animationSpec = MotionScheme.expressive().defaultEffectsSpec()
@@ -92,6 +93,11 @@ fun SettingsPage(
                 },
                 navigationIcon = {
                     IconButton(
+                        shape = IconButtonDefaults.standardShape,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
                         onClick = {
                             backStack.removeLastOrNull()
                             if (URLUtil.isValidUrl(state.text.toString()) && model.tryRepo(
@@ -120,30 +126,30 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clip(shape = RoundedCornerShape((15 + 8).dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            ) {
+            item {
                 Column(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clip(shape = RoundedCornerShape((15 + 8).dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        modifier = Modifier.padding(start = 8.dp),
+                        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
                         text = stringResource(R.string.providerSource),
                         style = MaterialTheme.typography.titleMedium
                     )
                     OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         state = state,
                         shape = RoundedCornerShape((15 / 2 + 8).dp),
                         lineLimits = TextFieldLineLimits.SingleLine,
@@ -168,7 +174,11 @@ fun SettingsPage(
                                             print(model.providerRepo.value)
                                         } else {
                                             Toast
-                                                .makeText(context, invalidText, Toast.LENGTH_SHORT)
+                                                .makeText(
+                                                    context,
+                                                    invalidText,
+                                                    Toast.LENGTH_SHORT
+                                                )
                                                 .show()
                                         }
                                     }
@@ -183,6 +193,12 @@ fun SettingsPage(
                     )
                 }
             }
+            items(50) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    text = it.toString()
+                )
+            }
         }
     }
 }
@@ -190,7 +206,7 @@ fun SettingsPage(
 @Composable
 @Preview
 fun SettingsPagePreview() {
-    val model = viewModel<MoveModel>()
+    val model = viewModel<MoveViewModel>()
     val backStack = rememberNavBackStack(MainView)
     SettingsPage(model, backStack)
 }

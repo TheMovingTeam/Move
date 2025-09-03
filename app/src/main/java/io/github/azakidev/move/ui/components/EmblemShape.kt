@@ -34,7 +34,7 @@ fun EmblemShape(
             Color(line.color.toColorInt())
         }
     }
-    var textColor = if (color.value != MaterialTheme.colorScheme.primary.value) {
+    val textColor = if (color.value != MaterialTheme.colorScheme.primary.value) {
         if (ColorUtils.calculateContrast(
                 Color.White.toColorLong().toColorInt(), color.toColorLong().toColorInt()
             ) < 1.4f

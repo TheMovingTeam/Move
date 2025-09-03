@@ -15,6 +15,7 @@ animation = "1.9.0"
 navigation3Ui = "1.0.0-alpha07"
 kotlinxSerializationJson = "1.9.0"
 coreSplashscreen = "1.2.0-rc01"
+roomCommon = "2.8.0-rc02"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
@@ -43,6 +44,7 @@ androidx-animation = { group = "androidx.compose.animation", name = "animation",
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3Ui" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
