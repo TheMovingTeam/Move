@@ -1,7 +1,5 @@
 package io.github.azakidev.move.data
 
-import androidx.annotation.DrawableRes
-import io.github.azakidev.move.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
@@ -12,7 +10,10 @@ data class StopItem(
     val name: String = "DefaultStop",
     var provider: Int = 0,
 
-    val lines: List<Int> = listOf(),
+    val geoX: Float? = null,
+    val geoY: Float? = null,
+
+    val lines: List<Int> = emptyList(),
 
 ) {
     private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())

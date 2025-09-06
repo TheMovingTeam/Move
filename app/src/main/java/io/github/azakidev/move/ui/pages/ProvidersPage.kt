@@ -112,7 +112,7 @@ fun ProvidersPage(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            if (!shouldLoad) {
+            if (model.providers.collectAsState().value.count() != 0) {
                 LazyColumn(
                     modifier = Modifier
                         .nestedScroll(scrollBehavior.nestedScrollConnection)

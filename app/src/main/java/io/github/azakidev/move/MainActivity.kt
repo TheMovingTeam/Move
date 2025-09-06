@@ -13,9 +13,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
@@ -25,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -34,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,6 +50,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LinesPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
+import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
@@ -71,6 +70,9 @@ class MainActivity : ComponentActivity() {
                 model.fetchInfo()
             })
             timer.run()
+
+            val sheetState = rememberModalBottomSheetState()
+            val sheetModel = viewModel<SheetStopViewModel>()
 
             val backStack = rememberNavBackStack(MainView)
             MoveTheme {
@@ -116,7 +118,7 @@ class MainActivity : ComponentActivity() {
                         },
                         entryProvider = entryProvider {
                             entry<MainView> {
-                                AppNavigator(model, backStack)
+                                AppNavigator(model, sheetState, sheetModel, backStack)
                             }
                             entry<Providers> {
                                 ProvidersPage(model, backStack)
@@ -125,17 +127,7 @@ class MainActivity : ComponentActivity() {
                                 SettingsPage(model, backStack)
                             }
                             entry<QrScanner> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.background),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        "Under construction",
-                                        color = MaterialTheme.colorScheme.onBackground
-                                    )
-                                }
+                                QrPage(model, sheetModel, backStack)
                             }
                         },
                     )
@@ -156,12 +148,12 @@ enum class AppDestinations(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigator(
-    model: MoveViewModel, backStack: NavBackStack
+    model: MoveViewModel,
+    sheetState: SheetState,
+    sheetModel: SheetStopViewModel,
+    backStack: NavBackStack
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    
-    val sheetState = rememberModalBottomSheetState()
-    val sheetModel = viewModel<SheetStopViewModel>()
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -197,10 +189,13 @@ fun AppNavigator(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun AppNavigatorPreview() {
     val model = viewModel<MoveViewModel>()
+    val sheetState = rememberModalBottomSheetState()
+    val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
-    AppNavigator(model, backStack)
+    AppNavigator(model, sheetState, sheetModel, backStack)
 }

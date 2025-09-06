@@ -55,13 +55,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         viewModelScope.launch {
-            // Wait for the first emission of savedProviders to ensure it's loaded from DataStore
             val initialSavedProviders = savedProviders.first()
             if (initialSavedProviders.isNotEmpty()) {
-                // You might need to fetch the full provider list first if `fetchInfo` relies on it
-                // and `savedProviders` only contains IDs.
-                // Assuming fetchProviders() populates `_providers.value`
-                fetchProviders() // Ensure provider list is available
+                fetchProviders()
 
                 // Wait for providers to be fetched if necessary
                 providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() } // Ensure providers are loaded if repo is set
@@ -71,12 +67,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun fetchProviders() {
-        // ... (implementation as before, ensure it uses providerRepo.value)
-        // Make sure this populates _providers.value
         this@MoveViewModel._providers.value = listOf()
         val currentRepoUrl = providerRepo.value
         thread { // Consider replacing with viewModelScope.launch(Dispatchers.IO)
-            val providerListJson = try { URL("${currentRepoUrl}/providers.json").readText() } catch (e: Exception) { return@thread }
+            val providerListJson = try { URL("${currentRepoUrl}/providers.json").readText() } catch (e: Exception) { println(e); return@thread }
             try {
                 val response = Json.decodeFromString<ProviderListResponse>(providerListJson)
                 val fetchedProviders = mutableListOf<ProviderItem>()
@@ -86,12 +80,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         val providerMetadata = URL("${currentRepoUrl}/${providerName}/metadata.json").readText()
                         val providerItem = Json.decodeFromString<ProviderItem>(providerMetadata)
                         fetchedProviders.add(providerItem)
-                    } catch (e: Exception) { /* handle individual error */ }
+                    } catch (e: Exception) { println(e); }
                 }
                 this@MoveViewModel._providers.value = fetchedProviders
                 // After fetching all providers, trigger fetchInfo for currently saved ones
                 viewModelScope.launch { fetchInfoForSavedProviders(savedProviders.value) }
-            } catch (e: Exception) { /* handle parsing error */ }
+            } catch (e: Exception) { println(e); }
         }
     }
 
@@ -131,8 +125,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
         // Fetch Stops
         thread { // Consider viewModelScope.launch(Dispatchers.IO)
-            val stopsJson = try { URL("$repoUrl/${provider.name}/stops.json").readText() } catch (e: Exception) { return@thread }
-            val response = try { Json.decodeFromString<StopResponse>(stopsJson) } catch (e: Exception) { return@thread }
+            val stopsJson = try { URL("$repoUrl/${provider.name}/stops.json").readText() } catch (e: Exception) { println(e); return@thread }
+            val response = try { Json.decodeFromString<StopResponse>(stopsJson) } catch (e: Exception) { println(e); return@thread }
             val fetchedStops = response.stops.map { it.apply { this.provider = provider.id } }
             _stops.value = (_stops.value + fetchedStops).distinctBy { Pair(it.id, it.provider) }
         }
@@ -181,20 +175,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setStops(stops: List<StopItem>) {
-        this._stops.value = stops
-    }
-
-    fun setLines(lines: List<LineItem>) {
-        this._lines.value = lines
-    }
-
-    fun setFavStops(stops: List<Int>) {
-        viewModelScope.launch {
-            _userStore.saveFavouriteStops(stops)
-        }
-    }
-
     fun addFavStop(stopId: Int) {
         viewModelScope.launch {
             val currentFavStops = favouriteStops.value.toMutableList()
@@ -222,6 +202,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     URL("${url}/providers.json").readText()
                 } catch (e: Exception) {
+                    println(e)
                     isValid.add(false)
                     return@thread
                 }
@@ -230,6 +211,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 isValid.add(true)
                 return@thread
             } catch (e: Exception) {
+                println(e)
                 isValid.add(false)
                 return@thread
             }
@@ -251,7 +233,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun fetchTimes(stopItem: StopItem) {
         val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider }
             ?: ProviderItem()
-        if (!provider.capabilities.contains("Time")) {
+        if (!(provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(Capabilities.DoubleTime)) ) {
             return
         }
         val url = provider.timeSource.replace("@stop", stopItem.id.toString())
@@ -260,6 +242,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     URL(url).readText()
                 } catch (e: Exception) {
+                    println(e)
                     return@thread
                 }
             val times = parseTimes(response, provider)

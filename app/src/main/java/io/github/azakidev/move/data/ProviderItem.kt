@@ -11,11 +11,19 @@ data class ProviderItem(
     val versionMinor: Int = 0,
 
     val lastUpdated: Int = 0,
-    val capabilities: List<String> = listOf(),
+    val capabilities: List<Capabilities> = listOf(),
 
     val timeSource: String = "",
-    val timeFormat: TimeFormat = TimeFormat()
+    val timeFormat: TimeFormat = TimeFormat(),
+
+    val qrFormat: String = ""
 )
+
+enum class Capabilities {
+    Time,
+    DoubleTime,
+    QrScan
+}
 
 @Serializable
 data class TimeFormat(
