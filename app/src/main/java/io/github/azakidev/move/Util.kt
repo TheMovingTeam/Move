@@ -1,5 +1,9 @@
 package io.github.azakidev.move
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.TimeType
@@ -22,5 +26,37 @@ fun parseTimes(response: String, provider: ProviderItem): List<Int> {
             return list
         }
     }
+}
 
+fun getListShape(count: Int, total: Int): Shape {
+    if (total == 1) {
+        return RoundedCornerShape(
+            8.dp
+        )
+    }
+    return when (count) {
+        0 -> {
+            RoundedCornerShape(
+                topStart = 8.dp,
+                topEnd = 8.dp,
+                bottomStart = 2.dp,
+                bottomEnd = 2.dp,
+            )
+        }
+
+        total - 1 -> {
+            RoundedCornerShape(
+                topStart = 2.dp,
+                topEnd = 2.dp,
+                bottomStart = 8.dp,
+                bottomEnd = 8.dp
+            )
+        }
+
+        else -> {
+            RoundedCornerShape(
+                4.dp
+            )
+        }
+    }
 }

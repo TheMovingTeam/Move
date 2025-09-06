@@ -69,7 +69,7 @@ fun FavStopCarousel(
         }
     }
 
-    val reloadTimer = Timer().schedule(delay = 500, period = 5000, action = {
+    val reloadTimer = Timer().schedule(delay = 1000, period = 5000, action = {
         model.favouriteStops.value.forEach {
             val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
             if (model.savedProviders.value.contains(stop.provider)) {
@@ -121,7 +121,9 @@ fun FavStopCarousel(
             )
         }
     } else {
-        reloadTimer.run()
+        if (model.favouriteStops.collectAsState().value.count() != 0) {
+            reloadTimer.run()
+        }
         EmptyCarrousel()
     }
 }

@@ -1,46 +1,57 @@
 package io.github.azakidev.move.ui.pages
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.azakidev.move.R
+import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.getListShape
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.StopItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -51,12 +62,43 @@ fun LinesPage(
     val searchBarState = rememberSearchBarState()
     val scope = rememberCoroutineScope()
 
+    val results = model.stops.collectAsState().value.filter {
+        it.name.lowercase().contains(textFieldState.text.toString().lowercase())
+    }
+
     val inputField = @Composable {
         SearchBarDefaults.InputField(
             searchBarState = searchBarState,
             textFieldState = textFieldState,
-            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
+            onSearch = {
+                scope.launch { searchBarState.animateToCollapsed() }
+                if (textFieldState.text.isNotEmpty()) {
+                    textFieldState.edit { delete(0, textFieldState.text.length) }
+                    sheetModel.sheetStop = results.first()
+                    sheetModel.showBottomSheet = true
+                }
+            },
             placeholder = { Text("Where to go...") },
+            leadingIcon = {
+                if (searchBarState.currentValue == SearchBarValue.Collapsed && !searchBarState.isAnimating) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null
+                    )
+                } else {
+                    IconButton(
+                        onClick = {
+                            textFieldState.edit { delete(0, textFieldState.text.length) }
+                            scope.launch { searchBarState.animateToCollapsed() }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            }
         )
     }
 
@@ -73,7 +115,33 @@ fun LinesPage(
                 ),
                 scrollBehavior = scrollBehavior
             )
-            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {
+                LazyColumn(
+                    modifier = Modifier.padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    if (textFieldState.text.isNotEmpty()) {
+                        var count = 0
+                        items(results.count()) {
+                            val shape = getListShape(count, results.count())
+                            count++
+                            val result = results[it]
+                            SearchResultStop(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                stopItem = result,
+                                shape = shape,
+                                onClick = {
+                                    sheetModel.sheetStop = result
+                                    sheetModel.showBottomSheet = true
+                                    textFieldState.edit { delete(0, textFieldState.text.length) }
+                                    scope.launch { searchBarState.animateToCollapsed() }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         },
     ) { padding ->
         if (model.lines.collectAsState().value.count() != 0) {
@@ -95,6 +163,31 @@ fun LinesPage(
     }
 }
 
+@Composable
+fun SearchResultStop(
+    modifier: Modifier = Modifier,
+    stopItem: StopItem,
+    shape: Shape,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.background)
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stopItem.name
+            )
+        }
+    }
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LineList(
@@ -104,35 +197,13 @@ fun LineList(
     sheetModel: SheetStopViewModel
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         var count = 0
         lineItems.forEach { item ->
             val expanded = remember { mutableStateOf(false) }
-            val shape = when (count) {
-                0 -> {
-                    RoundedCornerShape(
-                        topStart = 16.dp,
-                        topEnd = 16.dp,
-                        bottomStart = 4.dp,
-                        bottomEnd = 4.dp,
-                    )
-                }
-
-                lineItems.count() - 1 -> {
-                    RoundedCornerShape(
-                        topStart = 4.dp,
-                        topEnd = 4.dp,
-                        bottomStart = 16.dp,
-                        bottomEnd = 16.dp
-                    )
-                }
-
-                else -> {
-                    MaterialTheme.shapes.extraSmall
-                }
-            }
+            val shape = getListShape(count, lineItems.count())
             LineRow(
                 stops = stopItems,
                 sheetModel = sheetModel,
@@ -146,7 +217,6 @@ fun LineList(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 @Preview
 fun LinesPagePreview() {
@@ -180,7 +250,7 @@ fun LinesPagePreview() {
             )
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
         },
-    ) { paddingValues -> 
+    ) { paddingValues ->
         LineList(
             modifier = Modifier.padding(paddingValues),
             lineItems = lineItems,
@@ -206,7 +276,8 @@ fun EmptyLines(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable @Preview
+@Composable
+@Preview
 fun EmptyLinesPreview() {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()

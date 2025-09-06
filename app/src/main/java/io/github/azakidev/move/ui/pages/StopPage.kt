@@ -1,27 +1,25 @@
 package io.github.azakidev.move.ui.pages
 
-import android.media.Image
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +39,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +51,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.getListShape
 import io.github.azakidev.move.ui.components.EmblemShape
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -63,9 +63,17 @@ fun StopPage(
     sheetModel: SheetStopViewModel,
 ) {
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
+    var roundness: Int
+
     if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {
         icon = Icons.Default.Favorite
+        roundness = 25
+    } else {
+        icon = Icons.Default.FavoriteBorder
+        roundness = 50
     }
+
+    val cornerRadius = animateIntAsState(targetValue = roundness)
 
     Timer().schedule(delay = 1000, period = 1000, action = {
         if (!sheetModel.showBottomSheet) {
@@ -86,10 +94,8 @@ fun StopPage(
     val onClick = {
         if (sheetModel.sheetStop.id !in model.favouriteStops.value) {
             model.addFavStop(sheetModel.sheetStop.id)
-            icon = Icons.Default.Favorite
         } else {
             model.removeFavStop(sheetModel.sheetStop.id)
-            icon = Icons.Default.FavoriteBorder
         }
     }
 
@@ -103,11 +109,11 @@ fun StopPage(
             imgUrl = url,
             icon = icon,
             onClick = onClick,
-            sheetModel = sheetModel
+            sheetModel = sheetModel,
+            shape = RoundedCornerShape(cornerRadius.value)
         )
         StopTimes(
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             lineItems = model.lines.collectAsState().value,
             sheetModel = sheetModel
         )
@@ -118,6 +124,7 @@ fun StopPage(
 fun StopBanner(
     imgUrl: String,
     icon: ImageVector,
+    shape: Shape,
     onClick: () -> Unit,
     sheetModel: SheetStopViewModel
 ) {
@@ -155,16 +162,15 @@ fun StopBanner(
                 text = sheetModel.sheetStop.name,
                 style = MaterialTheme.typography.displayMedium
             )
-            Button(
+            IconButton(
                 modifier = Modifier
                     .padding(end = 12.dp, bottom = 16.dp)
-                    .size(50.dp)
+                    .size(55.dp)
                     .align(Alignment.BottomEnd),
-                colors = ButtonDefaults.buttonColors(
+                colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
+                shape = shape,
                 onClick = onClick
             ) {
                 Icon(
@@ -184,8 +190,9 @@ fun StopBannerPreview() {
     StopBanner(
         imgUrl = "",
         icon = Icons.Default.Favorite,
+        shape = RoundedCornerShape(25),
         onClick = {},
-        sheetModel = sheetModel
+        sheetModel = sheetModel,
     )
 }
 
@@ -204,34 +211,8 @@ fun StopTimes(
             val line =
                 lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
-            var shape = when (count) {
-                0 -> {
-                    RoundedCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 8.dp,
-                        bottomStart = 2.dp,
-                        bottomEnd = 2.dp,
-                    )
-                }
-
-                sheetModel.sheetStop.lineTimes.collectAsState().value.count() - 1 -> {
-                    RoundedCornerShape(
-                        topStart = 2.dp,
-                        topEnd = 2.dp,
-                        bottomStart = 8.dp,
-                        bottomEnd = 8.dp
-                    )
-                }
-
-                else -> {
-                    MaterialTheme.shapes.extraSmall
-                }
-            }
+            val shape = getListShape(count, sheetModel.sheetStop.lineTimes.collectAsState().value.count())
             count++
-
-            if (sheetModel.sheetStop.lineTimes.collectAsState().value.count() == 1) {
-                shape = RoundedCornerShape(8.dp)
-            }
 
             Box(
                 modifier = Modifier
@@ -283,7 +264,7 @@ fun StopTimesPreview(
         LineItem(id = 2),
         LineItem(id = 3),
     )
-    val stop = StopItem(id = 1, name = "Stop 1", lines = listOf(1, 2, 3))
+    val stop = StopItem(id = 1, name = "Stop 1", lines = listOf(1))
 
     stop.setTimeTable(
         listOf(

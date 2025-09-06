@@ -38,6 +38,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.azakidev.move.getListShape
 
 
 @Composable
@@ -101,29 +102,7 @@ fun StopEntries(
             var count = 0
             lineItem.stops.forEach { i ->
                 val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
-                val shape = when (count) {
-                    0 -> {
-                        RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 2.dp,
-                            bottomEnd = 2.dp,
-                        )
-                    }
-
-                    lineItem.stops.count() - 1 -> {
-                        RoundedCornerShape(
-                            topStart = 2.dp,
-                            topEnd = 2.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    }
-
-                    else -> {
-                        MaterialTheme.shapes.extraSmall
-                    }
-                }
+                val shape = getListShape(count, lineItem.stops.count())
                 Box(
                     modifier = Modifier
                         .clip(shape = shape)
