@@ -29,28 +29,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
 import kotlin.concurrent.schedule
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,8 +73,33 @@ fun ProvidersPage(
         timer.cancel()
     }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> ->
+        if (model.providers.value[i].id !in model.savedProviders.value) {
+            icon.value = Icons.Default.Favorite
+            model.addSavedProvider(model.providers.value[i].id)
+        } else {
+            icon.value = Icons.Default.FavoriteBorder
+            model.removeSavedProvider(model.providers.value[i].id)
+        }
+    }
 
+    ProvidersList(
+        providers = model.providers.collectAsState().value,
+        savedProviders = model.savedProviders.collectAsState().value,
+        onFavoriteClick = onFavoriteClick,
+        backStack = backStack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProvidersList(
+    providers: List<ProviderItem>,
+    savedProviders: List<Int>,
+    onFavoriteClick: (Int, MutableStateFlow<ImageVector>) -> Unit,
+    backStack: NavBackStack
+) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -112,7 +134,7 @@ fun ProvidersPage(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            if (model.providers.collectAsState().value.count() != 0) {
+            if (providers.count() != 0) {
                 LazyColumn(
                     modifier = Modifier
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -120,7 +142,7 @@ fun ProvidersPage(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     var count = 0
-                    items(model.providers.value.count()) { i ->
+                    items(providers.count()) { i ->
                         var shape = when (count) {
                             0 -> {
                                 RoundedCornerShape(
@@ -131,7 +153,7 @@ fun ProvidersPage(
                                 )
                             }
 
-                            model.providers.collectAsState().value.count() - 1 -> {
+                            providers.count() - 1 -> {
                                 RoundedCornerShape(
                                     topStart = 2.dp,
                                     topEnd = 2.dp,
@@ -146,12 +168,13 @@ fun ProvidersPage(
                         }
                         count++
 
-                        if (model.providers.collectAsState().value.count() == 1) {
+                        if (providers.count() == 1) {
                             shape = MaterialTheme.shapes.medium
                         }
 
-                        var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
-                        if (model.providers.collectAsState().value[i].id in model.savedProviders.collectAsState().value) {
+                        val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
+                        var icon = iconMut.collectAsState().value
+                        if (providers[i].id in savedProviders) {
                             icon = Icons.Default.Favorite
                         }
 
@@ -164,20 +187,12 @@ fun ProvidersPage(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = model.providers.collectAsState().value[i].name,
+                                text = providers[i].name,
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(12.dp),
                             )
                             IconButton(
-                                onClick = {
-                                    if (model.providers.value[i].id !in model.savedProviders.value) {
-                                        icon = Icons.Default.Favorite
-                                        model.addSavedProvider(model.providers.value[i].id)
-                                    } else {
-                                        icon = Icons.Default.FavoriteBorder
-                                        model.removeSavedProvider(model.providers.value[i].id)
-                                    }
-                                }
+                                onClick = { onFavoriteClick(i, iconMut) }
                             ) {
                                 Icon(
                                     imageVector = icon,
@@ -204,9 +219,10 @@ fun ProvidersPage(
 
 @Composable
 @Preview
-fun ProvidersPagePreview() {
-    val model = viewModel<MoveViewModel>()
-    model.setProviders(listOf(ProviderItem(), ProviderItem(), ProviderItem()))
+fun ProvidersListPreview() {
+    val providers = listOf(ProviderItem(), ProviderItem(), ProviderItem())
+    val savedProviders = emptyList<Int>()
+    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
     val backStack = rememberNavBackStack(MainView)
-    ProvidersPage(model, backStack)
+    ProvidersList(providers, savedProviders, onFavoriteClick, backStack)
 }

@@ -1,4 +1,4 @@
-package com.example.move
+package io.github.azakidev.move
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

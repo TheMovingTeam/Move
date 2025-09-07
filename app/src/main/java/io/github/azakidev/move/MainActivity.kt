@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
@@ -187,15 +186,4 @@ fun AppNavigator(
         StopPage(model = model, sheetModel = sheetModel)
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Preview
-fun AppNavigatorPreview() {
-    val model = viewModel<MoveViewModel>()
-    val sheetState = rememberModalBottomSheetState()
-    val sheetModel = viewModel<SheetStopViewModel>()
-    val backStack = rememberNavBackStack(MainView)
-    AppNavigator(model, sheetState, sheetModel, backStack)
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Move</string>
+    <string name="app_name" translatable="false">Move</string>
     <string name="home">Home</string>
     <string name="lines">Lines</string>
     <string name="map">Map</string>
@@ -12,5 +12,7 @@
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid provider</string>
     <string name="providerTitle">Providers</string>
-    <string name="qrScanFab">Scan</string>
+    <string name="qrScan">Scan</string>
+    <string name="qrNotFound">URL not recognized</string>
+    <string name="noCameraPerm">The camera permission has not been granted.</string>
 </resources>

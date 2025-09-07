@@ -14,14 +14,15 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import io.github.azakidev.move.R
 import io.github.azakidev.move.data.Capabilities
-import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
 import java.util.concurrent.Executors
 
@@ -30,24 +31,21 @@ class BarcodeAnalyser(
 ) : ImageAnalysis.Analyzer {
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .build()
+        val options =
+            BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
 
         val scanner = BarcodeScanning.getClient(options)
         val mediaImage = imageProxy.image
         mediaImage?.let {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-            scanner.process(image)
-                .addOnSuccessListener { barcodes ->
+            scanner.process(image).addOnSuccessListener { barcodes ->
                     if (barcodes.isNotEmpty()) {
                         barcodes.forEach { barcode ->
                             callback(barcode.rawValue ?: "")
                         }
                     }
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     // Task failed with an exception
                     // ...
                 }
@@ -60,10 +58,10 @@ class BarcodeAnalyser(
 @ExperimentalGetImage
 @Composable
 fun QrScanner(
-    modifier: Modifier = Modifier,
-    providers: List<ProviderItem>,
-    callback: (Int) -> Unit
+    modifier: Modifier = Modifier, providers: List<ProviderItem>, callback: (Int) -> Unit
 ) {
+    val msg = stringResource(R.string.qrNotFound)
+
     AndroidView(
         { context ->
             val cameraExecutor = Executors.newSingleThreadExecutor()
@@ -74,23 +72,23 @@ fun QrScanner(
             cameraProviderFuture.addListener({
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder()
-                    .build()
-                    .also {
+                val preview = Preview.Builder().build().also {
                         it.surfaceProvider = previewView.surfaceProvider
                     }
 
                 val imageCapture = ImageCapture.Builder().build()
 
-                val imageAnalyzer = ImageAnalysis.Builder()
-                    .build()
-                    .also {
+                val imageAnalyzer = ImageAnalysis.Builder().build().also {
                         it.setAnalyzer(cameraExecutor, BarcodeAnalyser { url ->
-                            val id = parseQr(
-                                providers = providers,
-                                url = url
-                            )
-                            callback(id)
+                            try {
+                                val id = parseQr(
+                                    providers = providers, url = url
+                                )
+                                callback(id)
+                            } catch (e: Exception) {
+                                Log.e("WARNING", "URL not recognized", e)
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
                         })
                     }
 
@@ -114,22 +112,15 @@ fun QrScanner(
                 }
             }, ContextCompat.getMainExecutor(context))
             previewView
-        },
-        modifier = modifier
+        }, modifier = modifier
     )
 }
 
 fun parseQr(
-    providers: List<ProviderItem>,
-    url: String
+    providers: List<ProviderItem>, url: String
 ): Int {
-    println(url)
-    val qrUrls =
-        providers.filter { it.capabilities.contains(Capabilities.QrScan) }.map { it.qrFormat.replace("@stop", "") }
-    println(qrUrls)
+    val qrUrls = providers.filter { it.capabilities.contains(Capabilities.QrScan) }
+        .map { it.qrFormat.replace("@stop", "") }
     val filter = qrUrls.filter { url.contains(it) }
-    println(filter)
-    val id = url.replace(filter.first(), "").toInt()
-    println(id)
-    return id
+    return url.replace(filter.first(), "").toInt()
 }

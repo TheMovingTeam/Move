@@ -18,7 +18,6 @@ import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,7 +64,7 @@ fun HomeFabMenu(
 
     val items = listOf(
         FabEntry(Icons.Filled.AddRoad, R.string.providerTitle),
-        FabEntry(Icons.Filled.QrCode, R.string.qrScanFab),
+        FabEntry(Icons.Filled.QrCode, R.string.qrScan),
     )
 
     FloatingActionButtonMenu(
@@ -117,7 +116,7 @@ fun HomeFabMenu(
                     fabMenuExpanded = false
                     when (item.label) {
                         R.string.providerTitle -> backStack.add(Providers)
-                        R.string.qrScanFab -> backStack.add(QrScanner)
+                        R.string.qrScan -> backStack.add(QrScanner)
                         else -> Toast
                             .makeText(context, "Unimplemented", Toast.LENGTH_SHORT)
                             .show()

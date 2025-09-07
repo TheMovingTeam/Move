@@ -1,6 +1,7 @@
 package io.github.azakidev.move.data
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -13,10 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.net.URL
 import kotlinx.serialization.json.Json
+import java.net.URL
 import java.util.concurrent.LinkedBlockingDeque
-import kotlin.collections.toMutableList
 import kotlin.concurrent.thread
 
 class MoveViewModel(application: Application) : AndroidViewModel(application) {
@@ -70,25 +70,31 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         this@MoveViewModel._providers.value = listOf()
         val currentRepoUrl = providerRepo.value
         thread { // Consider replacing with viewModelScope.launch(Dispatchers.IO)
-            val providerListJson = try { URL("${currentRepoUrl}/providers.json").readText() } catch (e: Exception) { println(e); return@thread }
+            val providerListJson = try {
+                URL("${currentRepoUrl}/providers.json").readText()
+            } catch (e: Exception) {
+                println(e); return@thread
+            }
             try {
                 val response = Json.decodeFromString<ProviderListResponse>(providerListJson)
                 val fetchedProviders = mutableListOf<ProviderItem>()
                 // This part should ideally be parallelized with coroutines for better performance
                 response.providers.forEach { providerName ->
                     try {
-                        val providerMetadata = URL("${currentRepoUrl}/${providerName}/metadata.json").readText()
+                        val providerMetadata =
+                            URL("${currentRepoUrl}/${providerName}/metadata.json").readText()
                         val providerItem = Json.decodeFromString<ProviderItem>(providerMetadata)
                         fetchedProviders.add(providerItem)
-                    } catch (e: Exception) { println(e); }
+                    } catch (e: Exception) {
+                        println(e); }
                 }
                 this@MoveViewModel._providers.value = fetchedProviders
                 // After fetching all providers, trigger fetchInfo for currently saved ones
                 viewModelScope.launch { fetchInfoForSavedProviders(savedProviders.value) }
-            } catch (e: Exception) { println(e); }
+            } catch (e: Exception) {
+                println(e); }
         }
     }
-
 
     // This function will fetch info for all providers currently in the savedProviders list.
     fun fetchInfo() {
@@ -97,6 +103,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             fetchInfoForSavedProviders(currentSavedProviders)
         }
     }
+
     // Updated fetchInfo to take a list of provider IDs
     private fun fetchInfoForSavedProviders(providerIds: List<Int>) {
         if (providers.value.isEmpty() && providerIds.isNotEmpty()) {
@@ -112,21 +119,39 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Extracted logic for fetching info for a single provider
-    private fun fetchInfoForSingleProvider(provider: ProviderItem, repoUrl: String = providerRepo.value) {
+    private fun fetchInfoForSingleProvider(
+        provider: ProviderItem,
+        repoUrl: String = providerRepo.value
+    ) {
         // Fetch Lines
         thread { // Consider viewModelScope.launch(Dispatchers.IO)
-            val linesJson = try { URL("$repoUrl/${provider.name}/lines.json").readText() } catch (e: Exception) { return@thread }
-            val response = try { Json.decodeFromString<LineResponse>(linesJson) } catch (e: Exception) { return@thread }
+            val linesJson = try {
+                URL("$repoUrl/${provider.name}/lines.json").readText()
+            } catch (e: Exception) {
+                println(e); return@thread
+            }
+            val response = try {
+                Json.decodeFromString<LineResponse>(linesJson)
+            } catch (e: Exception) {
+                println(e); return@thread
+            }
             val fetchedLines = response.lines.map { it.apply { this.provider = provider.id } }
             // Add only new lines to avoid duplicates and ensure distinctness
             _lines.value = (_lines.value + fetchedLines).distinctBy { Pair(it.id, it.provider) }
 
         }
-
         // Fetch Stops
         thread { // Consider viewModelScope.launch(Dispatchers.IO)
-            val stopsJson = try { URL("$repoUrl/${provider.name}/stops.json").readText() } catch (e: Exception) { println(e); return@thread }
-            val response = try { Json.decodeFromString<StopResponse>(stopsJson) } catch (e: Exception) { println(e); return@thread }
+            val stopsJson = try {
+                URL("$repoUrl/${provider.name}/stops.json").readText()
+            } catch (e: Exception) {
+                println(e); return@thread
+            }
+            val response = try {
+                Json.decodeFromString<StopResponse>(stopsJson)
+            } catch (e: Exception) {
+                println(e); return@thread
+            }
             val fetchedStops = response.stops.map { it.apply { this.provider = provider.id } }
             _stops.value = (_stops.value + fetchedStops).distinctBy { Pair(it.id, it.provider) }
         }
@@ -136,10 +161,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         _providers.value = emptyList()
         _lines.value = emptyList()
         _stops.value = emptyList()
-    }
-
-    fun setProviders(providers: List<ProviderItem>) {
-        this._providers.value = providers
     }
 
     fun addSavedProvider(providerId: Int) {
@@ -160,11 +181,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val currentSaved = savedProviders.value.toMutableList()
             if (currentSaved.remove(providerId)) {
-                _userStore.saveSavedProviders(currentSaved )
+                _userStore.saveSavedProviders(currentSaved)
                 // Optionally, flush info related to this provider
                 // This logic might need refinement based on how you store/display lines & stops
-                this@MoveViewModel._lines.value = _lines.value.filterNot { it.provider == providerId }
-                this@MoveViewModel._stops.value = _stops.value.filterNot { it.provider == providerId }
+                this@MoveViewModel._lines.value =
+                    _lines.value.filterNot { it.provider == providerId }
+                this@MoveViewModel._stops.value =
+                    _stops.value.filterNot { it.provider == providerId }
                 println(this@MoveViewModel.savedProviders.value)
                 println(this@MoveViewModel.stops.value)
                 println(this@MoveViewModel.lines.value)
@@ -194,7 +217,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     fun tryRepo(url: String): Boolean {
         val isValid = LinkedBlockingDeque<Boolean>()
         thread {
@@ -220,20 +242,23 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun saveRepo(url: String) {
-        if (tryRepo(url)) { // Assuming tryRepo validates and doesn't just block
+        if (tryRepo(url)) {
             viewModelScope.launch {
                 _userStore.saveProviderRepoUrl(url)
             }
         } else {
             // Handle invalid repo URL (e.g., show an error message)
-            println("Attempted to save invalid repo URL: $url")
+            Log.e("Error", "Attempted to save invalid repo URL: $url")
         }
     }
 
     fun fetchTimes(stopItem: StopItem) {
         val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider }
             ?: ProviderItem()
-        if (!(provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(Capabilities.DoubleTime)) ) {
+        if (!(provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
+                Capabilities.DoubleTime
+            ))
+        ) {
             return
         }
         val url = provider.timeSource.replace("@stop", stopItem.id.toString())
