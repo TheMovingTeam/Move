@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
@@ -36,12 +35,26 @@ import io.github.azakidev.move.Settings
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.components.FavStopCarousel
+import io.github.azakidev.move.ui.components.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.HomeFabMenu
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
     model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack
+) {
+    HomePageView(
+        backStack = backStack
+    ) {
+        FavStopCarousel(model, sheetModel)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun HomePageView(
+    backStack: NavBackStack,
+    favStopCarrousel: @Composable() () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -93,9 +106,9 @@ fun HomePage(
                         text = stringResource(id = R.string.favouriteStops),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
-                    FavStopCarousel(model, sheetModel)
+                    favStopCarrousel()
                 }
             }
         },
@@ -106,8 +119,10 @@ fun HomePage(
 @Composable
 @Preview
 fun HomePagePreview() {
-    val model = viewModel<MoveViewModel>()
-    val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
-    HomePage(model, sheetModel, backStack)
+    HomePageView(
+        backStack
+    ) {
+        FavStopCarouselPreview()
+    }
 }

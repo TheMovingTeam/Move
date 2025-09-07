@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -123,6 +124,84 @@ fun QrPage(
                     cameraPermissionState.launchPermissionRequest()
                 }
             }
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview
+fun NoPermissionPreview() {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                scrolledContainerColor = MaterialTheme.colorScheme.background
+            ), title = {
+                Text(stringResource(R.string.qrScan))
+            }, navigationIcon = {
+                IconButton(
+                    shape = IconButtonDefaults.standardShape,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    onClick = { }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+            })
+        }) {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            Text(
+                stringResource(R.string.noCameraPerm)
+            )
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview
+fun NoQrPreview() {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                scrolledContainerColor = MaterialTheme.colorScheme.background
+            ), title = {
+                Text(stringResource(R.string.qrScan))
+            }, navigationIcon = {
+                IconButton(
+                    shape = IconButtonDefaults.standardShape,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    onClick = { }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+            })
+        }) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "No added providers support QR codes.",
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }

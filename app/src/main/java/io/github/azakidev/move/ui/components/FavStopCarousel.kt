@@ -259,7 +259,7 @@ fun FavStopCarouselPreview() {
     val stops = listOf(
         StopItem(id = 1, name = "Stop 1", provider = 1),
         StopItem(id = 2, name = "Stop 2", provider = 1),
-        StopItem(id = 2, name = "Stop 3", provider = 1),
+        StopItem(id = 3, name = "Stop 3", provider = 1),
     )
     val lines = emptyList<LineItem>()
     val sheetModel = viewModel<SheetStopViewModel>()
