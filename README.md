@@ -11,15 +11,15 @@ It also includes the format for requesting ETAs and how to parse the response so
 ## Roadmap
 ### MVP
 - [x] User data storage
+- [x] Finalize MVP UI
+- [ ] Finalize MVP data spec
 - [ ] Cache lines and stop data
-- [ ] Finalize UI
-- [ ] Finalize data specification
-- [ ] Implement provider generator (a web crawler to get the latest metadata from each provider)
 - [ ] Implement first provider
+- [ ] Implement provider generator (a web crawler to get the latest metadata from each provider)
 ### Planned
-- [ ] QR Scanner
+- [x] QR Scanner
 - [ ] Onboarding experience
 - [ ] Map routes
-- [ ] Document and publish specification
+- [ ] Document and publish spec
 - [ ] Journey page when on a trip
 - [ ] Provider alerts

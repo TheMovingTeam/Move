@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,29 +56,31 @@ fun FavStopCarousel(
 ) {
     val favStops = MutableStateFlow<List<StopItem>>(listOf())
 
+    val context = LocalContext.current
+
     model.favouriteStops.collectAsState().value.forEach {
         val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
 
         if (model.savedProviders.value.contains(stop.provider)) {
             favStops.value += stop
 
-            slowTimer(model, stop).run()
+            slowTimer(model, stop, context).run()
 
             if (stop.lineTimes.value.isEmpty()) {
-                fastTimer(model, stop).run()
+                fastTimer(model, stop, context).run()
             }
         }
     }
 
-    val reloadTimer = Timer().schedule(delay = 1000, period = 5000, action = {
+    val reloadTimer = Timer().schedule(delay = 1000, period = 1000, action = {
         model.favouriteStops.value.forEach {
             val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
             if (model.savedProviders.value.contains(stop.provider)) {
                 favStops.value += stop
-                val timer = slowTimer(model, stop)
+                val timer = slowTimer(model, stop, context)
                 timer.run()
                 if (favStops.value.count() != 0) { timer.cancel() }
-                if (stop.lineTimes.value.isEmpty()) { fastTimer(model, stop).run() }
+                if (stop.lineTimes.value.isEmpty()) { fastTimer(model, stop, context).run() }
             }
         }
         if (favStops.value.count() != 0) {
@@ -130,27 +133,29 @@ fun FavStopCarousel(
 
 fun slowTimer(
     model: MoveViewModel,
-    stopItem: StopItem
+    stopItem: StopItem,
+    context: Context,
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
         period = 30000,
         action = {
-            model.fetchTimes(stopItem)
+            model.fetchTimes(stopItem, context)
         }
     )
 }
 
 fun fastTimer(
     model: MoveViewModel,
-    stop: StopItem
+    stopItem: StopItem,
+    context: Context
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
         period = 5000,
         action = {
-            model.fetchTimes(stop)
-            if (!stop.lineTimes.value.isEmpty()) {
+            model.fetchTimes(stopItem, context = context)
+            if (!stopItem.lineTimes.value.isEmpty()) {
                 this.cancel()
             }
         }
@@ -245,7 +250,7 @@ fun EmptyCarrousel() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.noStops),
+            text = stringResource(R.string.noFavStops),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface
         )

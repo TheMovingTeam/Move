@@ -102,6 +102,7 @@ fun StopEntries(
                 val shape = getListShape(count, lineItem.stops.count())
                 Box(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .clip(shape = shape)
                         .clickable(
                             enabled = isExpanded,
@@ -117,7 +118,6 @@ fun StopEntries(
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(12.dp)
                     )
                 }

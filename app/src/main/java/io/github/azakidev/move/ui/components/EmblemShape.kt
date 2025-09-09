@@ -18,15 +18,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toColorLong
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import io.github.azakidev.move.data.LineItem
 import androidx.core.graphics.toColorInt
 
 @Composable
 fun EmblemShape(
-    line: LineItem, modifier: Modifier = Modifier
+    line: LineItem, modifier: Modifier = Modifier, textStyle: TextStyle = MaterialTheme.typography.titleLarge
 ) {
     val color = when (line.color) {
         null -> MaterialTheme.colorScheme.primary
@@ -47,6 +50,7 @@ fun EmblemShape(
         MaterialTheme.colorScheme.onPrimary
     }
 
+
     Box(
         modifier = modifier
             .clip(shape = shapeFromId(line.id))
@@ -54,7 +58,9 @@ fun EmblemShape(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = line.emblem, style = MaterialTheme.typography.titleLarge, color = textColor
+            text = line.emblem,
+            style = textStyle,
+            color = textColor
         )
     }
 }

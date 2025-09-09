@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,6 +47,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.azakidev.move.R
+import io.github.azakidev.move.data.Capabilities
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.MoveViewModel
@@ -61,6 +65,8 @@ fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
 ) {
+    model.saveLastStop(sheetModel.sheetStop.id)
+
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
     var roundness: Int
 
@@ -73,6 +79,7 @@ fun StopPage(
     }
 
     val cornerRadius = animateIntAsState(targetValue = roundness)
+    val context = LocalContext.current
 
     Timer().schedule(delay = 1000, period = 1000, action = {
         if (!sheetModel.showBottomSheet) {
@@ -81,13 +88,13 @@ fun StopPage(
         if (!sheetModel.sheetStop.lineTimes.value.isEmpty()) {
             this.cancel()
         }
-        model.fetchTimes(sheetModel.sheetStop)
+        model.fetchTimes(sheetModel.sheetStop, context)
     }).run()
     Timer().schedule(delay = 1000, period = 15000, action = {
         if (!sheetModel.showBottomSheet) {
             this.cancel()
         }
-        model.fetchTimes(sheetModel.sheetStop)
+        model.fetchTimes(sheetModel.sheetStop, context)
     }).run()
 
     val onClick = {
@@ -99,7 +106,7 @@ fun StopPage(
     }
 
     val provider =
-        model.providers.collectAsState().value.find { it -> it.id == sheetModel.sheetStop.id }
+        model.providers.collectAsState().value.find { it.id == sheetModel.sheetStop.provider }
             ?: ProviderItem()
     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
@@ -111,11 +118,45 @@ fun StopPage(
             sheetModel = sheetModel,
             shape = RoundedCornerShape(cornerRadius.value)
         )
-        StopTimes(
+        Column(
             modifier = Modifier.padding(16.dp),
-            lineItems = model.lines.collectAsState().value,
-            sheetModel = sheetModel
-        )
+        ) {
+            StopTimes(
+                lineItems = model.lines.collectAsState().value,
+                sheetModel = sheetModel
+            )
+            if (provider.capabilities.contains(Capabilities.Notifications)) {
+                StopNotifications(
+                    notifications = sheetModel.sheetStop.notifications
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+@Preview
+fun StopPagePreview() {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(
+                topStart = 24.dp,
+                topEnd = 24.dp
+            ))
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        StopBannerPreview()
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            StopTimesPreview()
+            StopNotifications(
+                notifications = listOf(
+                    "All your bases are mine"
+                )
+            )
+        }
     }
 }
 
@@ -195,58 +236,79 @@ fun StopBannerPreview() {
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StopTimes(
     modifier: Modifier = Modifier,
     lineItems: List<LineItem>,
     sheetModel: SheetStopViewModel
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        var count = 0
-        sheetModel.sheetStop.lineTimes.collectAsState().value.forEach {
-            val line =
-                lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+    Text(
+        modifier = Modifier.padding(bottom = 8.dp),
+        text = stringResource(id = R.string.times),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.secondary,
+    )
+    if (sheetModel.sheetStop.lineTimes.collectAsState().value.count() > 0) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            var count = 0
+            sheetModel.sheetStop.lineTimes.collectAsState().value.forEach {
+                val line =
+                    lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
-            val shape = getListShape(count, sheetModel.sheetStop.lineTimes.collectAsState().value.count())
-            count++
+                val shape = getListShape(count, sheetModel.sheetStop.lineTimes.collectAsState().value.count())
+                count++
 
-            Box(
-                modifier = Modifier
-                    .clip(shape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Row(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 16.dp)
+                        .clip(shape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clip(shape),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .clip(shape),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        EmblemShape(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(48.dp),
-                            line = line
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            EmblemShape(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(48.dp),
+                                line = line
+                            )
+                            Text(
+                                text = line.name
+                            )
+                        }
                         Text(
-                            text = line.name
+                            text = it.nextTime.toString() + " " + "min."
                         )
                     }
-                    Text(
-                        text = it.nextTime.toString() + " " + "min."
-                    )
                 }
-            }
 
+            }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .height(150.dp)
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingIndicator()
         }
     }
 }
@@ -283,19 +345,68 @@ fun StopTimesPreview(
 }
 
 @Composable
-@Preview
-fun StopPagePreview() {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(
-                topStart = 24.dp,
-                topEnd = 24.dp
-            ))
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        StopBannerPreview()
-        StopTimesPreview(
-            modifier = Modifier.padding(16.dp)
-        )
+fun StopNotifications(
+    notifications: List<String>
+) {
+    Text(
+        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+        text = stringResource(id = R.string.alerts),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.secondary,
+    )
+    if (notifications.count() > 0) {
+        var count = 0
+        Column {
+            notifications.forEach {
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(getListShape(count, notifications.count()))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = it
+                    )
+                }
+                count++
+            }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .height(208.dp)
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.noAlerts),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
+}
+
+@Composable
+@Preview
+fun StopNotificationsPreview() {
+    val notifications = listOf(
+        "All your bases are mine"
+    )
+    StopNotifications(
+        notifications = notifications
+    )
+}
+
+@Composable
+@Preview
+fun StopNotificationsEmptyPreview() {
+    val notifications = emptyList<String>()
+    StopNotifications(
+        notifications = notifications
+    )
 }

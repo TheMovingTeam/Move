@@ -10,11 +10,12 @@ data class StopItem(
     val name: String = "DefaultStop",
     var provider: Int = 0,
 
+    val lines: List<Int> = emptyList(),
+
     val geoX: Float? = null,
     val geoY: Float? = null,
 
-    val lines: List<Int> = emptyList(),
-
+    val notifications: List<String> = emptyList()
 ) {
     private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())
     val lineTimes = _lineTimes.asStateFlow()

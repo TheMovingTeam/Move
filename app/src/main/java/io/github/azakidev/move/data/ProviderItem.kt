@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProviderItem(
     val name: String = "DummyProvider",
+    val description: String = "",
+
     val id: Int = 0,
     val versionMajor: Int = 0,
     val versionMinor: Int = 0,
@@ -22,32 +24,25 @@ data class ProviderItem(
 enum class Capabilities {
     Time,
     DoubleTime,
-    QrScan
+    Notifications,
+    QrScan,
+//    Geo,
 }
 
 @Serializable
 data class TimeFormat(
-    val type: TimeType = TimeType.IntArray
+    val type: TimeType = TimeType.IntArray,
+    val regex: String? = null,
 )
 
 enum class TimeType {
-    IntArray
+    IntArray,
+    XML,
+    JSON,
+    String,
 }
 
 @Serializable
 data class ProviderListResponse(
-    val providers: Array<String>
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ProviderListResponse
-
-        return providers.contentEquals(other.providers)
-    }
-
-    override fun hashCode(): Int {
-        return providers.contentHashCode()
-    }
-}
+    val providers: List<String>
+)

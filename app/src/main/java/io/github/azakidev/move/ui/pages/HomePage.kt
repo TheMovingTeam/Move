@@ -2,10 +2,16 @@ package io.github.azakidev.move.ui.pages
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -19,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -27,13 +35,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
 import io.github.azakidev.move.Settings
+import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.HomeFabMenu
@@ -43,17 +57,30 @@ import io.github.azakidev.move.ui.components.HomeFabMenu
 fun HomePage(
     model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack
 ) {
+    val unorderedLastStops = model.stops.collectAsState().value
+        .filter { model.lastStops.collectAsState().value.contains(it.id) }
+    val stopMap = unorderedLastStops.associateBy { it.id }
+    val lastStops = model.lastStops.collectAsState().value
+        .mapNotNull { id ->
+            stopMap[id]
+        }
+        .reversed()
     HomePageView(
-        backStack = backStack
-    ) {
-        FavStopCarousel(model, sheetModel)
-    }
+        backStack = backStack,
+        favStopCarrousel = { FavStopCarousel(model, sheetModel) },
+        lastStops = lastStops,
+        lines = model.lines.collectAsState().value,
+        sheetModel = sheetModel
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePageView(
     backStack: NavBackStack,
+    lastStops: List<StopItem>,
+    lines: List<LineItem>,
+    sheetModel: SheetStopViewModel,
     favStopCarrousel: @Composable() () -> Unit
 ) {
     Scaffold(
@@ -98,17 +125,91 @@ fun HomePageView(
                     .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
             ) {
-                Column(
+                LazyColumn(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
-                    Text(
-                        modifier = Modifier.padding(start = 16.dp),
-                        text = stringResource(id = R.string.favouriteStops),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                    favStopCarrousel()
+                    item {
+                        Text(
+                            modifier = Modifier.padding(start = 16.dp),
+                            text = stringResource(id = R.string.favouriteStops),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        favStopCarrousel()
+                    }
+                    item {
+                        Text(
+                            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
+                            text = stringResource(id = R.string.recentStops),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                    if (lastStops.count() > 0) {
+                        var count = 0
+                        items(lastStops.count()) {
+                            val stopItem = lastStops[it]
+                            val shape = getListShape(count, lastStops.count())
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp)
+                                    .clip(shape = shape)
+                                    .clickable(
+                                        onClick = {
+                                            sheetModel.sheetStop = stopItem
+                                            sheetModel.showBottomSheet = true
+                                        }
+                                    )
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stopItem.name,
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                                Row(
+                                    modifier = Modifier.padding(8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    stopItem.lines.forEach { lineId ->
+                                        val line =
+                                            lines.find { line -> line.id == lineId } ?: LineItem()
+                                        if (line != LineItem()) {
+                                            EmblemShape(
+                                                modifier = Modifier.size(36.dp),
+                                                line = line,
+                                                textStyle = MaterialTheme.typography.titleSmall
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            count++
+                        }
+                    } else {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .height(208.dp)
+                                    .fillMaxWidth()
+                                    .clip(MaterialTheme.shapes.extraLarge)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.noFavStops),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -119,10 +220,23 @@ fun HomePageView(
 @Composable
 @Preview
 fun HomePagePreview() {
+    val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
+    val lastStops = listOf(
+        StopItem(
+            lines = listOf(1, 2)
+        )
+    )
+    val lineItems = listOf(
+        LineItem(id = 1),
+        LineItem(id = 2),
+        LineItem(id = 3),
+    )
     HomePageView(
-        backStack
-    ) {
-        FavStopCarouselPreview()
-    }
+        backStack = backStack,
+        lastStops = lastStops,
+        lines = lineItems,
+        sheetModel = sheetModel,
+        favStopCarrousel = { FavStopCarouselPreview() }
+    )
 }

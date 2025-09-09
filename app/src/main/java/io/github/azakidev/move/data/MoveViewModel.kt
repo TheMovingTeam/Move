@@ -1,9 +1,12 @@
 package io.github.azakidev.move.data
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.azakidev.move.parseTimes
@@ -42,6 +45,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _stops: MutableStateFlow<List<StopItem>> = MutableStateFlow(listOf())
     var stops = _stops.asStateFlow()
     val favouriteStops: StateFlow<List<Int>> = _userStore.favouriteStopsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val lastStops: StateFlow<List<Int>> = _userStore.lastStopsFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -217,6 +227,29 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun saveLastStop(stopId: Int) {
+        viewModelScope.launch {
+            val currentLastStops = lastStops.value.toMutableList()
+            if (!currentLastStops.contains(stopId)) {
+                currentLastStops.add(stopId)
+                _userStore.saveLastStops(currentLastStops)
+            } else {
+                currentLastStops.remove(stopId)
+                _userStore.saveLastStops(currentLastStops)
+                currentLastStops.add(
+                    index = currentLastStops.count(),
+                    element = stopId
+                )
+                _userStore.saveLastStops(currentLastStops)
+            }
+            if (currentLastStops.count() > 5) {
+                currentLastStops.removeAt(index = 0)
+                _userStore.saveLastStops(currentLastStops)
+            }
+            println(currentLastStops)
+        }
+    }
+
     fun tryRepo(url: String): Boolean {
         val isValid = LinkedBlockingDeque<Boolean>()
         thread {
@@ -252,7 +285,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun fetchTimes(stopItem: StopItem) {
+    fun fetchTimes(stopItem: StopItem, context: Context) {
         val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider }
             ?: ProviderItem()
         if (!(provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
@@ -270,14 +303,19 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     println(e)
                     return@thread
                 }
-            val times = parseTimes(response, provider)
-            var count = 0
-            val timeList = mutableListOf<LineTime>()
-            stopItem.lines.forEach { i ->
-                timeList.add(LineTime(i, times[count]))
-                count++
+            val times = parseTimes(response, provider) ?: emptyList()
+            if (times.isNotEmpty()) {
+                var count = 0
+                val timeList = mutableListOf<LineTime>()
+                stopItem.lines.forEach { i ->
+                    timeList.add(LineTime(i, times[count]))
+                    count++
+                }
+                stopItem.setTimeTable(timeList)
             }
-            stopItem.setTimeTable(timeList)
+            else {
+                Toast.makeText(context, "Times couldn't be parsed", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

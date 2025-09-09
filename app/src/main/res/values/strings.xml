@@ -5,14 +5,19 @@
     <string name="map">Map</string>
     <string name="search">Search</string>
     <string name="favouriteStops">Favourite stops</string>
-    <string name="noProviders">No providers have been found</string>
-    <string name="noStops">No stops have been added</string>
+    <string name="recentStops">Recent stops</string>
+    <string name="noFavStops">No stops have been added to favourites</string>
+    <string name="noRecentStops">No stops have been seen recently</string>
     <string name="noLines">No lines have been added</string>
     <string name="settings">Settings</string>
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid provider</string>
     <string name="providerTitle">Providers</string>
+    <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>
     <string name="noCameraPerm">The camera permission has not been granted.</string>
+    <string name="times">Times</string>
+    <string name="alerts">Alerts</string>
+    <string name="noAlerts">There are no notifications for this stop</string>
 </resources>

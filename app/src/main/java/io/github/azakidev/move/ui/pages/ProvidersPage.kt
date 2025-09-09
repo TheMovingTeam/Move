@@ -5,12 +5,14 @@ package io.github.azakidev.move.ui.pages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,15 +38,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
+import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.ui.components.shapeFromId
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -84,6 +94,7 @@ fun ProvidersPage(
     }
 
     ProvidersList(
+        providerRepo = model.providerRepo.value,
         providers = model.providers.collectAsState().value,
         savedProviders = model.savedProviders.collectAsState().value,
         onFavoriteClick = onFavoriteClick,
@@ -94,6 +105,7 @@ fun ProvidersPage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProvidersList(
+    providerRepo: String,
     providers: List<ProviderItem>,
     savedProviders: List<Int>,
     onFavoriteClick: (Int, MutableStateFlow<ImageVector>) -> Unit,
@@ -143,60 +155,68 @@ fun ProvidersList(
                 ) {
                     var count = 0
                     items(providers.count()) { i ->
-                        var shape = when (count) {
-                            0 -> {
-                                RoundedCornerShape(
-                                    topStart = 8.dp,
-                                    topEnd = 8.dp,
-                                    bottomStart = 2.dp,
-                                    bottomEnd = 2.dp,
-                                )
-                            }
-
-                            providers.count() - 1 -> {
-                                RoundedCornerShape(
-                                    topStart = 2.dp,
-                                    topEnd = 2.dp,
-                                    bottomStart = 8.dp,
-                                    bottomEnd = 8.dp
-                                )
-                            }
-
-                            else -> {
-                                MaterialTheme.shapes.extraSmall
-                            }
-                        }
-                        count++
-
-                        if (providers.count() == 1) {
-                            shape = MaterialTheme.shapes.medium
-                        }
+                        val provider = providers[i]
+                        val shape = getListShape(count, providers.count())
 
                         val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
                         var icon = iconMut.collectAsState().value
-                        if (providers[i].id in savedProviders) {
+                        if (provider.id in savedProviders) {
                             icon = Icons.Default.Favorite
                         }
-
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(shape = shape)
                                 .background(MaterialTheme.colorScheme.surfaceContainerLow),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = providers[i].name,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(12.dp),
-                            )
-                            IconButton(
-                                onClick = { onFavoriteClick(i, iconMut) }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    val imgUrl = providerRepo + "/" + provider.name + "/res/provider.png"
+                                    AsyncImage(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(shapeFromId(provider.id)),
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(imgUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                        placeholder = painterResource(R.drawable.placeholderstop),
+                                        error = painterResource(R.drawable.placeholderstop),
+                                        contentScale = ContentScale.Crop,
+                                        contentDescription = provider.name,
+                                    )
+                                    Text(
+                                        text = provider.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                    )
+                                }
+                                IconButton(
+                                    shape = CircleShape,
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
+                                    onClick = { onFavoriteClick(i, iconMut) }
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                            if (provider.description.isNotEmpty()) {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    text = provider.description,
+                                    style = MaterialTheme.typography.bodySmall
                                 )
                             }
                         }
@@ -220,9 +240,20 @@ fun ProvidersList(
 @Composable
 @Preview
 fun ProvidersListPreview() {
-    val providers = listOf(ProviderItem(), ProviderItem(), ProviderItem())
+    val providers = listOf(
+        ProviderItem(
+            description = "This is a placeholder provider, if you see this it's probably in a preview"
+        ),
+        ProviderItem(),
+        ProviderItem()
+    )
     val savedProviders = emptyList<Int>()
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
     val backStack = rememberNavBackStack(MainView)
-    ProvidersList(providers, savedProviders, onFavoriteClick, backStack)
+    ProvidersList(
+        providerRepo = "",
+        providers = providers,
+        savedProviders,
+        onFavoriteClick,
+        backStack)
 }

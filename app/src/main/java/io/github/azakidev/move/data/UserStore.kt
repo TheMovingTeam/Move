@@ -18,6 +18,8 @@ class UserStore(private val context: Context) {
     private object PreferencesKeys {
         val PROVIDER_REPO_URL = stringPreferencesKey("provider_repo_url")
         val FAVOURITE_STOPS_IDS = stringSetPreferencesKey("favourite_stops_ids")
+        val LAST_STOPS_IDS = stringSetPreferencesKey("last_stops_ids")
+
         val SAVED_PROVIDERS_IDS = stringSetPreferencesKey("saved_providers_ids")
     }
 
@@ -64,6 +66,22 @@ class UserStore(private val context: Context) {
         val stringSet = stopIds.map { it.toString() }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.FAVOURITE_STOPS_IDS] = stringSet
+        }
+    }
+
+    // Favourite Stops
+    val lastStopsFlow: Flow<List<Int>> = context.dataStore.data
+        .map { preferences ->
+            // Read as Set<String>, then convert to List<Int>
+            // Provide an empty set as default if not found
+            (preferences[PreferencesKeys.LAST_STOPS_IDS] ?: emptySet()).mapNotNull { it.toIntOrNull() }
+        }
+
+    suspend fun saveLastStops(stopIds: List<Int>) {
+        // Convert List<Int> to Set<String> for saving
+        val stringSet = stopIds.map { it.toString() }.toSet()
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_STOPS_IDS] = stringSet
         }
     }
 }
