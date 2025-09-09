@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.delete
@@ -50,6 +51,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
 
@@ -130,10 +132,12 @@ fun LinesPage(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 stopItem = result,
+                                lines = model.lines.collectAsState().value,
                                 shape = shape,
                                 onClick = {
                                     sheetModel.sheetStop = result
                                     sheetModel.showBottomSheet = true
+                                    model.saveLastStop(sheetModel.sheetStop.id)
                                     textFieldState.edit { delete(0, textFieldState.text.length) }
                                     scope.launch { searchBarState.animateToCollapsed() }
                                 }
@@ -153,7 +157,11 @@ fun LinesPage(
                     .background(MaterialTheme.colorScheme.background),
                 lineItems = model.lines.collectAsState().value,
                 stopItems = model.stops.collectAsState().value,
-                sheetModel = sheetModel
+                onClick = { stopItem ->
+                    sheetModel.sheetStop = stopItem
+                    sheetModel.showBottomSheet = true
+                    model.saveLastStop(sheetModel.sheetStop.id)
+                }
             )
         } else {
             EmptyLines(
@@ -167,6 +175,7 @@ fun LinesPage(
 fun SearchResultStop(
     modifier: Modifier = Modifier,
     stopItem: StopItem,
+    lines: List<LineItem>,
     shape: Shape,
     onClick: () -> Unit
 ) {
@@ -177,15 +186,32 @@ fun SearchResultStop(
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stopItem.name
             )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                stopItem.lines.forEach { lineId ->
+                    val line =
+                        lines.find { line -> line.id == lineId } ?: LineItem()
+                    if (line != LineItem()) {
+                        EmblemShape(
+                            modifier = Modifier.size(36.dp),
+                            line = line,
+                            textStyle = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
+            }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,7 +220,7 @@ fun LineList(
     modifier: Modifier = Modifier,
     lineItems: List<LineItem>,
     stopItems: List<StopItem>,
-    sheetModel: SheetStopViewModel
+    onClick: (StopItem) -> Unit
 ) {
     Column(
         modifier = modifier.padding(bottom = 8.dp),
@@ -206,10 +232,10 @@ fun LineList(
             val shape = getListShape(count, lineItems.count())
             LineRow(
                 stops = stopItems,
-                sheetModel = sheetModel,
                 lineItem = item,
                 shape = shape,
                 expanded = expanded,
+                onClick = onClick
             )
             count++
         }
@@ -237,7 +263,6 @@ fun LinesPagePreview() {
         LineItem(id = 2),
         LineItem(id = 3),
     )
-    val sheetModel = viewModel<SheetStopViewModel>()
     Scaffold(
         topBar = {
             AppBarWithSearch(
@@ -255,7 +280,7 @@ fun LinesPagePreview() {
             modifier = Modifier.padding(paddingValues),
             lineItems = lineItems,
             stopItems = emptyList(),
-            sheetModel = sheetModel
+            onClick = {}
         )
     }
 }
@@ -310,4 +335,19 @@ fun EmptyLinesPreview() {
                 .fillMaxSize()
         )
     }
+}
+
+@Composable
+@Preview
+fun SearchResultPreview() {
+    SearchResultStop(
+        stopItem = StopItem(
+            lines = listOf(1)
+        ),
+        lines = listOf(
+            LineItem(id = 1)
+        ),
+        shape = MaterialTheme.shapes.medium,
+        onClick = {}
+    )
 }

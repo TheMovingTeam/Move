@@ -62,9 +62,9 @@ fun LineEntry(line: LineItem) {
 @Composable
 fun StopEntries(
     stops: List<StopItem>,
-    sheetModel: SheetStopViewModel,
     lineItem: LineItem,
-    isExpanded: Boolean
+    isExpanded: Boolean,
+    onClick: (StopItem) -> Unit
 ) {
     // Opening Animation
     val expandTransition = remember {
@@ -106,10 +106,7 @@ fun StopEntries(
                         .clip(shape = shape)
                         .clickable(
                             enabled = isExpanded,
-                            onClick = {
-                                sheetModel.sheetStop = stopItem
-                                sheetModel.showBottomSheet = true
-                            }
+                            onClick = { onClick(stopItem) }
                         )
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
@@ -130,10 +127,10 @@ fun StopEntries(
 @Composable
 fun LineRow(
     stops: List<StopItem>,
-    sheetModel: SheetStopViewModel,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
-    expanded: MutableState<Boolean>
+    expanded: MutableState<Boolean>,
+    onClick: (StopItem) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -151,9 +148,9 @@ fun LineRow(
             LineEntry(line = lineItem)
             StopEntries(
                 stops = stops,
-                sheetModel = sheetModel,
                 lineItem = lineItem,
-                isExpanded = expanded.value
+                isExpanded = expanded.value,
+                onClick = onClick
             )
         }
     }
@@ -167,13 +164,12 @@ fun LineRowPreview() {
             StopItem(id = 2, name = "Stop 2"),
             StopItem(id = 3, name = "Stop 3")
         )
-    val sheetModel = viewModel<SheetStopViewModel>()
     val expanded = remember { mutableStateOf(false) }
     LineRow(
         stops = stops,
-        sheetModel = sheetModel,
         lineItem = LineItem(stops = listOf(1, 2, 3)),
-        expanded = expanded
+        expanded = expanded,
+        onClick = {}
     )
 }
 
@@ -185,12 +181,11 @@ fun LineRowExpandedPreview() {
         StopItem(id = 2, name = "Stop 2"),
         StopItem(id = 3, name = "Stop 3")
     )
-    val sheetModel = viewModel<SheetStopViewModel>()
     val expanded = remember { mutableStateOf(true) }
     LineRow(
         stops = stops,
-        sheetModel = sheetModel,
         lineItem = LineItem(stops = listOf(1, 2, 3)),
-        expanded = expanded
+        expanded = expanded,
+        onClick = {}
     )
 }

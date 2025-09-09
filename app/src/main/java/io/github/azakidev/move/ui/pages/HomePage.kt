@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
@@ -70,7 +69,11 @@ fun HomePage(
         favStopCarrousel = { FavStopCarousel(model, sheetModel) },
         lastStops = lastStops,
         lines = model.lines.collectAsState().value,
-        sheetModel = sheetModel
+        onRecentOpen = { stopItem ->
+            sheetModel.sheetStop = stopItem
+            sheetModel.showBottomSheet = true
+            model.saveLastStop(sheetModel.sheetStop.id)
+        }
     )
 }
 
@@ -80,7 +83,7 @@ fun HomePageView(
     backStack: NavBackStack,
     lastStops: List<StopItem>,
     lines: List<LineItem>,
-    sheetModel: SheetStopViewModel,
+    onRecentOpen: (StopItem) -> Unit,
     favStopCarrousel: @Composable() () -> Unit
 ) {
     Scaffold(
@@ -158,10 +161,7 @@ fun HomePageView(
                                     .padding(bottom = 4.dp)
                                     .clip(shape = shape)
                                     .clickable(
-                                        onClick = {
-                                            sheetModel.sheetStop = stopItem
-                                            sheetModel.showBottomSheet = true
-                                        }
+                                        onClick = { onRecentOpen(stopItem) }
                                     )
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -220,7 +220,6 @@ fun HomePageView(
 @Composable
 @Preview
 fun HomePagePreview() {
-    val sheetModel = viewModel<SheetStopViewModel>()
     val backStack = rememberNavBackStack(MainView)
     val lastStops = listOf(
         StopItem(
@@ -236,7 +235,7 @@ fun HomePagePreview() {
         backStack = backStack,
         lastStops = lastStops,
         lines = lineItems,
-        sheetModel = sheetModel,
-        favStopCarrousel = { FavStopCarouselPreview() }
+        favStopCarrousel = { FavStopCarouselPreview() },
+        onRecentOpen = {}
     )
 }

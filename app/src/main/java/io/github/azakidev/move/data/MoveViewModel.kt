@@ -246,7 +246,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 currentLastStops.removeAt(index = 0)
                 _userStore.saveLastStops(currentLastStops)
             }
-            println(currentLastStops)
         }
     }
 

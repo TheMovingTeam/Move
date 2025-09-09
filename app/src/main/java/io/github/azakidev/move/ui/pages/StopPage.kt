@@ -65,8 +65,6 @@ fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
 ) {
-    model.saveLastStop(sheetModel.sheetStop.id)
-
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
     var roundness: Int
 
