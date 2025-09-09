@@ -13,9 +13,12 @@ It also includes the format for requesting ETAs and how to parse the response so
 - [x] User data storage
 - [x] Finalize MVP UI
 - [ ] Finalize MVP data spec
-- [ ] Cache lines and stop data
+    - [x] Planned feature entries
+    - [ ] Version checking
+    - [ ] Schema
+- [ ] Cache line and stop data
 - [ ] Implement first provider
-- [ ] Implement provider generator (a web crawler to get the latest metadata from each provider)
+- [ ] Implement fitst provider crawler
 ### Planned
 - [x] QR Scanner
 - [ ] Onboarding experience
