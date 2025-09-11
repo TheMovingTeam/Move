@@ -16,7 +16,7 @@ It also includes the format for requesting ETAs and how to parse the response so
     - [x] Planned feature entries
     - [ ] Version checking
     - [ ] Schema
-- [ ] Cache line and stop data
+- [x] Cache line and stop data
 - [ ] Implement first provider
 - [ ] Implement fitst provider crawler
 ### Planned
