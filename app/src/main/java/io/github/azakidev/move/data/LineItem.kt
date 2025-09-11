@@ -9,24 +9,11 @@ data class LineItem (
 
     val name: String = "DefaultLine",
     val emblem: String = "DL",
+    val color: String? = null,
 
-    val stops: List<Int> = listOf(),
-    val color: String? = null
+    val stops: List<Int> = listOf()
 )
 @Serializable
 data class LineResponse (
-    val lines: Array<LineItem>
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as LineResponse
-
-        return lines.contentEquals(other.lines)
-    }
-
-    override fun hashCode(): Int {
-        return lines.contentHashCode()
-    }
-}
+    val lines: List<LineItem>
+)

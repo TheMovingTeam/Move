@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
@@ -57,7 +58,7 @@ import io.github.azakidev.move.data.MoveViewModel
 @Composable
 fun SettingsPage(
     model: MoveViewModel,
-    backStack: NavBackStack
+    backStack: NavBackStack<NavKey>
 ) {
     val state = rememberTextFieldState(
         initialText = model.providerRepo.value,

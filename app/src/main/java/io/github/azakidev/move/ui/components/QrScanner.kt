@@ -54,14 +54,12 @@ class BarcodeAnalyser(
     }
 }
 
-
 @ExperimentalGetImage
 @Composable
 fun QrScanner(
     modifier: Modifier = Modifier, providers: List<ProviderItem>, callback: (Int) -> Unit
 ) {
     val msg = stringResource(R.string.qrNotFound)
-
     AndroidView(
         { context ->
             val cameraExecutor = Executors.newSingleThreadExecutor()

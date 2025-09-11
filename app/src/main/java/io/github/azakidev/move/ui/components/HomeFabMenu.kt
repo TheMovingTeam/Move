@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.Providers
@@ -50,7 +51,7 @@ data class FabEntry(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeFabMenu(
-    backStack: NavBackStack,
+    backStack: NavBackStack<NavKey>,
     initialState: Boolean = false
 ) {
     val listState = rememberLazyListState()

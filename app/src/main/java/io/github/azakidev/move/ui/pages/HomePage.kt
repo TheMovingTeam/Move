@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
@@ -54,7 +55,9 @@ import io.github.azakidev.move.ui.components.HomeFabMenu
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
-    model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack
+    model: MoveViewModel,
+    sheetModel: SheetStopViewModel,
+    backStack: NavBackStack<NavKey>
 ) {
     val unorderedLastStops = model.stops.collectAsState().value
         .filter { model.lastStops.collectAsState().value.contains(it.id) }
@@ -80,7 +83,7 @@ fun HomePage(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePageView(
-    backStack: NavBackStack,
+    backStack: NavBackStack<NavKey>,
     lastStops: List<StopItem>,
     lines: List<LineItem>,
     onRecentOpen: (StopItem) -> Unit,

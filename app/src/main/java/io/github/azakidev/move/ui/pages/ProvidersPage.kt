@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -63,7 +64,7 @@ import kotlin.concurrent.schedule
 @Composable
 fun ProvidersPage(
     model: MoveViewModel,
-    backStack: NavBackStack,
+    backStack: NavBackStack<NavKey>,
 ) {
     var shouldLoad = model.providers.collectAsState().value.count() == 0
 
@@ -109,7 +110,7 @@ fun ProvidersList(
     providers: List<ProviderItem>,
     savedProviders: List<Int>,
     onFavoriteClick: (Int, MutableStateFlow<ImageVector>) -> Unit,
-    backStack: NavBackStack
+    backStack: NavBackStack<NavKey>
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(

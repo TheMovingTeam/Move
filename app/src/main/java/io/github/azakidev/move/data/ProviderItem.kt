@@ -26,7 +26,7 @@ enum class Capabilities {
     DoubleTime,
     Notifications,
     QrScan,
-//    Geo,
+    Geo,
 }
 
 @Serializable

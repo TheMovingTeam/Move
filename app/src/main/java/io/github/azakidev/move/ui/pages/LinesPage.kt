@@ -68,6 +68,9 @@ fun LinesPage(
         it.name.lowercase().contains(textFieldState.text.toString().lowercase())
     }
 
+    println("Stops: ${model.stops.collectAsState().value}")
+    println("Lines: ${model.lines.collectAsState().value}")
+
     val inputField = @Composable {
         SearchBarDefaults.InputField(
             searchBarState = searchBarState,

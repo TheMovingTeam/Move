@@ -7,8 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StopItem(
     val id: Int = 0,
-    val name: String = "DefaultStop",
     var provider: Int = 0,
+
+    val name: String = "DefaultStop",
 
     val lines: List<Int> = emptyList(),
 

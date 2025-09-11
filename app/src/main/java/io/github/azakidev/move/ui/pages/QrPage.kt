@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -45,7 +46,7 @@ import io.github.azakidev.move.ui.components.QrScanner
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun QrPage(
-    model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack
+    model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack<NavKey>
 ) {
     Scaffold(
         topBar = {
