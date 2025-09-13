@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">Move</string>
+    <string name="welcomeTo">Welcome to</string>
+    <string name="chooseProvider">Choose a provider</string>
+    <string name="whatIsMove">What is Move?</string>
     <string name="home">Home</string>
     <string name="lines">Lines</string>
     <string name="map">Map</string>

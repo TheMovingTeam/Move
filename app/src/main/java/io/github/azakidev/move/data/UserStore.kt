@@ -3,6 +3,7 @@ package io.github.azakidev.move.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -19,8 +20,8 @@ class UserStore(private val context: Context) {
         val PROVIDER_REPO_URL = stringPreferencesKey("provider_repo_url")
         val FAVOURITE_STOPS_IDS = stringSetPreferencesKey("favourite_stops_ids")
         val LAST_STOPS_IDS = stringSetPreferencesKey("last_stops_ids")
-
         val SAVED_PROVIDERS_IDS = stringSetPreferencesKey("saved_providers_ids")
+        val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
     }
 
     // Default URL if nothing is saved yet
@@ -82,6 +83,20 @@ class UserStore(private val context: Context) {
         val stringSet = stopIds.map { it.toString() }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_STOPS_IDS] = stringSet
+        }
+    }
+
+    // Onboarding status
+    val onboardingFlow: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            // Read as Set<String>, then convert to List<Int>
+            // Provide an empty set as default if not found
+            (preferences[PreferencesKeys.HAS_COMPLETED_ONBOARDING] ?: false)
+        }
+
+    suspend fun saveOnboardingStatus(status: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HAS_COMPLETED_ONBOARDING] = status
         }
     }
 }

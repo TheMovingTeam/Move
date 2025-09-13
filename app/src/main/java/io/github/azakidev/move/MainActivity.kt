@@ -14,6 +14,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
@@ -58,6 +59,8 @@ import io.github.azakidev.move.ui.theme.MoveTheme
 import java.util.Timer
 import kotlin.concurrent.schedule
 import kotlin.getValue
+import androidx.compose.runtime.collectAsState
+import io.github.azakidev.move.ui.pages.OnboardingPage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
@@ -67,72 +70,78 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val model = viewModel<MoveViewModel>()
-            model.fetchProviders()
-            val timer = Timer().schedule(delay = 5000, action = {
-                model.fetchInfo()
-            })
-            timer.run()
-
-            val sheetState = rememberModalBottomSheetState()
-            val sheetModel = viewModel<SheetStopViewModel>()
-
-            val backStack = rememberNavBackStack(MainView)
             MoveTheme {
                 Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { backStack.removeLastOrNull() },
-                        transitionSpec = {
-                            // Slide in from right when navigating forward
-                            slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
-                                targetScale = 0.9f,
-                                transformOrigin = TransformOrigin(0f, 0.5f),
-                                animationSpec = MotionScheme.standard().defaultSpatialSpec()
-                            )
-                        },
-                        popTransitionSpec = {
-                            // Slide in from left when navigating back
-                            scaleIn(
-                                initialScale = 0.9f,
-                                transformOrigin = TransformOrigin(0f, 0.5f),
-                                animationSpec = tween(500)
-                            ) togetherWith slideOutHorizontally(
-                                animationSpec = tween(500)
-                            ) { it }
-                        },
-                        predictivePopTransitionSpec = {
-                            // Slide in from left when navigating back
-                            scaleIn(
-                                initialScale = 0.9f,
-                                transformOrigin = TransformOrigin(0f, 0.5f),
-                                animationSpec = tween(200)
-                            ) togetherWith scaleOut(
-                                targetScale = 0.9f,
-                                transformOrigin = TransformOrigin(0f, 0.5f),
-                                animationSpec = tween(200)
-                            ) + slideOutHorizontally(
-                                animationSpec = tween(200, easing = EaseInCirc),
-                                targetOffsetX = { it }
-                            )
+                    if (model.onboardingStatus.collectAsState().value) {
+                        model.fetchProviders()
+                        val timer = Timer().schedule(delay = 5000, action = {
+                            model.fetchInfo()
+                        })
+                        timer.run()
 
-                        },
-                        entryProvider = entryProvider {
-                            entry<MainView> {
-                                AppNavigator(model, sheetState, sheetModel, backStack)
-                            }
-                            entry<Providers> {
-                                ProvidersPage(model, backStack)
-                            }
-                            entry<Settings> {
-                                SettingsPage(model, backStack)
-                            }
-                            entry<QrScanner> {
-                                QrPage(model, sheetModel, backStack)
-                            }
-                        },
-                    )
+                        val sheetState = rememberModalBottomSheetState()
+                        val sheetModel = viewModel<SheetStopViewModel>()
+
+                        val backStack = rememberNavBackStack(MainView)
+                        NavDisplay(
+                            backStack = backStack,
+                            onBack = { backStack.removeLastOrNull() },
+                            transitionSpec = {
+                                // Slide in from right when navigating forward
+                                slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
+                                    targetScale = 0.9f,
+                                    transformOrigin = TransformOrigin(0f, 0.5f),
+                                    animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                )
+                            },
+                            popTransitionSpec = {
+                                // Slide in from left when navigating back
+                                scaleIn(
+                                    initialScale = 0.9f,
+                                    transformOrigin = TransformOrigin(0f, 0.5f),
+                                    animationSpec = tween(500)
+                                ) togetherWith slideOutHorizontally(
+                                    animationSpec = tween(500)
+                                ) { it }
+                            },
+                            predictivePopTransitionSpec = {
+                                // Slide in from left when navigating back
+                                scaleIn(
+                                    initialScale = 0.9f,
+                                    transformOrigin = TransformOrigin(0f, 0.5f),
+                                    animationSpec = tween(200)
+                                ) togetherWith scaleOut(
+                                    targetScale = 0.9f,
+                                    transformOrigin = TransformOrigin(0f, 0.5f),
+                                    animationSpec = tween(200)
+                                ) + slideOutHorizontally(
+                                    animationSpec = tween(200, easing = EaseInCirc),
+                                    targetOffsetX = { it }
+                                )
+
+                            },
+                            entryProvider = entryProvider {
+                                entry<MainView> {
+                                    AppNavigator(model, sheetState, sheetModel, backStack)
+                                }
+                                entry<Providers> {
+                                    ProvidersPage(model, backStack)
+                                }
+                                entry<Settings> {
+                                    SettingsPage(model, backStack)
+                                }
+                                entry<QrScanner> {
+                                    QrPage(model, sheetModel, backStack)
+                                }
+                            },
+                        )
+                    } else {
+                        OnboardingPage(model)
+                    }
                 }
             }
         }

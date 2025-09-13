@@ -69,6 +69,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
+    val onboardingStatus: StateFlow<Boolean> = _userStore.onboardingFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
     init {
         viewModelScope.launch {
             _providerRepo.collect { savedUrl ->
@@ -191,7 +198,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
 
     private fun loadProvidersFromDb() {
         viewModelScope.launch {
@@ -384,7 +390,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             if (!currentLastStops.contains(stopId)) {
                 currentLastStops.add(stopId)
                 _userStore.saveLastStops(currentLastStops)
-            } else {
+            } else if (currentLastStops.last() != stopId) {
                 currentLastStops.remove(stopId)
                 _userStore.saveLastStops(currentLastStops)
                 currentLastStops.add(
@@ -468,6 +474,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 Toast.makeText(context, "Times couldn't be parsed", Toast.LENGTH_SHORT)
                     .show()
             }
+        }
+    }
+
+    fun saveOnboarding(status: Boolean) {
+        viewModelScope.launch {
+            _userStore.saveOnboardingStatus(status)
         }
     }
 }
