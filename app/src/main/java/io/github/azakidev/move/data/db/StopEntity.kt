@@ -24,39 +24,35 @@ data class StopEntity(
 
     val name: String,
 
-    val lineIdsJson: String,
+    val lines: List<Int>,
 
     val geoX: Float?,
     val geoY: Float?,
 
-    val notificationsJson: String,
+    val notifications: List<String>,
 )
 
 // Helper to convert to and from StopItem
-fun StopEntity.toStopItem(): StopItem { // Or your preferred JSON library
-    val lineIds = Gson().fromJson<List<Int>>(this.lineIdsJson, object : com.google.gson.reflect.TypeToken<List<Int>>() {}.type)
-    val notifications = Gson().fromJson<List<String>>(this.notificationsJson, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type)
+fun StopEntity.toStopItem(): StopItem {
     return StopItem(
         id = this.id,
         name = this.name,
         geoX = this.geoX,
         geoY = this.geoY,
         provider = this.providerId,
-        lines = lineIds,
-        notifications = notifications
+        lines = this.lines,
+        notifications = this.notifications
     )
 }
 
 fun StopItem.toStopEntity(): StopEntity {
-    val lineIdsJson = Gson().toJson(this.lines)
-    val notificationsJson = Gson().toJson(this.notifications)
     return StopEntity(
         id = this.id,
         name = this.name,
         geoX = this.geoX,
         geoY = this.geoY,
         providerId = this.provider,
-        lineIdsJson = lineIdsJson,
-        notificationsJson = notificationsJson
+        lines = this.lines,
+        notifications = this.notifications
     )
 }

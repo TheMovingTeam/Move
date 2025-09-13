@@ -121,7 +121,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun fetchProviders() {
-        viewModelScope.launch(Dispatchers.IO) { // Use Dispatchers.IO for network and DB
+        viewModelScope.launch(Dispatchers.IO) {
             val currentRepoUrl = providerRepo.value
             if (currentRepoUrl.isEmpty()) {
                 Log.w("MoveViewModel", "Provider repo URL is empty, cannot fetch providers.")

@@ -1,5 +1,6 @@
 package io.github.azakidev.move.data.db
 
+import android.util.Log
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -20,6 +21,11 @@ class Converters {
             try {
                 Capabilities.valueOf(it)
             } catch (e: IllegalArgumentException) {
+                Log.e(
+                    "MoveDB",
+                    "Could not retrieve capabilities: ${e.message}",
+                    e
+                )
                 null
             }
         }
@@ -32,7 +38,7 @@ class Converters {
 
     @TypeConverter
     fun toTimeFormat(timeFormatString: String?): TimeFormat? {
-        return gson.fromJson(timeFormatString, object : com.google.gson.reflect.TypeToken<TimeFormat>() {}.type)
+        return gson.fromJson(timeFormatString, object : TypeToken<TimeFormat>() {}.type)
     }
 
     @TypeConverter
@@ -43,6 +49,17 @@ class Converters {
     @TypeConverter
     fun toIntegerList(json: String?): List<Int>? {
         val type = object : TypeToken<List<Int>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    @TypeConverter
+    fun fromStringList(list: List<String>?): String? {
+        return gson.toJson(list)
+    }
+
+    @TypeConverter
+    fun toStringList(json: String?): List<String>? {
+        val type = object : TypeToken<List<String>>() {}.type
         return gson.fromJson(json, type)
     }
 }

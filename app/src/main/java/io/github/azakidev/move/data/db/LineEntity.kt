@@ -26,30 +26,28 @@ data class LineEntity(
     val emblem: String,
     val color: String?,
 
-    val stops: String
+    val stops: List<Int>
     )
 
 // Helper to convert to and from LineItem
 fun LineEntity.toLineItem(): LineItem {
-    val stops = Gson().fromJson<List<Int>>(this.stops, object : com.google.gson.reflect.TypeToken<List<Int>>() {}.type)
     return LineItem(
         id = this.id,
         name = this.name,
         emblem = this.emblem,
         color = this.color,
         provider = this.providerId,
-        stops = stops
+        stops = this.stops
     )
 }
 
 fun LineItem.toLineEntity(): LineEntity {
-    val stops = Gson().toJson(this.stops)
     return LineEntity(
         id = this.id,
         name = this.name,
         emblem = this.emblem,
         color = this.color,
         providerId = this.provider,
-        stops = stops
+        stops = this.stops
     )
 }

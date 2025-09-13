@@ -7,14 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [
-        ProviderEntity::class,
-        LineEntity::class,
-        StopEntity::class
-               ],
+    entities = [ProviderEntity::class, LineEntity::class, StopEntity::class],
     version = 1,
-    exportSchema = false)
-@TypeConverters(Converters::class) // Add your TypeConverters here
+    exportSchema = false
+)
+@TypeConverters(Converters::class)
 abstract class MoveDatabase : RoomDatabase() {
     abstract fun providerDao(): ProviderDao
     abstract fun lineDao(): LineDao
@@ -27,9 +24,7 @@ abstract class MoveDatabase : RoomDatabase() {
         fun getDatabase(context: Context): MoveDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    MoveDatabase::class.java,
-                    "move_database"
+                    context.applicationContext, MoveDatabase::class.java, "move_database"
                 )
                     // Add migrations if you change the schema later
                     .build()
