@@ -8,7 +8,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.data.db.toLineEntity
 import io.github.azakidev.move.data.db.toLineItem
@@ -35,7 +34,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _providerDao = _database.providerDao()
     private val _lineDao = _database.lineDao()
     private val _stopDao = _database.stopDao()
-    private val _gson = Gson()
 
     private val _userStore = UserStore(application.applicationContext)
     private val _providerRepo: StateFlow<String> = _userStore.providerRepoUrlFlow
@@ -84,7 +82,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Wait for providers to be fetched if necessary
                 providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() } // Ensure providers are loaded if repo is set
-                fetchInfoForSavedProviders(initialSavedProviders, forceRefresh = false)
+                fetchInfoForSavedProviders(initialSavedProviders)
             }
         }
         viewModelScope.launch {
@@ -110,10 +108,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                             _stops.value = stopEntities.map { it.toStopItem() }
                         }
                     }
-
                     // Trigger a check/fetch for these saved providers
-                    // The 'forceRefresh = false' means it will use cache if provider not updated
-                    fetchInfoForSavedProviders(savedProviderIds, forceRefresh = false)
+                    fetchInfoForSavedProviders(savedProviderIds)
                 } else {
                     _lines.value = emptyList()
                     _stops.value = emptyList()
@@ -143,7 +139,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 // 2. Get currently cached providers' metadata (ID and lastUpdated)
                 val cachedProviders = _providerDao.getAllProviders().first() // Get current snapshot
 
-                val providersToFetchDetailsFor = mutableListOf<String>()
                 val freshProvidersFromRemote = mutableListOf<ProviderItem>()
 
                 // 3. Compare and decide which providers need full metadata fetching
@@ -186,8 +181,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 // 6. Fetch info for saved providers (lines and stops)
                 // This should also respect the lastUpdated timestamp for lines/stops if available
                 fetchInfoForSavedProviders(
-                    savedProviders.value,
-                    forceRefresh = false
+                    savedProviders.value
                 )
 
             } catch (e: Exception) {
@@ -212,11 +206,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { // Ensure it runs in a coroutine
             val currentSavedProviders =
                 savedProviders.first() // Get current list from DataStore
-            fetchInfoForSavedProviders(currentSavedProviders, false)
+            fetchInfoForSavedProviders(currentSavedProviders)
         }
     }
 
-    private fun fetchInfoForSavedProviders(providerIds: List<Int>, forceRefresh: Boolean) {
+    private fun fetchInfoForSavedProviders(providerIds: List<Int>) {
         if (_providers.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
                 "MoveViewModel",
@@ -249,17 +243,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch(Dispatchers.IO) {
                 val cachedProviderEntity = _providerDao.getProviderById(id)
 
-                // Decision logic:
                 // Fetch if:
-                // 1. Force refresh is true.
-                // 2. No cached lines/stops for this provider (check DAO).
-                // 3. The provider's metadata was updated more recently than the last time we fetched lines/stops for it.
-                //    (This requires storing a lastFetchedTimestamp for lines/stops, or assuming if provider is new, lines/stops are new)
-
-                // For simplicity now: fetch if forceRefresh or if the provider itself was just updated
-                // A more robust check would involve looking at when lines/stops were last fetched for this provider.
+                // 1. No cached lines/stops for this provider (check DAO).
+                // 2. The provider's metadata was updated more recently than the last time we fetched lines/stops for it.
                 val needsRemoteFetch =
-                    forceRefresh || (cachedProviderEntity != null && provider.lastUpdated > (cachedProviderEntity.lastUpdated)) // Simplified: if provider metadata is newer
+                    (cachedProviderEntity != null && provider.lastUpdated > (cachedProviderEntity.lastUpdated)) // Simplified: if provider metadata is newer
 
                 if (needsRemoteFetch && currentRepoUrl.isNotEmpty()) {
                     Log.d(
@@ -268,7 +256,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     fetchAndStoreLinesForProvider(provider, currentRepoUrl)
                     fetchAndStoreStopsForProvider(provider, currentRepoUrl)
-                } else if (_stopDao.getStopsForProvider(provider.id).first()
+                } else if (_stopDao.getStopsForProvider(provider.id)
+                        .first()
                         .isEmpty()
                 ) { // Force a fetch for the first fetch
                     Log.d(
@@ -419,7 +408,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 Json.decodeFromString<ProviderListResponse>(providerListJson)
                 isValid.add(true)
             } catch (e: Exception) {
-                println(e)
+                Log.e(
+                    "MoveViewModel",
+                    "The repo at $url could not be verified: ${e.message}",
+                    e
+                )
                 isValid.add(false)
                 return@launch
             }
@@ -455,7 +448,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     URL(url).readText()
                 } catch (e: Exception) {
-                    println(e)
+                    Log.e(
+                        "MoveViewModel",
+                        "The times at $url could not be verified: ${e.message}",
+                        e
+                    )
                     return@thread
                 }
             val times = parseTimes(response, provider) ?: emptyList()
