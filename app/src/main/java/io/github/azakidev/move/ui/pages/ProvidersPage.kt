@@ -50,7 +50,7 @@ import coil3.request.crossfade
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -155,7 +155,7 @@ fun ProvidersList(
             ) {
                 items(providers.count()) { i ->
                     val provider = providers[i]
-                    val shape = getListShape(i, providers.count())
+                    val shape = listShape(i, providers.count())
                     val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
                     var icon = iconMut.collectAsState().value
                     if (provider.id in savedProviders) {

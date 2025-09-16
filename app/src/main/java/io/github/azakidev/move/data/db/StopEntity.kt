@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.google.gson.Gson
 import io.github.azakidev.move.data.StopItem
 
 @Entity(
@@ -20,6 +19,7 @@ import io.github.azakidev.move.data.StopItem
 data class StopEntity(
     @PrimaryKey(autoGenerate = true) val localId: Long = 0, // Auto-generated local primary key
     val id: Int, // Original ID from the Provider
+    val comId: Int, // Commercial ID from the Provider, in case it differs
     val providerId: Int, // Foreign key to ProviderEntity
 
     val name: String,
@@ -36,6 +36,7 @@ data class StopEntity(
 fun StopEntity.toStopItem(): StopItem {
     return StopItem(
         id = this.id,
+        comId = this.comId,
         name = this.name,
         geoX = this.geoX,
         geoY = this.geoY,
@@ -48,6 +49,7 @@ fun StopEntity.toStopItem(): StopItem {
 fun StopItem.toStopEntity(): StopEntity {
     return StopEntity(
         id = this.id,
+        comId = this.comId,
         name = this.name,
         geoX = this.geoX,
         geoY = this.geoY,

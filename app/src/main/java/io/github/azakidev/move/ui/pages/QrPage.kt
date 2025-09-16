@@ -52,23 +52,23 @@ fun QrPage(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                scrolledContainerColor = MaterialTheme.colorScheme.background
-            ), title = {
-                Text(stringResource(R.string.qrScan))
-            }, navigationIcon = {
-                IconButton(
-                    shape = IconButtonDefaults.standardShape,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = { backStack.removeLastOrNull() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            })
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ), title = {
+                    Text(stringResource(R.string.qrScan))
+                }, navigationIcon = {
+                    IconButton(
+                        shape = IconButtonDefaults.standardShape,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { backStack.removeLastOrNull() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                })
         }) {
         val cameraPermissionState = rememberPermissionState(
             android.Manifest.permission.CAMERA
@@ -90,13 +90,18 @@ fun QrPage(
                                 .fillMaxSize()
                                 .padding(8.dp)
                                 .clip(RoundedCornerShape(16.dp)),
-                            providers = model.providers.collectAsState().value,
-                            callback = { id ->
-                                val stopItem = model.stops.value.find { it.id == id } ?: StopItem()
+                            providers = model.providers.collectAsState().value.filter { model.savedProviders.collectAsState().value.contains(it.id) },
+                            callback = { response ->
+                                val stopItem = if (response.second.capabilities.contains(Capabilities.ComId)) {
+                                    model.stops.value.find { it.comId == response.first } ?: StopItem()
+                                } else {
+                                    model.stops.value.find { it.id == response.first } ?: StopItem()
+                                }
                                 sheetModel.sheetStop = stopItem
                                 if (backStack.last() != MainView) {
                                     backStack.removeLastOrNull()
                                 }
+                                model.saveLastStop(stopItem.id)
                                 sheetModel.showBottomSheet = true
                             })
                     }
@@ -119,7 +124,7 @@ fun QrPage(
                 modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 Text(
-                    stringResource(R.string.noCameraPerm)
+                    stringResource(R.string.noCameraPermission)
                 )
                 SideEffect {
                     cameraPermissionState.launchPermissionRequest()
@@ -138,29 +143,29 @@ fun NoPermissionPreview() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                scrolledContainerColor = MaterialTheme.colorScheme.background
-            ), title = {
-                Text(stringResource(R.string.qrScan))
-            }, navigationIcon = {
-                IconButton(
-                    shape = IconButtonDefaults.standardShape,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = { }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            })
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ), title = {
+                    Text(stringResource(R.string.qrScan))
+                }, navigationIcon = {
+                    IconButton(
+                        shape = IconButtonDefaults.standardShape,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                })
         }) {
         Box(
             modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
         ) {
             Text(
-                stringResource(R.string.noCameraPerm)
+                stringResource(R.string.noCameraPermission)
             )
         }
     }
@@ -175,23 +180,23 @@ fun NoQrPreview() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                scrolledContainerColor = MaterialTheme.colorScheme.background
-            ), title = {
-                Text(stringResource(R.string.qrScan))
-            }, navigationIcon = {
-                IconButton(
-                    shape = IconButtonDefaults.standardShape,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = { }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            })
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ), title = {
+                    Text(stringResource(R.string.qrScan))
+                }, navigationIcon = {
+                    IconButton(
+                        shape = IconButtonDefaults.standardShape,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                })
         }) {
         Box(
             modifier = Modifier

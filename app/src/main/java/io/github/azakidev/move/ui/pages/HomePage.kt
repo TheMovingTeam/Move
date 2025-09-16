@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -46,7 +46,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
@@ -114,7 +114,7 @@ fun HomePageView(
                             backStack.add(Settings)
                         }) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            imageVector = Icons.Rounded.Settings,
                             contentDescription = stringResource(R.string.settings)
                         )
                     }
@@ -157,7 +157,7 @@ fun HomePageView(
                         var count = 0
                         items(lastStops.count()) {
                             val stopItem = lastStops[it]
-                            val shape = getListShape(count, lastStops.count())
+                            val shape = listShape(count, lastStops.count())
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

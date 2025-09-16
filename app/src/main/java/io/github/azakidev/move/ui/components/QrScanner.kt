@@ -40,15 +40,15 @@ class BarcodeAnalyser(
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
             scanner.process(image).addOnSuccessListener { barcodes ->
-                    if (barcodes.isNotEmpty()) {
-                        barcodes.forEach { barcode ->
-                            callback(barcode.rawValue ?: "")
-                        }
+                if (barcodes.isNotEmpty()) {
+                    barcodes.forEach { barcode ->
+                        callback(barcode.rawValue ?: "")
                     }
-                }.addOnFailureListener {
-                    // Task failed with an exception
-                    // ...
                 }
+            }.addOnFailureListener {
+                // Task failed with an exception
+                // ...
+            }
         }
         imageProxy.close()
     }
@@ -57,7 +57,9 @@ class BarcodeAnalyser(
 @ExperimentalGetImage
 @Composable
 fun QrScanner(
-    modifier: Modifier = Modifier, providers: List<ProviderItem>, callback: (Int) -> Unit
+    modifier: Modifier = Modifier,
+    providers: List<ProviderItem>,
+    callback: (Pair<Int, ProviderItem>) -> Unit
 ) {
     val msg = stringResource(R.string.qrNotFound)
     AndroidView(
@@ -71,24 +73,24 @@ fun QrScanner(
                 val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
                 val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
-                    }
+                    it.surfaceProvider = previewView.surfaceProvider
+                }
 
                 val imageCapture = ImageCapture.Builder().build()
 
                 val imageAnalyzer = ImageAnalysis.Builder().build().also {
-                        it.setAnalyzer(cameraExecutor, BarcodeAnalyser { url ->
-                            try {
-                                val id = parseQr(
-                                    providers = providers, url = url
-                                )
-                                callback(id)
-                            } catch (e: Exception) {
-                                Log.e("WARNING", "URL not recognized", e)
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                            }
-                        })
-                    }
+                    it.setAnalyzer(cameraExecutor, BarcodeAnalyser { url ->
+                        try {
+                            val parsed = parseQr(
+                                providers = providers, url = url
+                            )
+                            callback(parsed)
+                        } catch (e: Exception) {
+                            Log.e("WARNING", "URL not recognized", e)
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                }
 
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -116,9 +118,13 @@ fun QrScanner(
 
 fun parseQr(
     providers: List<ProviderItem>, url: String
-): Int {
+): Pair<Int, ProviderItem> {
     val qrUrls = providers.filter { it.capabilities.contains(Capabilities.QrScan) }
         .map { it.qrFormat.replace("@stop", "") }
     val filter = qrUrls.filter { url.contains(it) }
-    return url.replace(filter.first(), "").toInt()
+    val provider = providers.find { it.qrFormat.contains(filter.first()) } ?: ProviderItem()
+    return Pair(
+        url.replace(filter.first(), "").toInt(),
+        provider
+    )
 }

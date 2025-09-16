@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.github.azakidev.move.data.Capabilities // Assuming these are simple enums
 import io.github.azakidev.move.data.ProviderItem
-import io.github.azakidev.move.data.TimeFormat
 
 @Entity(tableName = "providers")
 data class ProviderEntity(
@@ -16,8 +15,6 @@ data class ProviderEntity(
     val lastUpdated: Int, // Unix timestamp
     val capabilities: List<Capabilities>, // Or use a TypeConverter for List<Capabilities>
     val timeSource: String,
-    // Similarly for timeFormat, consider a TypeConverter or store its properties directly
-    val timeFormat: TimeFormat,
     val qrFormat: String
 )
 
@@ -34,7 +31,6 @@ fun ProviderEntity.toProviderItem(): ProviderItem {
         lastUpdated = this.lastUpdated,
         capabilities = this.capabilities,
         timeSource = this.timeSource,
-        timeFormat = this.timeFormat,
         qrFormat = this.qrFormat
     )
 }
@@ -49,7 +45,6 @@ fun ProviderItem.toProviderEntity(): ProviderEntity {
         lastUpdated = this.lastUpdated,
         capabilities = this.capabilities,
         timeSource = this.timeSource,
-        timeFormat = this.timeFormat,
         qrFormat = this.qrFormat
     )
 }

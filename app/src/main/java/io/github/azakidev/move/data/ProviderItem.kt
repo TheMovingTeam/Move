@@ -16,7 +16,6 @@ data class ProviderItem(
     val capabilities: List<Capabilities> = listOf(),
 
     val timeSource: String = "",
-    val timeFormat: TimeFormat = TimeFormat(),
 
     val qrFormat: String = ""
 )
@@ -25,21 +24,10 @@ enum class Capabilities {
     Time,
     DoubleTime,
     Notifications,
+
+    ComId,
     QrScan,
     Geo,
-}
-
-@Serializable
-data class TimeFormat(
-    val type: TimeType = TimeType.IntArray,
-    val regex: String? = null,
-)
-
-enum class TimeType {
-    IntArray,
-    XML,
-    JSON,
-    String,
 }
 
 @Serializable

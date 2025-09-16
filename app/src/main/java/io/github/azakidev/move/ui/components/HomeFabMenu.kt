@@ -3,15 +3,17 @@ package io.github.azakidev.move.ui.components
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddRoad
-import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AddRoad
+import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.animateFloatingActionButton
@@ -24,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,7 +48,7 @@ import io.github.azakidev.move.R
 
 data class FabEntry(
     val icon: ImageVector,
-    @StringRes val label: Int
+    @param:StringRes val label: Int
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -64,8 +67,8 @@ fun HomeFabMenu(
     val context = LocalContext.current.applicationContext
 
     val items = listOf(
-        FabEntry(Icons.Filled.AddRoad, R.string.providerTitle),
-        FabEntry(Icons.Filled.QrCode, R.string.qrScan),
+        FabEntry(Icons.Rounded.AddRoad, R.string.providerTitle),
+        FabEntry(Icons.Rounded.QrCode, R.string.qrScan),
     )
 
     FloatingActionButtonMenu(
@@ -85,8 +88,14 @@ fun HomeFabMenu(
                 checked = fabMenuExpanded,
                 onCheckedChange = { fabMenuExpanded = !fabMenuExpanded },
             ) {
+                val rotation by animateFloatAsState(
+                    targetValue = if (fabMenuExpanded) 45f else 0f,
+                    label = "Expand rotate",
+                    animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+                )
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    modifier = Modifier.rotate(rotation),
+                    imageVector = Icons.Rounded.Add,
                     contentDescription = stringResource(id = R.string.search),
                 )
             }

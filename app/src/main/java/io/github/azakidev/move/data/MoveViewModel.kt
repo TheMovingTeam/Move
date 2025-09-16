@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
@@ -356,13 +359,15 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun flushInfo() {
-        _providers.value = emptyList()
-        _lines.value = emptyList()
-        _stops.value = emptyList()
-        // Nuke all entries from database
-        _providerDao.clearAllProviders() // Example: if you add such a method
-        _lineDao.clearAllLines()
-        _stopDao.clearAllStops()
+        viewModelScope.launch(Dispatchers.IO) {
+            _providers.value = emptyList()
+            _lines.value = emptyList()
+            _stops.value = emptyList()
+            // Nuke all entries from database
+            _providerDao.clearAllProviders() // Example: if you add such a method
+            _lineDao.clearAllLines()
+            _stopDao.clearAllStops()
+        }
     }
 
     fun addFavStop(stopId: Int) {
@@ -448,31 +453,34 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         ) {
             return
         }
-        val url = provider.timeSource.replace("@stop", stopItem.id.toString())
-        thread {
-            val response =
-                try {
-                    URL(url).readText()
-                } catch (e: Exception) {
-                    Log.e(
-                        "MoveViewModel",
-                        "The times at $url could not be verified: ${e.message}",
-                        e
-                    )
-                    return@thread
+        viewModelScope.launch(Dispatchers.IO) {
+            val url = provider.timeSource.replace("@stop", stopItem.id.toString())
+            val client = OkHttpClient()
+            val request = Request.Builder()
+            if (provider.name.contains("Vectalia")) {
+                request
+                    .header("Accept", "*/*")
+                    .header("responseType", "ResponseType.json")
+                    .header("followRedirects", "true")
+            }
+            val requestBuilt = request.url(url)
+                .get()
+                .build()
+
+            val response = client.newCall(requestBuilt).execute()
+
+            val responseText = response.body!!.string()
+            try {
+                val times = parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
+                if (times.isNotEmpty()) {
+                    stopItem.setTimeTable(times)
                 }
-            val times = parseTimes(response, provider) ?: emptyList()
-            if (times.isNotEmpty()) {
-                var count = 0
-                val timeList = mutableListOf<LineTime>()
-                stopItem.lines.forEach { i ->
-                    timeList.add(LineTime(i, times[count]))
-                    count++
-                }
-                stopItem.setTimeTable(timeList)
-            } else {
-                Toast.makeText(context, "Times couldn't be parsed", Toast.LENGTH_SHORT)
-                    .show()
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Could not parse times for ${stopItem.name}: $e",
+                    e
+                )
             }
         }
     }

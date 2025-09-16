@@ -1,12 +1,16 @@
 package io.github.azakidev.move.ui.pages
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -28,6 +32,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -35,13 +41,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -62,7 +73,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import java.util.Timer
@@ -105,9 +116,7 @@ fun OnboardingPage(model: MoveViewModel) {
             slideInHorizontally(
                 animationSpec = tween(200, easing = EaseInCirc)
             ) { -it } togetherWith slideOutHorizontally(
-                animationSpec = tween(200, easing = EaseInCirc),
-                targetOffsetX = { it }
-            )
+                animationSpec = tween(200, easing = EaseInCirc), targetOffsetX = { it })
 
         },
         entryProvider = entryProvider {
@@ -115,29 +124,21 @@ fun OnboardingPage(model: MoveViewModel) {
                 WelcomePage(
                     onNext = {
                         backStack.add(FeaturePage)
-                    }
-                )
+                    })
             }
             entry<FeaturePage> {
-                FeaturePage(
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                    onNext = {
-                        backStack.add(ProviderPage)
-                    }
-                )
+                FeaturePage(onBack = {
+                    backStack.removeLastOrNull()
+                }, onNext = {
+                    backStack.add(ProviderPage)
+                })
             }
             entry<ProviderPage> {
-                ProviderPage(
-                    model = model,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                    onEnd = {
-                        model.saveOnboarding(true)
-                    }
-                )
+                ProviderPage(model = model, onBack = {
+                    backStack.removeLastOrNull()
+                }, onEnd = {
+                    model.saveOnboarding(true)
+                })
             }
         },
     )
@@ -150,15 +151,25 @@ fun OnboardingPage(model: MoveViewModel) {
 fun WelcomePage(
     onNext: () -> Unit = {}
 ) {
+    val revealed = rememberSaveable { mutableStateOf(false) }
+    val blur by animateFloatAsState(
+        targetValue = if (revealed.value) 0f else 20f,
+        label = "Blur",
+        animationSpec = MotionScheme.expressive().slowEffectsSpec()
+    )
     val infiniteTransition = rememberInfiniteTransition(label = "moveCookieRotate")
     val shapeAngle = infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            animation = tween(6000, easing = LinearEasing), repeatMode = RepeatMode.Restart
         ),
     )
+
+    Timer().schedule(delay = 1000, action = {
+        revealed.value = true
+    })
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -167,24 +178,30 @@ fun WelcomePage(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.End
+                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    modifier = Modifier.size(48.dp),
+                Button(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth(),
                     onClick = onNext,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.purple_brand),
+                        contentColor = Color.White
                     )
                 ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = "Next"
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.start), fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -193,7 +210,6 @@ fun WelcomePage(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(36.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -206,34 +222,46 @@ fun WelcomePage(
                                     colorResource(R.color.purple_shadow)
                                 )
                             )
-                        ),
-                    contentAlignment = Alignment.Center
+                        ), contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        modifier = Modifier
-                            .size(128.dp),
+                        modifier = Modifier.size(128.dp),
                         imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                         contentDescription = null,
                         tint = Color.White
                     )
                 }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                AnimatedVisibility(
+                    modifier = Modifier
+                        .padding(top = 36.dp)
+                        .blur(blur.dp),
+                    visible = revealed.value,
+                    enter = fadeIn(
+                        animationSpec = MotionScheme.expressive().slowEffectsSpec(),
+                        initialAlpha = 0.25f
+                    ) + expandVertically(
+                        animationSpec = MotionScheme.expressive().slowSpatialSpec()
+                    ),
                 ) {
-                    Text(
-                        text = stringResource(R.string.welcomeTo),
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.ExtraLight,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.Light,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    Column(
+                        modifier = Modifier,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.welcomeTo),
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.ExtraLight,
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Light,
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
             }
         }
@@ -243,8 +271,7 @@ fun WelcomePage(
 @Composable
 @Preview
 fun FeaturePage(
-    onBack: () -> Unit = {},
-    onNext: () -> Unit = {}
+    onBack: () -> Unit = {}, onNext: () -> Unit = {}
 ) {
     val entries = listOf(
         "Explaining goes here",
@@ -259,7 +286,7 @@ fun FeaturePage(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
+                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
@@ -270,8 +297,7 @@ fun FeaturePage(
                     )
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back"
+                        Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back"
                     )
                 }
                 IconButton(
@@ -282,13 +308,11 @@ fun FeaturePage(
                     )
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = "Next"
+                        Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Next"
                     )
                 }
             }
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -313,7 +337,7 @@ fun FeaturePage(
             entries.forEach {
                 ExplainingRow(
                     index = entries.indexOf(it) + 1,
-                    shape = getListShape(entries.indexOf(it), entries.count()),
+                    shape = listShape(entries.indexOf(it), entries.count()),
                     modifier = Modifier.padding(horizontal = 8.dp),
                     description = it
                 )
@@ -347,8 +371,7 @@ fun ExplainingRow(
                     .clip(CircleShape)
                     .background(
                         MaterialTheme.colorScheme.background
-                    ),
-                contentAlignment = Alignment.Center
+                    ), contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = index.toString(),
@@ -357,8 +380,7 @@ fun ExplainingRow(
                 )
             }
             Text(
-                text = description,
-                color = MaterialTheme.colorScheme.onBackground
+                text = description, color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
@@ -367,9 +389,7 @@ fun ExplainingRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPage(
-    model: MoveViewModel,
-    onBack: () -> Unit = {},
-    onEnd: () -> Unit = {}
+    model: MoveViewModel, onBack: () -> Unit = {}, onEnd: () -> Unit = {}
 ) {
     var shouldLoad = model.providers.collectAsState().value.count() == 0
 
@@ -409,8 +429,7 @@ fun ProviderPage(
                 savedProviders = model.savedProviders.collectAsState().value,
                 onFavoriteClick = onFavoriteClick
             )
-        }
-    )
+        })
 }
 
 @Composable
@@ -438,7 +457,7 @@ fun ProviderContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
+                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
@@ -458,18 +477,15 @@ fun ProviderContent(
                     onClick = onEnd,
                     enabled = providerCount > 0,
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = color,
-                        contentColor = iconColor
+                        containerColor = color, contentColor = iconColor
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Done"
+                        imageVector = Icons.Default.Check, contentDescription = "Done"
                     )
                 }
             }
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

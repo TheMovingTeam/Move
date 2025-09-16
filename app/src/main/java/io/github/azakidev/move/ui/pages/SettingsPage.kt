@@ -1,7 +1,5 @@
 package io.github.azakidev.move.ui.pages
 
-import android.webkit.URLUtil
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,8 +20,8 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -37,34 +35,32 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.MoveViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsPage(
-    model: MoveViewModel,
-    backStack: NavBackStack<NavKey>
+    providerRepo: MutableState<String>,
+    backStack: NavBackStack<NavKey>,
+    onClick: (String) -> Unit
 ) {
     val state = rememberTextFieldState(
-        initialText = model.providerRepo.value,
+        initialText = providerRepo.value,
     )
-    val context = LocalContext.current
-    val invalidText = stringResource(R.string.providerInvalid)
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -156,7 +152,7 @@ fun SettingsPage(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Restore,
+                                imageVector = Icons.Rounded.Restore,
                                 contentDescription = null
                             )
                         }
@@ -175,28 +171,12 @@ fun SettingsPage(
                         },
                         trailingIcon = {
                             AnimatedVisibility(
-                                visible = state.text.toString() != model.providerRepo.value,
+                                visible = state.text.toString() != providerRepo.value,
                                 enter = enterTransition,
                                 exit = exitTransition
                             ) {
                                 IconButton(
-                                    onClick = {
-                                        if (URLUtil.isValidUrl(state.text.toString()) && model.tryRepo(
-                                                state.text.toString()
-                                            )
-                                        ) {
-                                            model.saveRepo(state.text.toString())
-                                            model.flushInfo()
-                                        } else {
-                                            Toast
-                                                .makeText(
-                                                    context,
-                                                    invalidText,
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                .show()
-                                        }
-                                    }
+                                    onClick = { onClick(state.text.toString()) }
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Save,
@@ -215,7 +195,11 @@ fun SettingsPage(
 @Composable
 @Preview
 fun SettingsPagePreview() {
-    val model = viewModel<MoveViewModel>()
+    val providerRepo = remember { mutableStateOf("") }
     val backStack = rememberNavBackStack(MainView)
-    SettingsPage(model, backStack)
+    SettingsPage(
+        providerRepo = providerRepo,
+        backStack = backStack,
+        onClick = {}
+    )
 }

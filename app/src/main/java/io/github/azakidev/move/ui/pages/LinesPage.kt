@@ -44,13 +44,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.LineRow
 import kotlinx.coroutines.launch
@@ -125,7 +124,7 @@ fun LinesPage(
                     if (textFieldState.text.isNotEmpty()) {
                         var count = 0
                         items(results.count()) {
-                            val shape = getListShape(count, results.count())
+                            val shape = listShape(count, results.count())
                             count++
                             val result = results[it]
                             SearchResultStop(
@@ -229,7 +228,7 @@ fun LineList(
         var count = 0
         lineItems.forEach { item ->
             val expanded = remember { mutableStateOf(false) }
-            val shape = getListShape(count, lineItems.count())
+            val shape = listShape(count, lineItems.count())
             LineRow(
                 stops = stopItems,
                 lineItem = item,

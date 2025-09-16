@@ -31,11 +31,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 
 
 @Composable
@@ -99,7 +97,7 @@ fun StopEntries(
             var count = 0
             lineItem.stops.forEach { i ->
                 val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
-                val shape = getListShape(count, lineItem.stops.count())
+                val shape = listShape(count, lineItem.stops.count())
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

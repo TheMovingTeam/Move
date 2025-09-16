@@ -5,7 +5,6 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.github.azakidev.move.data.Capabilities
-import io.github.azakidev.move.data.TimeFormat
 
 class Converters {
     private val gson = Gson()
@@ -29,16 +28,6 @@ class Converters {
                 null
             }
         }
-    }
-
-    @TypeConverter
-    fun fromTimeFormat(timeFormat: TimeFormat?): String? {
-        return gson.toJson(timeFormat)
-    }
-
-    @TypeConverter
-    fun toTimeFormat(timeFormatString: String?): TimeFormat? {
-        return gson.fromJson(timeFormatString, object : TypeToken<TimeFormat>() {}.type)
     }
 
     @TypeConverter

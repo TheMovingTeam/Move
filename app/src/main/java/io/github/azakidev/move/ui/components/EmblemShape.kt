@@ -20,12 +20,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
-import io.github.azakidev.move.data.LineItem
 import androidx.core.graphics.toColorInt
+import io.github.azakidev.move.data.LineItem
 
 @Composable
 fun EmblemShape(
@@ -53,7 +51,7 @@ fun EmblemShape(
 
     Box(
         modifier = modifier
-            .clip(shape = shapeFromId(line.id))
+            .clip(shape = shapeFromId(line.emblem.hashCode()))
             .background(color),
         contentAlignment = Alignment.Center
     ) {

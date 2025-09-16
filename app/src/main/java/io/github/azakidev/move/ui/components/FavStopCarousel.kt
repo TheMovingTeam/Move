@@ -37,11 +37,13 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
@@ -222,12 +224,13 @@ fun HeroCarrouselItem(
                             .padding(start = 16.dp, bottom = 8.dp),
                         text = lineName,
                         style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Light,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         modifier = Modifier
                             .padding(end = 16.dp, bottom = 8.dp),
-                        text = it.nextTime.toString() + " min.",
+                        text = it.nextTimeFirst.toString() + "m.",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -265,6 +268,13 @@ fun FavStopCarouselPreview() {
         StopItem(id = 1, name = "Stop 1", provider = 1),
         StopItem(id = 2, name = "Stop 2", provider = 1),
         StopItem(id = 3, name = "Stop 3", provider = 1),
+    )
+    stops.first().setTimeTable(
+        listOf(
+            LineTime(1, 2, 18),
+            LineTime(2, 4, 18),
+            LineTime(3, 5, 18),
+        )
     )
     val lines = emptyList<LineItem>()
     val sheetModel = viewModel<SheetStopViewModel>()

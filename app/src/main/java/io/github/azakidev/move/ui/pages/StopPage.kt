@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -40,8 +41,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -54,7 +57,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.getListShape
+import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -121,6 +124,7 @@ fun StopPage(
         ) {
             StopTimes(
                 lineItems = model.lines.collectAsState().value,
+                providers = model.providers.collectAsState().value,
                 sheetModel = sheetModel
             )
             if (provider.capabilities.contains(Capabilities.Notifications)) {
@@ -138,10 +142,12 @@ fun StopPage(
 fun StopPagePreview() {
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(
-                topStart = 24.dp,
-                topEnd = 24.dp
-            ))
+            .clip(
+                RoundedCornerShape(
+                    topStart = 24.dp,
+                    topEnd = 24.dp
+                )
+            )
             .background(MaterialTheme.colorScheme.background)
     ) {
         StopBannerPreview()
@@ -193,16 +199,27 @@ fun StopBanner(
                     )
                 ),
         ) {
+            val style = when {
+                sheetModel.sheetStop.name.length > 20 -> MaterialTheme.typography.headlineMedium
+                sheetModel.sheetStop.name.length > 15 -> MaterialTheme.typography.headlineLarge
+                sheetModel.sheetStop.name.length > 10 -> MaterialTheme.typography.displaySmall
+                else -> MaterialTheme.typography.displayMedium
+            }
+            val width = if (sheetModel.sheetStop.name.length > 10) .8f
+            else 1f
             Text(
                 modifier = Modifier
                     .padding(16.dp)
+                    .fillMaxWidth(width)
                     .align(Alignment.BottomStart),
                 text = sheetModel.sheetStop.name,
-                style = MaterialTheme.typography.displayMedium
+                style = style,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
             IconButton(
                 modifier = Modifier
-                    .padding(end = 12.dp, bottom = 16.dp)
+                    .padding(horizontal = 12.dp, vertical = 16.dp)
                     .size(55.dp)
                     .align(Alignment.BottomEnd),
                 colors = IconButtonDefaults.iconButtonColors(
@@ -239,6 +256,7 @@ fun StopBannerPreview() {
 fun StopTimes(
     modifier: Modifier = Modifier,
     lineItems: List<LineItem>,
+    providers: List<ProviderItem>,
     sheetModel: SheetStopViewModel
 ) {
     Text(
@@ -248,17 +266,21 @@ fun StopTimes(
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.secondary,
     )
-    if (sheetModel.sheetStop.lineTimes.collectAsState().value.count() > 0) {
+    val lineTimes = sheetModel.sheetStop.lineTimes.collectAsState().value
+    if (lineTimes.count() > 0) {
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             var count = 0
-            sheetModel.sheetStop.lineTimes.collectAsState().value.forEach {
+            lineTimes.forEach {
                 val line =
                     lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+                val provider =
+                    providers.find { providerItem -> providerItem.id == line.provider }
+                        ?: ProviderItem()
 
-                val shape = getListShape(count, sheetModel.sheetStop.lineTimes.collectAsState().value.count())
+                val shape = listShape(count, lineTimes.count())
                 count++
 
                 Box(
@@ -286,12 +308,28 @@ fun StopTimes(
                                 line = line
                             )
                             Text(
-                                text = line.name
+                                modifier = Modifier.fillMaxWidth(.60f),
+                                text = line.name,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 2
                             )
                         }
-                        Text(
-                            text = it.nextTime.toString() + " " + "min."
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = it.nextTimeFirst.toString() + "m."
+                            )
+                            if (provider.capabilities.contains(Capabilities.DoubleTime) and (it.nextTimeSecond != null)) {
+                                Text(
+                                    text = "/"
+                                )
+                                Text(
+                                    text = it.nextTimeSecond.toString() + "m."
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -320,16 +358,19 @@ fun StopTimesPreview(
     val sheetModel = viewModel<SheetStopViewModel>()
     val lineItems = listOf(
         LineItem(id = 1),
-        LineItem(id = 2),
-        LineItem(id = 3),
+        LineItem(
+            id = 2,
+            name = "A really really really really long name for a line like it's actually massive given it goes nowhere"
+        ),
+        LineItem(id = 3, name = "Example line with a long-ish name"),
     )
-    val stop = StopItem(id = 1, name = "Stop 1", lines = listOf(1))
+    val stop = StopItem(id = 1, name = "Example stop", lines = listOf(1))
 
     stop.setTimeTable(
         listOf(
-            LineTime(1, 2),
-            LineTime(2, 4),
-            LineTime(3, 5),
+            LineTime(1, 2, 18),
+            LineTime(2, 4, 18),
+            LineTime(3, 5, 18),
         )
     )
 
@@ -338,6 +379,7 @@ fun StopTimesPreview(
     StopTimes(
         modifier = modifier,
         lineItems = lineItems,
+        providers = emptyList(),
         sheetModel = sheetModel
     )
 }
@@ -357,10 +399,10 @@ fun StopNotifications(
         var count = 0
         Column {
             notifications.forEach {
-                Row (
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(getListShape(count, notifications.count()))
+                        .clip(listShape(count, notifications.count()))
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 ) {
                     Text(

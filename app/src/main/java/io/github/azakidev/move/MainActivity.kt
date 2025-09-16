@@ -1,6 +1,8 @@
 package io.github.azakidev.move
 
 import android.os.Bundle
+import android.webkit.URLUtil
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,19 +52,17 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LinesPage
+import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
+import okhttp3.OkHttpClient
 import java.util.Timer
 import kotlin.concurrent.schedule
-import kotlin.getValue
-import androidx.compose.runtime.collectAsState
-import io.github.azakidev.move.ui.pages.OnboardingPage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
@@ -87,6 +89,9 @@ class MainActivity : ComponentActivity() {
                         val sheetModel = viewModel<SheetStopViewModel>()
 
                         val backStack = rememberNavBackStack(MainView)
+
+                        val context = LocalContext.current
+
                         NavDisplay(
                             backStack = backStack,
                             onBack = { backStack.removeLastOrNull() },
@@ -132,7 +137,28 @@ class MainActivity : ComponentActivity() {
                                     ProvidersPage(model, backStack)
                                 }
                                 entry<Settings> {
-                                    SettingsPage(model, backStack)
+                                    val invalidText = stringResource(R.string.providerInvalid)
+                                    SettingsPage(
+                                        model.providerRepo,
+                                        backStack,
+                                        onClick = { url ->
+                                            if (URLUtil.isValidUrl(url) && model.tryRepo(
+                                                    url
+                                                )
+                                            ) {
+                                                model.saveRepo(url)
+                                                model.flushInfo()
+                                            } else {
+                                                Toast
+                                                    .makeText(
+                                                        context,
+                                                        invalidText,
+                                                        Toast.LENGTH_SHORT
+                                                    )
+                                                    .show()
+                                            }
+                                        }
+                                    )
                                 }
                                 entry<QrScanner> {
                                     QrPage(model, sheetModel, backStack)
@@ -149,7 +175,9 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppDestinations(
-    @param:StringRes val label: Int, val icon: ImageVector, @param:StringRes val contentDescription: Int
+    @param:StringRes val label: Int,
+    val icon: ImageVector,
+    @param:StringRes val contentDescription: Int
 ) {
     HOME(R.string.home, Icons.Default.Home, R.string.home),
     LINES(R.string.lines, Icons.AutoMirrored.Filled.ArrowForward, R.string.lines),
@@ -195,7 +223,7 @@ fun AppNavigator(
             sheetState = sheetState,
             dragHandle = { },
         ) {
-        StopPage(model = model, sheetModel = sheetModel)
+            StopPage(model = model, sheetModel = sheetModel)
         }
     }
 }
