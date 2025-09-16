@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Move</string>
     <string name="welcomeTo">Welcome to</string>
+    <string name="start">Cool, let\'s get started</string>
     <string name="chooseProvider">Choose a provider</string>
     <string name="whatIsMove">What is Move?</string>
     <string name="home">Home</string>
@@ -19,7 +20,7 @@
     <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>
-    <string name="noCameraPerm">The camera permission has not been granted.</string>
+    <string name="noCameraPermission">The camera permission has not been granted.</string>
     <string name="times">Times</string>
     <string name="alerts">Alerts</string>
     <string name="noAlerts">There are no notifications for this stop</string>
