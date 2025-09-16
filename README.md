@@ -17,12 +17,14 @@ It also includes the format for requesting ETAs and how to parse the response so
     - [ ] Version checking
     - [ ] Schema
 - [x] Cache line and stop data
-- [ ] Implement first provider
+- [x] Implement first provider
 - [ ] Implement fitst provider crawler
 ### Planned
 - [x] QR Scanner
-- [ ] Onboarding experience
-- [ ] Map routes
+- [x] Onboarding experience
+    - [ ] Onboarding information
 - [ ] Document and publish spec
+- [ ] Map for lines
+- [ ] Routing algorithm
 - [ ] Journey page when on a trip
-- [ ] Provider alerts
+- [x] Provider alerts
