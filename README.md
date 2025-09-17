@@ -18,7 +18,7 @@ It also includes the format for requesting ETAs and how to parse the response so
     - [ ] Schema
 - [x] Cache line and stop data
 - [x] Implement first provider
-- [ ] Implement fitst provider crawler
+- [x] Implement fitst provider crawler
 ### Planned
 - [x] QR Scanner
 - [x] Onboarding experience
