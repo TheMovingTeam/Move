@@ -1,6 +1,5 @@
 package io.github.azakidev.move.ui.components
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,18 +57,16 @@ fun FavStopCarousel(
 ) {
     val favStops = MutableStateFlow<List<StopItem>>(listOf())
 
-    val context = LocalContext.current
-
     model.favouriteStops.collectAsState().value.forEach {
         val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
 
         if (model.savedProviders.value.contains(stop.provider)) {
             favStops.value += stop
 
-            slowTimer(model, stop, context).run()
+            slowTimer(model, stop).run()
 
             if (stop.lineTimes.value.isEmpty()) {
-                fastTimer(model, stop, context).run()
+                fastTimer(model, stop).run()
             }
         }
     }
@@ -79,10 +76,10 @@ fun FavStopCarousel(
             val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
             if (model.savedProviders.value.contains(stop.provider)) {
                 favStops.value += stop
-                val timer = slowTimer(model, stop, context)
+                val timer = slowTimer(model, stop)
                 timer.run()
                 if (favStops.value.count() != 0) { timer.cancel() }
-                if (stop.lineTimes.value.isEmpty()) { fastTimer(model, stop, context).run() }
+                if (stop.lineTimes.value.isEmpty()) { fastTimer(model, stop).run() }
             }
         }
         if (favStops.value.count() != 0) {
@@ -136,13 +133,12 @@ fun FavStopCarousel(
 fun slowTimer(
     model: MoveViewModel,
     stopItem: StopItem,
-    context: Context,
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
         period = 30000,
         action = {
-            model.fetchTimes(stopItem, context)
+            model.fetchTimes(stopItem)
         }
     )
 }
@@ -150,13 +146,12 @@ fun slowTimer(
 fun fastTimer(
     model: MoveViewModel,
     stopItem: StopItem,
-    context: Context
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
         period = 5000,
         action = {
-            model.fetchTimes(stopItem, context = context)
+            model.fetchTimes(stopItem)
             if (!stopItem.lineTimes.value.isEmpty()) {
                 this.cancel()
             }
@@ -202,13 +197,20 @@ fun HeroCarrouselItem(
                             MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     )
-                ),
-            verticalArrangement = Arrangement.Bottom,
+                )
+                .padding(bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(
+                space = 4.dp,
+                alignment = Alignment.Bottom
+            ),
         ) {
             Text(
                 modifier = Modifier
-                    .padding(start = 16.dp, bottom = 8.dp),
-                text = stopItem.name,
+                    .padding(start = 16.dp, bottom = 4.dp),
+                text = stopItem.name
+                    .replace("-", " - ")
+                    .replace(".", ". ")
+                    .replace("  ", " "),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -216,20 +218,21 @@ fun HeroCarrouselItem(
                 val line = lineItems.find { lineItem -> lineItem.id == it.lineId }
                 val lineName = line?.name ?: "DefaultLine"
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier
-                            .padding(start = 16.dp, bottom = 8.dp),
-                        text = lineName,
+                        text = lineName
+                            .replace("-", " - ")
+                            .replace(".", ". ")
+                            .replace("  ", " "),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Light,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        modifier = Modifier
-                            .padding(end = 16.dp, bottom = 8.dp),
                         text = it.nextTimeFirst.toString() + "m.",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface

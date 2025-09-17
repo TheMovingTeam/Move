@@ -4,17 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -33,8 +31,8 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
@@ -50,8 +49,8 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.listShape
-import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.LineRow
+import io.github.azakidev.move.ui.components.StopEmblemRow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -64,7 +63,8 @@ fun LinesPage(
     val scope = rememberCoroutineScope()
 
     val results = model.stops.collectAsState().value.filter {
-        it.name.lowercase().contains(textFieldState.text.toString().lowercase())
+        it.name.lowercase().replace(" ", "")
+            .contains(textFieldState.text.toString().lowercase().replace(" ", ""))
     }
 
     val inputField = @Composable {
@@ -128,8 +128,7 @@ fun LinesPage(
                             count++
                             val result = results[it]
                             SearchResultStop(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 stopItem = result,
                                 lines = model.lines.collectAsState().value,
                                 shape = shape,
@@ -151,7 +150,6 @@ fun LinesPage(
             LineList(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .verticalScroll(rememberScrollState())
                     .padding(padding)
                     .background(MaterialTheme.colorScheme.background),
                 lineItems = model.lines.collectAsState().value,
@@ -192,23 +190,19 @@ fun SearchResultStop(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier
+                    .fillMaxWidth(0.65f),
                 text = stopItem.name
+                    .replace("-", " - ")
+                    .replace(".", ". ")
+                    .replace("  ", " "),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                stopItem.lines.forEach { lineId ->
-                    val line =
-                        lines.find { line -> line.id == lineId } ?: LineItem()
-                    if (line != LineItem()) {
-                        EmblemShape(
-                            modifier = Modifier.size(36.dp),
-                            line = line,
-                            textStyle = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                }
-            }
+            StopEmblemRow(
+                stopItem = stopItem,
+                lines = lines
+            )
         }
     }
 }
@@ -221,22 +215,26 @@ fun LineList(
     stopItems: List<StopItem>,
     onClick: (StopItem) -> Unit
 ) {
-    Column(
-        modifier = modifier.padding(bottom = 8.dp),
+    LazyColumn(
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        var count = 0
-        lineItems.forEach { item ->
-            val expanded = remember { mutableStateOf(false) }
-            val shape = listShape(count, lineItems.count())
+        items(lineItems.count()) {
+            val lineItem = lineItems.sortedBy { line -> line.emblem }[it]
+            val expanded = rememberSaveable { mutableStateOf(false) }
+            val shape = listShape(it, lineItems.count())
             LineRow(
                 stops = stopItems,
-                lineItem = item,
+                lineItem = lineItem,
                 shape = shape,
                 expanded = expanded,
                 onClick = onClick
             )
-            count++
+        }
+        item {
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
         }
     }
 }

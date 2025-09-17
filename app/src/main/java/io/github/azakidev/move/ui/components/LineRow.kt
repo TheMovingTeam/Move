@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,12 +36,10 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.listShape
 
-
 @Composable
 fun LineEntry(line: LineItem) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         EmblemShape(
@@ -50,8 +49,10 @@ fun LineEntry(line: LineItem) {
             line = line
         )
         Text(
-            modifier = Modifier.padding(start = 8.dp),
-            text = line.name,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            text = line.name.replace("-", " - ").replace("  ", " "),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleLarge,
         )
     }
@@ -84,6 +85,18 @@ fun StopEntries(
         )
     }
 
+    val fetchedStops = mutableListOf<StopItem>()
+    lineItem.stops.forEach { i ->
+        val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
+        if (stopItem != StopItem()) {
+            fetchedStops += stopItem
+        }
+    }
+    val map = fetchedStops.associateBy { stopItem -> stopItem.id }
+    val sortedStops = lineItem.stops.mapNotNull { id ->
+        map[id]
+    }
+    
     AnimatedVisibility(
         visible = isExpanded,
         enter = expandTransition,
@@ -93,11 +106,9 @@ fun StopEntries(
             Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-
             var count = 0
-            lineItem.stops.forEach { i ->
-                val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
-                val shape = listShape(count, lineItem.stops.count())
+            sortedStops.forEach { stopItem ->
+                val shape = listShape(count, sortedStops.count())
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -109,7 +120,7 @@ fun StopEntries(
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Text(
-                        text = stopItem.name,
+                        text = stopItem.name.replace("-", " - ").replace("  ", " "),
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
@@ -173,6 +184,26 @@ fun LineRowPreview() {
 
 @Preview
 @Composable
+fun LineRowLongPreview() {
+    val stops = listOf(
+        StopItem(id = 1, name = "Stop 1"),
+        StopItem(id = 2, name = "Stop 2"),
+        StopItem(id = 3, name = "Stop 3")
+    )
+    val expanded = remember { mutableStateOf(false) }
+    LineRow(
+        stops = stops,
+        lineItem = LineItem(
+            name = "A line with an obscenely long name to which I would rather not read but I might need regardless",
+            stops = listOf(1, 2, 3)
+        ),
+        expanded = expanded,
+        onClick = {}
+    )
+}
+
+@Preview
+@Composable
 fun LineRowExpandedPreview() {
     val stops = listOf(
         StopItem(id = 1, name = "Stop 1"),
@@ -182,7 +213,7 @@ fun LineRowExpandedPreview() {
     val expanded = remember { mutableStateOf(true) }
     LineRow(
         stops = stops,
-        lineItem = LineItem(stops = listOf(1, 2, 3)),
+        lineItem = LineItem(stops = listOf(1, 3, 2)),
         expanded = expanded,
         onClick = {}
     )

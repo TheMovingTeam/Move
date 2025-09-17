@@ -1,9 +1,7 @@
 package io.github.azakidev.move.data
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -27,10 +25,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.LinkedBlockingDeque
-import kotlin.concurrent.thread
 
 class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _database = MoveDatabase.getDatabase(application.applicationContext)
@@ -105,14 +101,14 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     // Wait for providers to be available if they were just fetched
                     providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() }
 
-                    viewModelScope.launch {
+                    viewModelScope.launch(Dispatchers.IO) {
                         // Observe lines from DB for the current set of saved providers
                         _lineDao.getLinesForProviders(savedProviderIds).collect { lineEntities ->
                             _lines.value = lineEntities.map { it.toLineItem() }
                         }
                     }
 
-                    viewModelScope.launch {
+                    viewModelScope.launch(Dispatchers.IO) {
                         // Observe stops from DB
                         _stopDao.getStopsForProviders(savedProviderIds).collect { stopEntities ->
                             _stops.value = stopEntities.map { it.toStopItem() }
@@ -203,7 +199,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadProvidersFromDb() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _providerDao.getAllProviders().collect { entities ->
                 _providers.value = entities.map { it.toProviderItem() }
             }
@@ -212,7 +208,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     // This function will fetch info for all providers currently in the savedProviders list.
     fun fetchInfo() {
-        viewModelScope.launch { // Ensure it runs in a coroutine
+        viewModelScope.launch(Dispatchers.IO) { // Ensure it runs in a coroutine
             val currentSavedProviders =
                 savedProviders.first() // Get current list from DataStore
             fetchInfoForSavedProviders(currentSavedProviders)
@@ -443,7 +439,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun fetchTimes(stopItem: StopItem, context: Context) {
+    fun fetchTimes(stopItem: StopItem) {
         val provider =
             providers.value.find { providerItem -> providerItem.id == stopItem.provider }
                 ?: ProviderItem()

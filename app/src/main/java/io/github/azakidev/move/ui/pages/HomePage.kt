@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastDistinctBy
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -51,6 +52,7 @@ import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.HomeFabMenu
+import io.github.azakidev.move.ui.components.StopEmblemRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -154,10 +156,9 @@ fun HomePageView(
                         )
                     }
                     if (lastStops.count() > 0) {
-                        var count = 0
                         items(lastStops.count()) {
                             val stopItem = lastStops[it]
-                            val shape = listShape(count, lastStops.count())
+                            val shape = listShape(it, lastStops.count())
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -167,33 +168,28 @@ fun HomePageView(
                                         onClick = { onRecentOpen(stopItem) }
                                     )
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+//                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = stopItem.name,
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.65f)
+                                        .padding(12.dp),
+                                    text = stopItem.name
+                                        .replace("-", " - ")
+                                        .replace(".", ". ")
+                                        .replace("  ", " "),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.padding(12.dp)
                                 )
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    stopItem.lines.forEach { lineId ->
-                                        val line =
-                                            lines.find { line -> line.id == lineId } ?: LineItem()
-                                        if (line != LineItem()) {
-                                            EmblemShape(
-                                                modifier = Modifier.size(36.dp),
-                                                line = line,
-                                                textStyle = MaterialTheme.typography.titleSmall
-                                            )
-                                        }
-                                    }
-                                }
+                                StopEmblemRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    stopItem = stopItem,
+                                    lines = lines
+                                )
                             }
-                            count++
                         }
                     } else {
                         item {
@@ -226,13 +222,14 @@ fun HomePagePreview() {
     val backStack = rememberNavBackStack(MainView)
     val lastStops = listOf(
         StopItem(
+            name = "A stop with a really long name",
             lines = listOf(1, 2)
         )
     )
     val lineItems = listOf(
-        LineItem(id = 1),
-        LineItem(id = 2),
-        LineItem(id = 3),
+        LineItem(id = 1, emblem = "DL"),
+        LineItem(id = 2, emblem = "TST"),
+        LineItem(id = 3, emblem = "LONG"),
     )
     HomePageView(
         backStack = backStack,

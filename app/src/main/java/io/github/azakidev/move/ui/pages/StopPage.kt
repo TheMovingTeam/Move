@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -80,7 +78,6 @@ fun StopPage(
     }
 
     val cornerRadius = animateIntAsState(targetValue = roundness)
-    val context = LocalContext.current
 
     Timer().schedule(delay = 1000, period = 1000, action = {
         if (!sheetModel.showBottomSheet) {
@@ -89,13 +86,13 @@ fun StopPage(
         if (!sheetModel.sheetStop.lineTimes.value.isEmpty()) {
             this.cancel()
         }
-        model.fetchTimes(sheetModel.sheetStop, context)
+        model.fetchTimes(sheetModel.sheetStop)
     }).run()
     Timer().schedule(delay = 1000, period = 15000, action = {
         if (!sheetModel.showBottomSheet) {
             this.cancel()
         }
-        model.fetchTimes(sheetModel.sheetStop, context)
+        model.fetchTimes(sheetModel.sheetStop)
     }).run()
 
     val onClick = {
@@ -212,7 +209,10 @@ fun StopBanner(
                     .padding(16.dp)
                     .fillMaxWidth(width)
                     .align(Alignment.BottomStart),
-                text = sheetModel.sheetStop.name,
+                text = sheetModel.sheetStop.name
+                    .replace("-", " - ")
+                    .replace(".", ". ")
+                    .replace("  ", " "),
                 style = style,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -309,7 +309,10 @@ fun StopTimes(
                             )
                             Text(
                                 modifier = Modifier.fillMaxWidth(.60f),
-                                text = line.name,
+                                text = line.name
+                                    .replace("-", " - ")
+                                    .replace(".", ". ")
+                                    .replace("  ", " "),
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 2
                             )

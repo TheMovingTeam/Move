@@ -1,12 +1,16 @@
 package io.github.azakidev.move.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,11 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastDistinctBy
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.StopItem
 
 @Composable
 fun EmblemShape(
@@ -48,15 +55,17 @@ fun EmblemShape(
         MaterialTheme.colorScheme.onPrimary
     }
 
-
     Box(
         modifier = modifier
             .clip(shape = shapeFromId(line.emblem.hashCode()))
             .background(color),
         contentAlignment = Alignment.Center
     ) {
+        val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
         Text(
-            text = line.emblem,
+            text = text,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
             style = textStyle,
             color = textColor
         )
@@ -75,8 +84,8 @@ fun shapeFromId(id: Int): Shape {
         5 -> MaterialShapes.Flower.toShape()
         6 -> MaterialShapes.Slanted.toShape()
         7 -> MaterialShapes.Sunny.toShape()
-        8 -> MaterialShapes.Diamond.toShape()
-        9 -> MaterialShapes.Gem.toShape()
+        8 -> MaterialShapes.Diamond.toShape(360)
+        9 -> MaterialShapes.Gem.toShape(90)
         10 -> MaterialShapes.Cookie4Sided.toShape()
         11 -> MaterialShapes.Arch.toShape(45)
         12 -> MaterialShapes.Clover4Leaf.toShape()
@@ -101,6 +110,7 @@ fun ShapePreview() {
     Row {
         Column {
             (0..11).forEach { i ->
+                val line = LineItem(id = i, emblem = "L$i")
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
@@ -109,8 +119,11 @@ fun ShapePreview() {
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
+                    val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
                     Text(
-                        text = "L$i",
+                        text = text,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -119,6 +132,7 @@ fun ShapePreview() {
         }
         Column {
             (12..23).forEach { i ->
+                val line = LineItem(id = i, emblem = "L$i")
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
@@ -127,13 +141,97 @@ fun ShapePreview() {
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
+                    val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
                     Text(
-                        text = "L$i",
+                        text = text,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
+        }
+        Column {
+            val line = LineItem(id = 1, emblem = "CAS")
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(48.dp)
+                    .clip(shape = shapeFromId(line.emblem.hashCode()))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
+                Text(
+                    text = text,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            val line2 = LineItem(id = 1, emblem = "TURI")
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(48.dp)
+                    .clip(shape = shapeFromId(line2.emblem.hashCode()))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                val text = if (line2.emblem.length <= 3) line2.emblem else line2.emblem.substring(0..2)
+                Text(
+                    text = text,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StopEmblemRow(
+    modifier: Modifier = Modifier,
+    stopItem: StopItem,
+    lines: List<LineItem>
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        val lineItems = mutableListOf<LineItem>()
+        stopItem.lines.forEach { lineId ->
+            val line = lines.find { line -> line.id == lineId } ?: LineItem()
+            if (line != LineItem()) {
+                lineItems += line
+            }
+        }
+        val distinctLines = lineItems.fastDistinctBy { line -> line.emblem }.sortedBy { it.emblem }
+        if (distinctLines.count() <= 3) {
+            distinctLines.forEach { line ->
+                EmblemShape(
+                    modifier = Modifier.size(36.dp),
+                    line = line,
+                    textStyle = MaterialTheme.typography.titleSmall
+                )
+            }
+        } else {
+            distinctLines.take(2).forEach { line ->
+                EmblemShape(
+                    modifier = Modifier.size(36.dp),
+                    line = line,
+                    textStyle = MaterialTheme.typography.titleSmall
+                )
+            }
+            Icon(
+                modifier = Modifier.size(36.dp),
+                imageVector = Icons.Rounded.MoreHoriz,
+                contentDescription = null
+            )
         }
     }
 }
