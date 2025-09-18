@@ -11,9 +11,6 @@ interface LineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLines(lines: List<LineEntity>)
 
-    @Query("SELECT * FROM lines WHERE providerId = :providerId")
-    fun getLinesForProvider(providerId: Int): Flow<List<LineEntity>>
-
     @Query("DELETE FROM lines WHERE providerId = :providerId")
     suspend fun deleteLinesForProvider(providerId: Int)
 

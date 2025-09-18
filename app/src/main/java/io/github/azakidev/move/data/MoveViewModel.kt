@@ -178,7 +178,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 // 4. Insert/Update fresh providers in DB
                 if (freshProvidersFromRemote.isNotEmpty()) {
-                    _providerDao.insertAllProviders(freshProvidersFromRemote.map { it.toProviderEntity() })
+                    _providerDao.insertProviders(freshProvidersFromRemote.map { it.toProviderEntity() })
                 }
 
                 // 5. Update the _providers StateFlow by loading all (including just updated) from DB
