@@ -76,7 +76,6 @@ fun parseTimes(response: String, provider: ProviderItem, stopItem: StopItem, lin
             return null
         }
     }
-    return null
 }
 
 fun listShape(count: Int, total: Int): Shape {

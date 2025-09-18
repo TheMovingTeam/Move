@@ -17,6 +17,7 @@
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid provider</string>
     <string name="providerTitle">Providers</string>
+    <string name="savedProviders">Saved providers</string>
     <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>

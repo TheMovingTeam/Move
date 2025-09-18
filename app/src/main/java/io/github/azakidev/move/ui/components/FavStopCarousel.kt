@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +38,8 @@ import io.github.azakidev.move.data.StopItem
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -206,7 +209,7 @@ fun HeroCarrouselItem(
         ) {
             Text(
                 modifier = Modifier
-                    .padding(start = 16.dp, bottom = 4.dp),
+                    .padding(start = 12.dp, bottom = 4.dp),
                 text = stopItem.name
                     .replace("-", " - ")
                     .replace(".", ". ")
@@ -215,25 +218,41 @@ fun HeroCarrouselItem(
                 color = MaterialTheme.colorScheme.onSurface
             )
             stopItem.lineTimes.collectAsState().value.forEach {
-                val line = lineItems.find { lineItem -> lineItem.id == it.lineId }
-                val lineName = line?.name ?: "DefaultLine"
+                val line = lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+                val lineName = line.name
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = lineName
-                            .replace("-", " - ")
-                            .replace(".", ". ")
-                            .replace("  ", " "),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Light,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(.85f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        EmblemShape(
+                            modifier = Modifier.size(26.dp),
+                            line = line,
+                            textStyle = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = lineName
+                                .replace("-", " - ")
+                                .replace(".", ". ")
+                                .replace("  ", " "),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Light,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     Text(
                         text = it.nextTimeFirst.toString() + "m.",
+                        maxLines = 1,
+                        overflow = TextOverflow.Visible,
+                        textAlign = TextAlign.End,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -274,12 +293,17 @@ fun FavStopCarouselPreview() {
     )
     stops.first().setTimeTable(
         listOf(
-            LineTime(1, 2, 18),
+            LineTime(1, 20, 18),
             LineTime(2, 4, 18),
             LineTime(3, 5, 18),
         )
     )
-    val lines = emptyList<LineItem>()
+    val lines = listOf(
+        LineItem(
+            id = 1,
+            name = "A line with a really long name I don't really like"
+        )
+    )
     val sheetModel = viewModel<SheetStopViewModel>()
 
     HorizontalCenteredHeroCarousel(

@@ -8,19 +8,24 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.AddRoad
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -49,6 +54,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
+import io.github.azakidev.move.Providers
 import io.github.azakidev.move.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -62,30 +68,8 @@ fun SettingsPage(
         initialText = providerRepo.value,
     )
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val enterTransition = remember {
-        slideInHorizontally(
-            initialOffsetX = { it / 2 },
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        ) + fadeIn(
-            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-        ) + scaleIn(
-            initialScale = 0.8f,
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        )
-    }
-    val exitTransition = remember {
-        slideOutHorizontally(
-            targetOffsetX = { it / 2 },
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        ) + fadeOut(
-            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-        ) + scaleOut(
-            targetScale = 0.8f,
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        )
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -127,66 +111,14 @@ fun SettingsPage(
                 .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
             item {
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(shape = RoundedCornerShape((15 + 8).dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-                            text = stringResource(R.string.providerSource),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        IconButton(
-                            onClick = {
-                                state.edit {
-                                    replace(0, state.text.length, "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main")
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Restore,
-                                contentDescription = null
-                            )
-                        }
+                ProviderSection(
+                    state,
+                    providerRepo,
+                    onClick,
+                    onBack = {
+                        backStack.add(Providers)
                     }
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        state = state,
-                        shape = RoundedCornerShape((15 / 2 + 8).dp),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.providerSource)
-                            )
-                        },
-                        trailingIcon = {
-                            AnimatedVisibility(
-                                visible = state.text.toString() != providerRepo.value,
-                                enter = enterTransition,
-                                exit = exitTransition
-                            ) {
-                                IconButton(
-                                    onClick = { onClick(state.text.toString()) }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Save,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
+                )
             }
         }
     }
@@ -202,4 +134,129 @@ fun SettingsPagePreview() {
         backStack = backStack,
         onClick = {}
     )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ProviderSection(
+    state: TextFieldState,
+    providerRepo: MutableState<String>,
+    onClick: (String) -> Unit,
+    onBack: () -> Unit,
+    ) {
+    val enterTransition = remember {
+        slideInHorizontally(
+            initialOffsetX = { it / 2 },
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+        ) + fadeIn(
+            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+        ) + scaleIn(
+            initialScale = 0.8f,
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+        )
+    }
+    val exitTransition = remember {
+        slideOutHorizontally(
+            targetOffsetX = { it / 2 },
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+        ) + fadeOut(
+            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+        ) + scaleOut(
+            targetScale = 0.8f,
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+        )
+    }
+    Column(
+        modifier = Modifier
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 4.dp)
+            .clip(shape = RoundedCornerShape(topStart =  (15 + 8).dp, topEnd =  (15 + 8).dp, 4.dp, 4.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                text = stringResource(R.string.providerSource),
+                style = MaterialTheme.typography.titleMedium
+            )
+            IconButton(
+                onClick = {
+                    state.edit {
+                        replace(0, state.text.length, "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main")
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Restore,
+                    contentDescription = null
+                )
+            }
+        }
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            state = state,
+            shape = RoundedCornerShape((15 / 2 + 8).dp),
+            lineLimits = TextFieldLineLimits.SingleLine,
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.providerSource)
+                )
+            },
+            trailingIcon = {
+                AnimatedVisibility(
+                    visible = state.text.toString() != providerRepo.value,
+                    enter = enterTransition,
+                    exit = exitTransition
+                ) {
+                    IconButton(
+                        onClick = { onClick(state.text.toString()) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        )
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .clip(shape = RoundedCornerShape(4.dp, 4.dp, 23.dp, 23.dp))
+            .clickable(
+                onClick = onBack
+            )
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryFixedDim)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AddRoad,
+                    contentDescription = stringResource(R.string.providerTitle),
+                    tint = MaterialTheme.colorScheme.onSecondaryFixed
+                )
+            }
+            Text(
+                text = stringResource(R.string.savedProviders)
+            )
+        }
+    }
 }

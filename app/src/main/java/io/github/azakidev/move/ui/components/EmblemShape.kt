@@ -201,7 +201,10 @@ fun StopEmblemRow(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 4.dp,
+            alignment = Alignment.End
+        )
     ) {
         val lineItems = mutableListOf<LineItem>()
         stopItem.lines.forEach { lineId ->

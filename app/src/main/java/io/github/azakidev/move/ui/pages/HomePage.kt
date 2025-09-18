@@ -10,13 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,11 +37,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastDistinctBy
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.MainView
+import io.github.azakidev.move.QrScanner
 import io.github.azakidev.move.R
 import io.github.azakidev.move.Settings
 import io.github.azakidev.move.data.LineItem
@@ -48,10 +49,8 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.listShape
-import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
-import io.github.azakidev.move.ui.components.HomeFabMenu
 import io.github.azakidev.move.ui.components.StopEmblemRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -123,7 +122,16 @@ fun HomePageView(
                 })
         },
         floatingActionButton = {
-            HomeFabMenu(backStack)
+            FloatingActionButton(
+                onClick = {
+                    backStack.add(QrScanner)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.QrCode,
+                    contentDescription = null
+                )
+            }
         },
         content = { padding ->
             Box(
@@ -168,7 +176,7 @@ fun HomePageView(
                                         onClick = { onRecentOpen(stopItem) }
                                     )
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow),
-//                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
@@ -185,7 +193,6 @@ fun HomePageView(
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 StopEmblemRow(
-                                    modifier = Modifier.fillMaxWidth(),
                                     stopItem = stopItem,
                                     lines = lines
                                 )

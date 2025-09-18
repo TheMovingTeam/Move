@@ -1,6 +1,7 @@
 package io.github.azakidev.move.ui.pages
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,7 @@ import io.github.azakidev.move.ui.components.QrScanner
 fun QrPage(
     model: MoveViewModel, sheetModel: SheetStopViewModel, backStack: NavBackStack<NavKey>
 ) {
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,13 +100,22 @@ fun QrPage(
                                 } else {
                                     model.stops.value.find { it.id == response.first } ?: StopItem()
                                 }
-                                sheetModel.sheetStop = stopItem
-                                if (backStack.last() != MainView) {
-                                    backStack.removeLastOrNull()
+                                if (stopItem != StopItem()) {
+                                    if (backStack.last() != MainView) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                    sheetModel.sheetStop = stopItem
+                                    model.saveLastStop(stopItem.id)
+                                    sheetModel.showBottomSheet = true
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Stop not found",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                                model.saveLastStop(stopItem.id)
-                                sheetModel.showBottomSheet = true
-                            })
+                            }
+                        )
                     }
                 }
             } else {

@@ -60,7 +60,6 @@ import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
-import okhttp3.OkHttpClient
 import java.util.Timer
 import kotlin.concurrent.schedule
 
