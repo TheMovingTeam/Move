@@ -206,13 +206,7 @@ fun StopEmblemRow(
             alignment = Alignment.End
         )
     ) {
-        val lineItems = mutableListOf<LineItem>()
-        stopItem.lines.forEach { lineId ->
-            val line = lines.find { line -> line.id == lineId } ?: LineItem()
-            if (line != LineItem()) {
-                lineItems += line
-            }
-        }
+        val lineItems = lines.filter { stopItem.lines.contains(it.id) }
         val distinctLines = lineItems.fastDistinctBy { line -> line.emblem }.sortedBy { it.emblem }
         if (distinctLines.count() <= 3) {
             distinctLines.forEach { line ->

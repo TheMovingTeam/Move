@@ -270,7 +270,7 @@ fun ProvidersPagePreview() {
     )
     val savedProviders = emptyList<Int>()
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         topBar = {
             TopAppBar(

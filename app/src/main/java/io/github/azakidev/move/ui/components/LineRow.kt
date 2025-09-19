@@ -61,6 +61,7 @@ fun LineEntry(line: LineItem) {
 @Composable
 fun StopEntries(
     stops: List<StopItem>,
+    lines: List<LineItem>,
     lineItem: LineItem,
     isExpanded: Boolean,
     onClick: (StopItem) -> Unit
@@ -85,13 +86,8 @@ fun StopEntries(
         )
     }
 
-    val fetchedStops = mutableListOf<StopItem>()
-    lineItem.stops.forEach { i ->
-        val stopItem = stops.find { stopItem -> stopItem.id == i } ?: StopItem()
-        if (stopItem != StopItem()) {
-            fetchedStops += stopItem
-        }
-    }
+    val fetchedStops = stops.filter { lineItem.stops.contains(it.id) }
+
     val map = fetchedStops.associateBy { stopItem -> stopItem.id }
     val sortedStops = lineItem.stops.mapNotNull { id ->
         map[id]
@@ -119,13 +115,28 @@ fun StopEntries(
                         )
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
-                    Text(
-                        text = stopItem.name.replace("-", " - ").replace("  ", " "),
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    Row(
                         modifier = Modifier
-                            .padding(12.dp)
-                    )
+                            .padding( horizontal = 12.dp, vertical = 6.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(vertical = 6.dp)
+                                .fillMaxWidth(.6f),
+                            text = stopItem.name.replace("-", " - ").replace("  ", " "),
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        StopEmblemRow(
+                            stopItem = stopItem,
+                            lines = lines.filterNot { it == lineItem }
+                        )
+                    }
                 }
                 count++
             }
@@ -136,6 +147,7 @@ fun StopEntries(
 @Composable
 fun LineRow(
     stops: List<StopItem>,
+    lines: List<LineItem>,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
     expanded: MutableState<Boolean>,
@@ -157,6 +169,7 @@ fun LineRow(
             LineEntry(line = lineItem)
             StopEntries(
                 stops = stops,
+                lines = lines,
                 lineItem = lineItem,
                 isExpanded = expanded.value,
                 onClick = onClick
@@ -169,13 +182,19 @@ fun LineRow(
 @Composable
 fun LineRowPreview() {
     val stops = listOf(
-            StopItem(id = 1, name = "Stop 1"),
+            StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
             StopItem(id = 2, name = "Stop 2"),
             StopItem(id = 3, name = "Stop 3")
         )
+    val lines = listOf(
+        LineItem(id = 1, name = "Line 1", emblem = "L1"),
+        LineItem(id = 2, name = "Line 2", emblem = "L2"),
+        LineItem(id = 3, name = "Line 3", emblem = "L3")
+    )
     val expanded = remember { mutableStateOf(false) }
     LineRow(
         stops = stops,
+        lines = lines,
         lineItem = LineItem(stops = listOf(1, 2, 3)),
         expanded = expanded,
         onClick = {}
@@ -186,13 +205,19 @@ fun LineRowPreview() {
 @Composable
 fun LineRowLongPreview() {
     val stops = listOf(
-        StopItem(id = 1, name = "Stop 1"),
+        StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
         StopItem(id = 2, name = "Stop 2"),
         StopItem(id = 3, name = "Stop 3")
+    )
+    val lines = listOf(
+        LineItem(id = 1, name = "Line 1", emblem = "L1"),
+        LineItem(id = 2, name = "Line 2", emblem = "L2"),
+        LineItem(id = 3, name = "Line 3", emblem = "L3")
     )
     val expanded = remember { mutableStateOf(false) }
     LineRow(
         stops = stops,
+        lines = lines,
         lineItem = LineItem(
             name = "A line with an obscenely long name to which I would rather not read but I might need regardless",
             stops = listOf(1, 2, 3)
@@ -206,13 +231,19 @@ fun LineRowLongPreview() {
 @Composable
 fun LineRowExpandedPreview() {
     val stops = listOf(
-        StopItem(id = 1, name = "Stop 1"),
+        StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
         StopItem(id = 2, name = "Stop 2"),
         StopItem(id = 3, name = "Stop 3")
+    )
+    val lines = listOf(
+        LineItem(id = 1, name = "Line 1", emblem = "L1"),
+        LineItem(id = 2, name = "Line 2", emblem = "L2"),
+        LineItem(id = 3, name = "Line 3", emblem = "L3")
     )
     val expanded = remember { mutableStateOf(true) }
     LineRow(
         stops = stops,
+        lines = lines,
         lineItem = LineItem(stops = listOf(1, 3, 2)),
         expanded = expanded,
         onClick = {}

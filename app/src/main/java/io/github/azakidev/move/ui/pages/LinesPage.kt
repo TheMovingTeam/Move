@@ -225,6 +225,7 @@ fun LineList(
             val shape = listShape(it, lineItems.count())
             LineRow(
                 stops = stopItems,
+                lines = lineItems,
                 lineItem = lineItem,
                 shape = shape,
                 expanded = expanded,

@@ -58,42 +58,26 @@ fun FavStopCarousel(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel
 ) {
-    val favStops = MutableStateFlow<List<StopItem>>(listOf())
+    val favStops = model.stops.collectAsState().value.filter {
+        model.favouriteStops.collectAsState().value.contains(it.id)
+    }
 
-    model.favouriteStops.collectAsState().value.forEach {
-        val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
+    val map = favStops.associateBy { stopItem -> stopItem.id }
 
-        if (model.savedProviders.value.contains(stop.provider)) {
-            favStops.value += stop
+    val sortedFavStops = model.favouriteStops.collectAsState().value.mapNotNull { id ->
+        map[id]
+    }.reversed()
 
-            slowTimer(model, stop).run()
-
-            if (stop.lineTimes.value.isEmpty()) {
-                fastTimer(model, stop).run()
-            }
+    sortedFavStops.forEach { stopItem ->
+        slowTimer(model, stopItem).run()
+        if (stopItem.lineTimes.value.isEmpty()) {
+            fastTimer(model, stopItem).run()
         }
     }
 
-    val reloadTimer = Timer().schedule(delay = 1000, period = 1000, action = {
-        model.favouriteStops.value.forEach {
-            val stop = model.stops.value.find { stopItem -> it == stopItem.id } ?: StopItem()
-            if (model.savedProviders.value.contains(stop.provider)) {
-                favStops.value += stop
-                val timer = slowTimer(model, stop)
-                timer.run()
-                if (favStops.value.count() != 0) { timer.cancel() }
-                if (stop.lineTimes.value.isEmpty()) { fastTimer(model, stop).run() }
-            }
-        }
-        if (favStops.value.count() != 0) {
-            this.cancel()
-        }
-    })
-
-    if (favStops.collectAsState().value.count() != 0) {
-        reloadTimer.cancel()
+    if (sortedFavStops.count() != 0) {
         HorizontalCenteredHeroCarousel(
-            state = rememberCarouselState { favStops.value.count() },
+            state = rememberCarouselState { sortedFavStops.count() },
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -101,7 +85,7 @@ fun FavStopCarousel(
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) { i ->
-            val stopItem = favStops.collectAsState().value[i]
+            val stopItem = sortedFavStops[i]
             val provider =
                 model.providers.collectAsState().value.find { it -> it.id == stopItem.id }
                     ?: ProviderItem()
@@ -126,9 +110,6 @@ fun FavStopCarousel(
             )
         }
     } else {
-        if (model.favouriteStops.collectAsState().value.count() != 0) {
-            reloadTimer.run()
-        }
         EmptyCarrousel()
     }
 }

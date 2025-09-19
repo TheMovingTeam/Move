@@ -27,9 +27,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -90,12 +92,15 @@ fun HomePageView(
     onRecentOpen: (StopItem) -> Unit,
     favStopCarrousel: @Composable() () -> Unit
 ) {
+    val greetings = stringArrayResource(R.array.greetings)
+    greetings.shuffle()
+    val greeting = rememberSaveable { greetings.first() }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Going somewhere?",
+                        text = greeting,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontStyle = FontStyle.Italic,

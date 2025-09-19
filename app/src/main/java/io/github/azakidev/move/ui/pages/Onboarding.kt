@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -61,17 +66,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.R
+import io.github.azakidev.move.Settings
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.listShape
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -134,11 +142,18 @@ fun OnboardingPage(model: MoveViewModel) {
                 })
             }
             entry<ProviderPage> {
-                ProviderPage(model = model, onBack = {
-                    backStack.removeLastOrNull()
-                }, onEnd = {
-                    model.saveOnboarding(true)
-                })
+                ProviderPage(
+                    model = model,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onEnd = {
+                        model.saveOnboarding(true)
+                    },
+                    onSettings = {
+                        backStack.add(Settings)
+                    }
+                )
             }
         },
     )
@@ -202,6 +217,43 @@ fun WelcomePage(
                 }
             }
         }) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(-1f)
+        ) {
+            val size = 200
+            val padding = 40
+            val color = colorResource(R.color.purple_shadow)
+            Box(
+                modifier = Modifier
+                    .blur(25.dp)
+                    .padding(padding.dp)
+                    .offset((-(size + padding)/2).dp, (-(size + padding)/2).dp)
+                    .size(size.dp)
+                    .scale(2f)
+                    .aspectRatio(1f)
+                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value/2).toInt()))
+                    .background(
+                        Color(color.red, color.green, color.blue, .8f)
+                    )
+                    .align(Alignment.TopStart)
+            ) {}
+            Box(
+                modifier = Modifier
+                    .blur(25.dp)
+                    .padding(padding.dp)
+                    .offset(((size + padding)/2).dp, ((size + padding)/2).dp)
+                    .size(size.dp)
+                    .scale(2f)
+                    .aspectRatio(1f)
+                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value/3).toInt()))
+                    .background(
+                        Color(color.red, color.green, color.blue, .4f)
+                    )
+                    .align(Alignment.BottomEnd)
+            ) {}
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -273,11 +325,8 @@ fun WelcomePage(
 fun FeaturePage(
     onBack: () -> Unit = {}, onNext: () -> Unit = {}
 ) {
-    val entries = listOf(
-        "Explaining goes here",
-        "And here",
-        "Explaining also goes here",
-    )
+    val entryTitles = stringArrayResource(R.array.onboardingTitles)
+    val entryDescriptions = stringArrayResource(R.array.onboardingDescriptions)
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -334,12 +383,65 @@ fun FeaturePage(
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            entries.forEach {
+            entryTitles.forEach {
                 ExplainingRow(
-                    index = entries.indexOf(it) + 1,
-                    shape = listShape(entries.indexOf(it), entries.count()),
+                    index = entryTitles.indexOf(it) + 1,
+                    shape = listShape(entryTitles.indexOf(it), entryTitles.count()),
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    description = it
+                    title = it,
+                    description = entryDescriptions[entryTitles.indexOf(it)]
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExplainingRow(
+    modifier: Modifier = Modifier,
+    index: Int = 0,
+    shape: Shape = MaterialTheme.shapes.small,
+    title: String,
+    description: String
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.background
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = index.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description
                 )
             }
         }
@@ -348,48 +450,19 @@ fun FeaturePage(
 
 @Composable
 @Preview
-fun ExplainingRow(
-    modifier: Modifier = Modifier,
-    index: Int = 0,
-    shape: Shape = MaterialTheme.shapes.small,
-    description: String = "Explaining goes here"
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme.background
-                    ), contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = index.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Text(
-                text = description, color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-    }
+fun ExplainingRowPreview() {
+    val title = "Explaining goes here"
+    val description = "This is like, the description that actually does the explaining and stuff."
+    ExplainingRow(
+        title = title,
+        description = description
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPage(
-    model: MoveViewModel, onBack: () -> Unit = {}, onEnd: () -> Unit = {}
+    model: MoveViewModel, onBack: () -> Unit = {}, onEnd: () -> Unit = {}, onSettings: () -> Unit
 ) {
     var shouldLoad = model.providers.collectAsState().value.count() == 0
 
@@ -421,6 +494,7 @@ fun ProviderPage(
     ProviderContent(
         onBack = onBack,
         onEnd = onEnd,
+        onSettings = onSettings,
         providerCount = model.savedProviders.collectAsState().value.count(),
         providerList = {
             ProvidersList(
@@ -432,10 +506,12 @@ fun ProviderPage(
         })
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderContent(
     onBack: () -> Unit = {},
     onEnd: () -> Unit = {},
+    onSettings: () -> Unit = {},
     providerCount: Int,
     providerList: @Composable (() -> Unit)
 ) {
@@ -453,6 +529,28 @@ fun ProviderContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
+        topBar = {
+            TopAppBar(
+                scrollBehavior = null,
+                title = {
+                    Text(
+                        text = stringResource(R.string.chooseProvider),
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = onSettings
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Settings,
+                            contentDescription = stringResource(R.string.settings)
+                        )
+                    }
+                }
+            )
+        },
         bottomBar = {
             Row(
                 modifier = Modifier
@@ -490,14 +588,7 @@ fun ProviderContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                modifier = Modifier.padding(12.dp),
-                text = stringResource(R.string.chooseProvider),
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
             providerList()
         }
     }

@@ -2,6 +2,16 @@
     <string name="app_name" translatable="false">Move</string>
     <string name="welcomeTo">Welcome to</string>
     <string name="start">Cool, let\'s get started</string>
+    <string-array name="onboardingTitles">
+        <item>Explaining goes here</item>
+        <item>And here</item>
+        <item>Explaining also goes here</item>
+    </string-array>
+    <string-array name="onboardingDescriptions">
+        <item>Explaining goes here</item>
+        <item>And here</item>
+        <item>Explaining also goes here</item>
+    </string-array>
     <string name="chooseProvider">Choose a provider</string>
     <string name="whatIsMove">What is Move?</string>
     <string name="home">Home</string>
@@ -25,4 +35,10 @@
     <string name="times">Times</string>
     <string name="alerts">Alerts</string>
     <string name="noAlerts">There are no notifications for this stop</string>
+    <string-array name="greetings">
+        <item>Going somewhere?</item>
+        <item>Let\'s go!</item>
+        <item>Doing something?</item>
+        <item>Let\'s get moving</item>
+    </string-array>
 </resources>
