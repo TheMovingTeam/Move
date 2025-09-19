@@ -459,24 +459,34 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     .header("responseType", "ResponseType.json")
                     .header("followRedirects", "true")
             }
-            val requestBuilt = request.url(url)
-                .get()
-                .build()
-
-            val response = client.newCall(requestBuilt).execute()
-
-            val responseText = response.body!!.string()
             try {
-                val times = parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
-                if (times.isNotEmpty()) {
-                    stopItem.setTimeTable(times)
+                val requestBuilt = request.url(url)
+                    .get()
+                    .build()
+
+                val response = client.newCall(requestBuilt).execute()
+
+                val responseText = response.body!!.string()
+                try {
+                    val times = parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
+                    if (times.isNotEmpty()) {
+                        stopItem.setTimeTable(times)
+                    }
+                } catch (e: Exception) {
+                    Log.e(
+                        "MoveViewModel",
+                        "Could not parse times for ${stopItem.name}: $e",
+                        e
+                    )
+                    return@launch
                 }
             } catch (e: Exception) {
                 Log.e(
                     "MoveViewModel",
-                    "Could not parse times for ${stopItem.name}: $e",
+                    "Could not get times for ${stopItem.name}: $e",
                     e
                 )
+                return@launch
             }
         }
     }
