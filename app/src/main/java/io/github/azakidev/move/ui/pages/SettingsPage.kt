@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.AddRoad
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -62,7 +63,9 @@ import io.github.azakidev.move.R
 fun SettingsPage(
     providerRepo: MutableState<String>,
     backStack: NavBackStack<NavKey>,
-    onClick: (String) -> Unit
+    onProviderReset: (String) -> Unit,
+    onboardingIsComplete: Boolean,
+    onAppReset: () -> Unit,
 ) {
     val state = rememberTextFieldState(
         initialText = providerRepo.value,
@@ -114,11 +117,24 @@ fun SettingsPage(
                 ProviderSection(
                     state,
                     providerRepo,
-                    onClick,
+                    onProviderReset,
                     onBack = {
                         backStack.add(Providers)
-                    }
+                    },
+                    onboardingIsComplete
                 )
+            }
+            if (onboardingIsComplete) {
+                item {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        text = stringResource(R.string.reset),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    ResetButtonRow(
+                        onClick = onAppReset
+                    )
+                }
             }
         }
     }
@@ -132,7 +148,9 @@ fun SettingsPagePreview() {
     SettingsPage(
         providerRepo = providerRepo,
         backStack = backStack,
-        onClick = {}
+        onProviderReset = {},
+        onboardingIsComplete = true,
+        onAppReset = {}
     )
 }
 
@@ -143,6 +161,7 @@ fun ProviderSection(
     providerRepo: MutableState<String>,
     onClick: (String) -> Unit,
     onBack: () -> Unit,
+    onboardingIsComplete: Boolean
     ) {
     val enterTransition = remember {
         slideInHorizontally(
@@ -169,7 +188,14 @@ fun ProviderSection(
     Column(
         modifier = Modifier
             .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 4.dp)
-            .clip(shape = RoundedCornerShape(topStart =  (15 + 8).dp, topEnd =  (15 + 8).dp, 4.dp, 4.dp))
+            .clip(
+                shape = RoundedCornerShape(
+                    topStart = (15 + 8).dp,
+                    topEnd = (15 + 8).dp,
+                    4.dp,
+                    4.dp
+                )
+            )
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(
@@ -225,13 +251,55 @@ fun ProviderSection(
             }
         )
     }
+    if (onboardingIsComplete) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clip(shape = RoundedCornerShape(4.dp, 4.dp, 23.dp, 23.dp))
+                .clickable(
+                    onClick = onBack
+                )
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondaryFixedDim)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.AddRoad,
+                        contentDescription = stringResource(R.string.providerTitle),
+                        tint = MaterialTheme.colorScheme.onSecondaryFixed
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.savedProviders)
+                )
+            }
+        }
+    }
+}
+
+@Composable @Preview
+fun ResetButtonRow(
+    onClick: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .clip(shape = RoundedCornerShape(4.dp, 4.dp, 23.dp, 23.dp))
+            .clip(shape = RoundedCornerShape(23.dp))
             .clickable(
-                onClick = onBack
+                onClick = onClick
             )
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
@@ -245,17 +313,17 @@ fun ProviderSection(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryFixedDim)
+                    .background(MaterialTheme.colorScheme.errorContainer)
                     .padding(8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.AddRoad,
-                    contentDescription = stringResource(R.string.providerTitle),
-                    tint = MaterialTheme.colorScheme.onSecondaryFixed
+                    imageVector = Icons.Rounded.BugReport,
+                    contentDescription = stringResource(R.string.resetDesc),
+                    tint = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
             Text(
-                text = stringResource(R.string.savedProviders)
+                text = stringResource(R.string.resetDesc)
             )
         }
     }

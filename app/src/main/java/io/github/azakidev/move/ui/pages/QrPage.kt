@@ -118,7 +118,7 @@ fun QrPage(
                         )
                     }
                 }
-            } else {
+            } else { //NoProviderPage
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -126,12 +126,12 @@ fun QrPage(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "No added providers support QR codes.",
+                        text = stringResource(R.string.noQrProviders),
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
-        } else {
+        } else { // NoPermissionPage
             Box(
                 modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {

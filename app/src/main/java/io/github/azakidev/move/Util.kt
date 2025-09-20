@@ -14,15 +14,23 @@ import io.github.azakidev.move.data.providers.parseVectaliaResponse
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data object MainView: NavKey
-@Serializable
-internal data object Settings: NavKey
-@Serializable
-internal data object Providers: NavKey
-@Serializable
-internal data object QrScanner: NavKey
+internal data object MainView : NavKey
 
-fun parseTimes(response: String, provider: ProviderItem, stopItem: StopItem, lines: List<LineItem>): MutableList<LineTime>? {
+@Serializable
+internal data object Settings : NavKey
+
+@Serializable
+internal data object Providers : NavKey
+
+@Serializable
+internal data object QrScanner : NavKey
+
+fun parseTimes(
+    response: String,
+    provider: ProviderItem,
+    stopItem: StopItem,
+    lines: List<LineItem>
+): List<LineTime>? {
     when (provider.name) {
         "DummyProvider" -> {
             val times = Regex("\\w+").findAll(response).toList().map { it.value.toInt() }
@@ -38,6 +46,7 @@ fun parseTimes(response: String, provider: ProviderItem, stopItem: StopItem, lin
                 return null
             }
         }
+
         "Vectalia Alicante" -> {
             val estimations: List<VectaliaResponse> = try {
                 parseVectaliaResponse(response)
@@ -49,29 +58,26 @@ fun parseTimes(response: String, provider: ProviderItem, stopItem: StopItem, lin
                 )
                 return null
             }
-            val timeList = mutableListOf<LineTime>()
-            estimations.forEach { estimation ->
+            val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
                 val matchingLine = lines.find { line ->
                     line.name.equals(estimation.destination, ignoreCase = true) ||
-                            // Add more sophisticated matching if needed, e.g., if destination might have extra details
-                            // or if there's a specific mapping logic between API destination and your LineItem.name
                             line.emblem == estimation.lineEmblem // Fallback or additional check using emblem
                 }
-                println(matchingLine)
-                if (matchingLine != null) {
-                    if (estimation.firstEstimateSeconds != null) {
-                        timeList.add(
-                            LineTime(
-                                lineId = matchingLine.id,
-                                nextTimeFirst = estimation.firstEstimateSeconds.div(60),
-                                nextTimeSecond = estimation.secondEstimateSeconds?.div(60)
-                            )
+                val time =
+                    if ((matchingLine != null) && (estimation.firstEstimateSeconds != null)) {
+                        LineTime(
+                            lineId = matchingLine.id,
+                            nextTimeFirst = estimation.firstEstimateSeconds.div(60),
+                            nextTimeSecond = estimation.secondEstimateSeconds?.div(60)
                         )
+                    } else {
+                        null
                     }
-                }
+                time
             }
             return timeList
         }
+
         else -> {
             return null
         }

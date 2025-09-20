@@ -79,10 +79,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     if (model.onboardingStatus.collectAsState().value) {
                         model.fetchProviders()
-                        val timer = Timer().schedule(delay = 5000, action = {
-                            model.fetchInfo()
-                        })
-                        timer.run()
+
+                        model.fetchInfoForProviders(model.savedProviders.collectAsState().value)
 
                         val sheetState = rememberModalBottomSheetState()
                         val sheetModel = viewModel<SheetStopViewModel>()
@@ -140,7 +138,7 @@ class MainActivity : ComponentActivity() {
                                     SettingsPage(
                                         model.providerRepo,
                                         backStack,
-                                        onClick = { url ->
+                                        onProviderReset = { url ->
                                             if (URLUtil.isValidUrl(url) && model.tryRepo(
                                                     url
                                                 )
@@ -156,6 +154,11 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                     .show()
                                             }
+                                        },
+                                        onboardingIsComplete = model.onboardingStatus.collectAsState().value,
+                                        onAppReset = {
+                                            model.flushInfo()
+                                            model.saveOnboarding(false)
                                         }
                                     )
                                 }

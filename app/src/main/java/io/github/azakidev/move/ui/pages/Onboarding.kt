@@ -1,5 +1,7 @@
 package io.github.azakidev.move.ui.pages
 
+import android.webkit.URLUtil
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.LinearEasing
@@ -64,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
@@ -100,6 +103,7 @@ internal data object ProviderPage : NavKey
 @Composable
 fun OnboardingPage(model: MoveViewModel) {
     val backStack = rememberNavBackStack(WelcomePage)
+
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -153,6 +157,33 @@ fun OnboardingPage(model: MoveViewModel) {
                     onSettings = {
                         backStack.add(Settings)
                     }
+                )
+            }
+            entry<Settings> {
+                val context = LocalContext.current
+                val invalidText = stringResource(R.string.providerInvalid)
+                SettingsPage(
+                    model.providerRepo,
+                    backStack,
+                    onProviderReset = { url ->
+                        if (URLUtil.isValidUrl(url) && model.tryRepo(
+                                url
+                            )
+                        ) {
+                            model.saveRepo(url)
+                            model.flushInfo()
+                        } else {
+                            Toast
+                                .makeText(
+                                    context,
+                                    invalidText,
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        }
+                    },
+                    onboardingIsComplete = model.onboardingStatus.collectAsState().value,
+                    onAppReset = {}
                 )
             }
         },
@@ -372,13 +403,15 @@ fun FeaturePage(
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(228.dp),
+                    .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+                    .clip(MaterialTheme.shapes.large)
+                    .aspectRatio(16/9f),
                 painter = painterResource(R.drawable.placeholderstop),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Feature banner"
             )
             Text(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(vertical = (12-4).dp),
                 text = stringResource(R.string.whatIsMove),
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground
@@ -410,39 +443,40 @@ fun ExplainingRow(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        MaterialTheme.colorScheme.background
+                    ),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.background
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = index.toString(),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    text = index.toString(),
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            if (description.isNotEmpty()) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 Text(
-                    text = description
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }

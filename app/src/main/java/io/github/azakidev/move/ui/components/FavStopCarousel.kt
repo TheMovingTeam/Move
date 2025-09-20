@@ -47,7 +47,6 @@ import coil3.request.crossfade
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -68,7 +67,7 @@ fun FavStopCarousel(
         map[id]
     }.reversed()
 
-    sortedFavStops.forEach { stopItem ->
+    sortedFavStops.parallelStream().forEach { stopItem ->
         slowTimer(model, stopItem).run()
         if (stopItem.lineTimes.value.isEmpty()) {
             fastTimer(model, stopItem).run()
@@ -229,8 +228,9 @@ fun HeroCarrouselItem(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    val text = if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
                     Text(
-                        text = it.nextTimeFirst.toString() + "m.",
+                        text = text,
                         maxLines = 1,
                         overflow = TextOverflow.Visible,
                         textAlign = TextAlign.End,

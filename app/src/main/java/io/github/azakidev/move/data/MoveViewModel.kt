@@ -35,6 +35,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _stopDao = _database.stopDao()
 
     private val _userStore = UserStore(application.applicationContext)
+
     private val _providerRepo: StateFlow<String> = _userStore.providerRepoUrlFlow
         .stateIn(
             scope = viewModelScope,
@@ -77,21 +78,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            _providerRepo.collect { savedUrl ->
-                providerRepo.value = savedUrl
-            }
-        }
-        viewModelScope.launch {
-            val initialSavedProviders = savedProviders.first()
-            if (initialSavedProviders.isNotEmpty()) {
-                fetchProviders()
-
-                // Wait for providers to be fetched if necessary
-                providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() } // Ensure providers are loaded if repo is set
-                fetchInfoForSavedProviders(initialSavedProviders)
-            }
-        }
-        viewModelScope.launch {
             savedProviders.collect { savedProviderIds ->
                 if (savedProviderIds.isNotEmpty()) {
                     // Load providers if not already loaded, then lines/stops
@@ -101,21 +87,20 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     // Wait for providers to be available if they were just fetched
                     providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() }
 
+                    // Observing lines and stops from DB, each must be in a coroutine to not obstruct each other
                     viewModelScope.launch(Dispatchers.IO) {
-                        // Observe lines from DB for the current set of saved providers
                         _lineDao.getLinesForProviders(savedProviderIds).collect { lineEntities ->
                             _lines.value = lineEntities.map { it.toLineItem() }
                         }
                     }
 
                     viewModelScope.launch(Dispatchers.IO) {
-                        // Observe stops from DB
                         _stopDao.getStopsForProviders(savedProviderIds).collect { stopEntities ->
                             _stops.value = stopEntities.map { it.toStopItem() }
                         }
                     }
                     // Trigger a check/fetch for these saved providers
-                    fetchInfoForSavedProviders(savedProviderIds)
+                    fetchInfoForProviders(savedProviderIds)
                 } else {
                     _lines.value = emptyList()
                     _stops.value = emptyList()
@@ -186,7 +171,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 // 6. Fetch info for saved providers (lines and stops)
                 // This should also respect the lastUpdated timestamp for lines/stops if available
-                fetchInfoForSavedProviders(
+                fetchInfoForProviders(
                     savedProviders.value
                 )
 
@@ -206,16 +191,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // This function will fetch info for all providers currently in the savedProviders list.
-    fun fetchInfo() {
-        viewModelScope.launch(Dispatchers.IO) { // Ensure it runs in a coroutine
-            val currentSavedProviders =
-                savedProviders.first() // Get current list from DataStore
-            fetchInfoForSavedProviders(currentSavedProviders)
-        }
-    }
-
-    private fun fetchInfoForSavedProviders(providerIds: List<Int>) {
+    fun fetchInfoForProviders(providerIds: List<Int>) {
         if (_providers.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
                 "MoveViewModel",
@@ -233,7 +209,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         providerIds.forEach { id ->
-            // Get the full ProviderItem, which might have been updated by fetchProviders
             val provider = _providers.value.find { it.id == id }
             if (provider == null) {
                 Log.w(
@@ -259,8 +234,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         "MoveViewModel",
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchAndStoreLinesForProvider(provider, currentRepoUrl)
-                    fetchAndStoreStopsForProvider(provider, currentRepoUrl)
+                    fetchLinesForProvider(provider, currentRepoUrl)
+                    fetchStopsForProvider(provider, currentRepoUrl)
                 } else if (_stopDao.getStopsForProvider(provider.id)
                         .first()
                         .isEmpty()
@@ -269,8 +244,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         "MoveViewModel",
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchAndStoreLinesForProvider(provider, currentRepoUrl)
-                    fetchAndStoreStopsForProvider(provider, currentRepoUrl)
+                    fetchLinesForProvider(provider, currentRepoUrl)
+                    fetchStopsForProvider(provider, currentRepoUrl)
                 } else {
                     Log.d(
                         "MoveViewModel",
@@ -281,8 +256,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Updated to fetch and store in DB
-    private suspend fun fetchAndStoreLinesForProvider(
+    private suspend fun fetchLinesForProvider(
         provider: ProviderItem,
         repoUrl: String
     ) {
@@ -291,23 +265,20 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val response = Json.decodeFromString<LineResponse>(linesJson)
             val fetchedLineItems = response.lines.map { it.apply { this.provider = provider.id } }
 
-            // Convert to LineEntity and store in DB
             val lineEntities = fetchedLineItems.map { it.toLineEntity() }
-            // Consider deleting old lines for this provider before inserting new ones
-            // if the API guarantees a full list each time.
-            _lineDao.deleteLinesForProvider(provider.id) // Optional: clear old before inserting
+            _lineDao.deleteLinesForProvider(provider.id)
             _lineDao.insertLines(lineEntities)
             // The Flow from lineDao will automatically update _lines.value
         } catch (e: Exception) {
             Log.e(
                 "MoveViewModel",
-                "Error fetching/storing lines for ${provider.name}: ${e.localizedMessage}",
+                "Error fetching lines for ${provider.name}: ${e.localizedMessage}",
                 e
             )
         }
     }
 
-    private suspend fun fetchAndStoreStopsForProvider(
+    private suspend fun fetchStopsForProvider(
         provider: ProviderItem,
         repoUrl: String
     ) {
@@ -315,14 +286,15 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val stopsJson = URL("$repoUrl/${provider.name}/stops.json").readText()
             val response = Json.decodeFromString<StopResponse>(stopsJson)
             val fetchedStopItems = response.stops.map { it.apply { this.provider = provider.id } }
+
             val stopEntities = fetchedStopItems.map { it.toStopEntity() }
-            _stopDao.deleteStopsForProvider(provider.id) // Optional: clear old
+            _stopDao.deleteStopsForProvider(provider.id)
             _stopDao.insertStops(stopEntities)
             // The Flow from stopDao will automatically update _stops.value
         } catch (e: Exception) {
             Log.e(
                 "MoveViewModel",
-                "Error fetching/storing stops for ${provider.name}: ${e.localizedMessage}",
+                "Error fetching stops for ${provider.name}: ${e.localizedMessage}",
                 e
             )
         }
@@ -335,7 +307,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 currentSaved.add(providerId)
                 _userStore.saveSavedProviders(currentSaved)
             }
-            fetchInfo()
+            fetchInfoForProviders(currentSaved)
         }
     }
 
@@ -356,11 +328,20 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     fun flushInfo() {
         viewModelScope.launch(Dispatchers.IO) {
+            // Nuke all user settings
+            favouriteStops.value.map {
+                removeFavStop(it)
+            }
+            savedProviders.value.map {
+                removeSavedProvider(it)
+            }
+            clearLastStops()
+            // Nuke all temporary data
             _providers.value = emptyList()
             _lines.value = emptyList()
             _stops.value = emptyList()
             // Nuke all entries from database
-            _providerDao.clearAllProviders() // Example: if you add such a method
+            _providerDao.clearAllProviders()
             _lineDao.clearAllLines()
             _stopDao.clearAllStops()
         }
@@ -404,6 +385,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 currentLastStops.removeAt(index = 0)
                 _userStore.saveLastStops(currentLastStops)
             }
+        }
+    }
+
+    fun clearLastStops() {
+        viewModelScope.launch {
+            _userStore.saveLastStops(emptyList())
         }
     }
 

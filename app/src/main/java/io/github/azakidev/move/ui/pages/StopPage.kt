@@ -325,8 +325,9 @@ fun StopTimes(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val text = if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
                             Text(
-                                text = it.nextTimeFirst.toString() + "m."
+                                text = text
                             )
                             if (provider.capabilities.contains(Capabilities.DoubleTime) and (it.nextTimeSecond != null)) {
                                 Text(

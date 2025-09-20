@@ -45,7 +45,7 @@ fun EmblemShape(
     val textColor = if (color.value != MaterialTheme.colorScheme.primary.value) {
         if (ColorUtils.calculateContrast(
                 Color.White.toColorLong().toColorInt(), color.toColorLong().toColorInt()
-            ) < 1.4f
+            ) < 1.85f
         ) {
             Color.Black
         } else {
@@ -99,7 +99,7 @@ fun shapeFromId(id: Int): Shape {
         20 -> MaterialShapes.Clover8Leaf.toShape()
         21 -> MaterialShapes.Pentagon.toShape()
         22 -> MaterialShapes.PixelCircle.toShape()
-        23 -> MaterialShapes.Diamond.toShape()
+        23 -> MaterialShapes.Oval.toShape(45)
         else -> MaterialShapes.Circle.toShape()
     }
 }
