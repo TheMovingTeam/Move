@@ -21,10 +21,10 @@ It also includes the format for requesting ETAs and how to parse the response so
 - [x] Implement first provider crawler
 ### Planned
 - [x] QR Scanner
-- [x] Onboarding experience
-    - [ ] Onboarding information
-- [ ] Document and publish spec
-- [ ] Map for lines
-- [ ] Routing algorithm
-- [ ] Journey page when on a trip
 - [x] Provider alerts
+- [x] Onboarding experience
+    - [x] Onboarding information
+- [ ] Document and publish spec
+- [ ] Map
+    - [ ] Routing algorithm
+    - [ ] Journey page when on a trip
