@@ -3,6 +3,7 @@ package io.github.azakidev.move
 import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.data.LineItem
@@ -84,34 +85,39 @@ fun parseTimes(
     }
 }
 
-fun listShape(count: Int, total: Int): Shape {
+fun listShape(
+    count: Int,
+    total: Int,
+    roundingLarge: Dp = 8.dp,
+    roundingSmall: Dp = 2.dp
+): Shape {
     if (total == 1) {
         return RoundedCornerShape(
-            8.dp
+            roundingLarge
         )
     }
     return when (count) {
         0 -> {
             RoundedCornerShape(
-                topStart = 8.dp,
-                topEnd = 8.dp,
-                bottomStart = 2.dp,
-                bottomEnd = 2.dp,
+                topStart = roundingLarge,
+                topEnd = roundingLarge,
+                bottomStart = roundingSmall,
+                bottomEnd = roundingSmall,
             )
         }
 
         total - 1 -> {
             RoundedCornerShape(
-                topStart = 2.dp,
-                topEnd = 2.dp,
-                bottomStart = 8.dp,
-                bottomEnd = 8.dp
+                topStart = roundingSmall,
+                topEnd = roundingSmall,
+                bottomStart = roundingLarge,
+                bottomEnd = roundingLarge
             )
         }
 
         else -> {
             RoundedCornerShape(
-                4.dp
+                roundingSmall
             )
         }
     }

@@ -19,15 +19,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
+import java.lang.Integer.min
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable @Preview
 fun LogoHero(
-    shapeAngle:Int = 0
+    size: Int = 208,
+    shapeAngle: Int = 0
 ) {
     Box(
         modifier = Modifier
-            .size(208.dp)
+            .size(size.dp)
             .clip(MaterialShapes.Cookie12Sided.toShape(shapeAngle))
             .background(
                 brush = Brush.linearGradient(
@@ -39,7 +41,7 @@ fun LogoHero(
             ), contentAlignment = Alignment.Center
     ) {
         Icon(
-            modifier = Modifier.size(128.dp),
+            modifier = Modifier.size( min(128, (size-60)).dp ),
             imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
             contentDescription = null,
             tint = Color.White

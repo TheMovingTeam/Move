@@ -171,6 +171,9 @@ class MainActivity : ComponentActivity() {
                                         onAppReset = {
                                             model.flushInfo()
                                             model.saveOnboarding(false)
+                                        },
+                                        onOnboardingReset = {
+                                            model.saveOnboarding(false)
                                         }
                                     )
                                 }
@@ -239,17 +242,7 @@ fun AppNavigator(
             onDismissRequest = { sheetModel.showBottomSheet = false },
             containerColor = MaterialTheme.colorScheme.background,
             sheetState = sheetState,
-//            sheetGesturesEnabled = false,
-            dragHandle = {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .offset(y = (-12).dp),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    BottomSheetDefaults.DragHandle()
-//                }
-            },
+            dragHandle = { },
         ) {
             StopPage(model = model, sheetModel = sheetModel)
         }

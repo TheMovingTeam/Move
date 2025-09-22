@@ -61,7 +61,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -184,7 +183,8 @@ fun OnboardingPage(model: MoveViewModel) {
                         }
                     },
                     onboardingIsComplete = model.onboardingStatus.collectAsState().value,
-                    onAppReset = {}
+                    onAppReset = {},
+                    onOnboardingReset = {}
                 )
             }
         },
@@ -204,6 +204,7 @@ fun WelcomePage(
         label = "Blur",
         animationSpec = MotionScheme.expressive().slowEffectsSpec()
     )
+
     val infiniteTransition = rememberInfiniteTransition(label = "moveCookieRotate")
     val shapeAngle = infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -296,7 +297,7 @@ fun WelcomePage(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 LogoHero(
-                    shapeAngle.value.toInt()
+                    shapeAngle = shapeAngle.value.toInt()
                 )
                 AnimatedVisibility(
                     modifier = Modifier

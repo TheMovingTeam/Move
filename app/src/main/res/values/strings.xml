@@ -12,7 +12,7 @@
         <item>Each transit service is called a provider, it holds all the information for that service.</item>
         <item>Adding a provider to favourites will automatically download all the information to your device.</item>
         <item>Once everything has been set up, you can search, save and check the times for every provider you have added in one place.</item>
-        <item>If you like the app, please consider supporting the development of more features coming to Move after using it for a while.</item>
+        <item>If you like the app, please consider supporting the development with a donation after using it for a while so more features can be added to Move.</item>
     </string-array>
     <string name="chooseProvider">Choose a provider</string>
     <string name="whatIsMove">What is Move?</string>
@@ -26,12 +26,16 @@
     <string name="noRecentStops">No stops have been seen recently</string>
     <string name="noLines">No lines have been added</string>
     <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="bugReport">Report an issue</string>
+    <string name="socialMedia">Follow Move</string>
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid provider</string>
     <string name="providerTitle">Providers</string>
     <string name="savedProviders">Saved providers</string>
     <string name="reset">Reset</string>
     <string name="resetDesc">Reset lines, stops, and providers</string>
+    <string name="resetOnboarding">Restart onboarding</string>
     <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>
