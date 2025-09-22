@@ -85,6 +85,7 @@ import io.github.azakidev.move.R
 import io.github.azakidev.move.Settings
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.listShape
+import io.github.azakidev.move.ui.components.LogoHero
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import java.util.Timer
@@ -294,26 +295,9 @@ fun WelcomePage(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(208.dp)
-                        .clip(MaterialShapes.Cookie12Sided.toShape(shapeAngle.value.toInt()))
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    colorResource(R.color.purple_brand),
-                                    colorResource(R.color.purple_shadow)
-                                )
-                            )
-                        ), contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        modifier = Modifier.size(128.dp),
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
+                LogoHero(
+                    shapeAngle.value.toInt()
+                )
                 AnimatedVisibility(
                     modifier = Modifier
                         .padding(top = 36.dp)

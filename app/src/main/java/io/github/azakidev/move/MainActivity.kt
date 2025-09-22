@@ -15,11 +15,17 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -37,11 +43,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
@@ -52,16 +63,17 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.ui.pages.HomePage
+import io.github.azakidev.move.ui.pages.HomePagePreview
 import io.github.azakidev.move.ui.pages.LinesPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
+import io.github.azakidev.move.ui.pages.StopPagePreview
 import io.github.azakidev.move.ui.theme.MoveTheme
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
@@ -219,13 +231,48 @@ fun AppNavigator(
     }
 
     if (sheetModel.showBottomSheet) {
+        val nestedScroll = rememberNestedScrollInteropConnection()
         ModalBottomSheet(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .nestedScroll(nestedScroll),
             onDismissRequest = { sheetModel.showBottomSheet = false },
+            containerColor = MaterialTheme.colorScheme.background,
             sheetState = sheetState,
-            dragHandle = { },
+//            sheetGesturesEnabled = false,
+            dragHandle = {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .offset(y = (-12).dp),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    BottomSheetDefaults.DragHandle()
+//                }
+            },
         ) {
             StopPage(model = model, sheetModel = sheetModel)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable @Preview
+fun BottomSheetPreview() {
+    val sheetState = rememberModalBottomSheetState()
+    val sheetModel = viewModel<SheetStopViewModel>()
+    sheetModel.sheetStop = StopItem()
+    sheetModel.showBottomSheet = true
+    HomePagePreview()
+    if (sheetModel.showBottomSheet) {
+        ModalBottomSheet(
+            modifier = Modifier
+                .fillMaxHeight(),
+            onDismissRequest = { sheetModel.showBottomSheet = false },
+            sheetState = sheetState,
+            dragHandle = {  },
+        ) {
+            StopPagePreview()
         }
     }
 }

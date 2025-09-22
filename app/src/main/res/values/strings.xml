@@ -31,7 +31,7 @@
     <string name="providerTitle">Providers</string>
     <string name="savedProviders">Saved providers</string>
     <string name="reset">Reset</string>
-    <string name="resetDesc">Reset everything</string>
+    <string name="resetDesc">Reset lines, stops, and providers</string>
     <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>

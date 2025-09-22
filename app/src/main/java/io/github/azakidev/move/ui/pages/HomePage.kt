@@ -227,7 +227,6 @@ fun HomePageView(
     )
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 @Preview
 fun HomePagePreview() {

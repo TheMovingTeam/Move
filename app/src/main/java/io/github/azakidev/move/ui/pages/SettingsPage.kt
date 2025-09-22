@@ -185,17 +185,13 @@ fun ProviderSection(
             animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         )
     }
+    val shape =
+        if(onboardingIsComplete) RoundedCornerShape(4.dp, 4.dp, 23.dp, 23.dp)
+        else RoundedCornerShape( 23.dp)
     Column(
         modifier = Modifier
             .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 4.dp)
-            .clip(
-                shape = RoundedCornerShape(
-                    topStart = (15 + 8).dp,
-                    topEnd = (15 + 8).dp,
-                    4.dp,
-                    4.dp
-                )
-            )
+            .clip(shape = shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(

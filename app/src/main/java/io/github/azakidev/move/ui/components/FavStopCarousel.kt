@@ -197,48 +197,52 @@ fun HeroCarrouselItem(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            stopItem.lineTimes.collectAsState().value.forEach {
-                val line = lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
-                val lineName = line.name
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+            stopItem.lineTimes.collectAsState().value
+                .sortedBy { it.nextTimeFirst }
+                .take(3)
+                .reversed()
+                .forEach {
+                    val line = lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+                    val lineName = line.name
                     Row(
-                        modifier = Modifier.fillMaxWidth(.85f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        EmblemShape(
-                            modifier = Modifier.size(26.dp),
-                            line = line,
-                            textStyle = MaterialTheme.typography.titleSmall
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(.85f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            EmblemShape(
+                                modifier = Modifier.size(26.dp),
+                                line = line,
+                                textStyle = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                text = lineName
+                                    .replace("-", " - ")
+                                    .replace(".", ". ")
+                                    .replace("  ", " "),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Light,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        val text = if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
                         Text(
-                            text = lineName
-                                .replace("-", " - ")
-                                .replace(".", ". ")
-                                .replace("  ", " "),
+                            text = text,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Visible,
+                            textAlign = TextAlign.End,
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Light,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    val text = if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
-                    Text(
-                        text = text,
-                        maxLines = 1,
-                        overflow = TextOverflow.Visible,
-                        textAlign = TextAlign.End,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
                 }
-            }
         }
     }
 }
