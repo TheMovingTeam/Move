@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcomeTo">Bienvenido a</string>
+    <string name="start">Chachi, comenzemos</string>
+    <string name="chooseProvider">Selecciona un proveedor</string>
+    <string name="whatIsMove">¿Qué es Move?</string>
+    <string name="home">Inicio</string>
+    <string name="lines">Líneas</string>
+    <string name="map">Mapa</string>
+    <string name="search">Buscar</string>
+    <string name="favouriteStops">Paradas favoritas</string>
+    <string name="recentStops">Paradas recientes</string>
+    <string name="noFavStops">No se ha añadido ninguna parada a favoritos</string>
+    <string name="noRecentStops">No se ha visto ninguna parada recientemente</string>
+    <string name="noLines">No se ha añadido ninguna línea</string>
+    <string name="settings">Ajustes</string>
+    <string name="about">Sobre la app</string>
+    <string name="bugReport">Reportar un problema</string>
+    <string name="socialMedia">Seguir a Move</string>
+    <string name="providerSource">Fuente de proveedores</string>
+    <string name="providerInvalid">La URL no corresponde a ninguna fuente válida</string>
+    <string name="providerTitle">Proveedores</string>
+    <string name="savedProviders">Proveedores guardados</string>
+    <string name="reset">Restaurar</string>
+    <string name="resetDesc">Restaurar líneas, paradas y proveedores</string>
+    <string name="resetOnboarding">Reiniciar presentación</string>
+    <string name="noProviders">No se han encontrado proveedores</string>
+    <string name="qrScan">Escanear</string>
+    <string name="qrNotFound">URL no reconocída</string>
+    <string name="noQrProviders">No se han encontrado proveedores que soporten códigos QR</string>
+    <string name="noCameraPermission">No se ha otorgado permísos de cámara</string>
+    <string name="times">Estimaciones</string>
+    <string name="soon">Pronto</string>
+    <string name="alerts">Alertas</string>
+    <string name="noAlerts">No hay ninguna alerta en esta parada</string>
+
+    <string-array name="greetings">
+        <item>¿Vas a algún sitio?</item>
+        <item>Adelante!</item>
+        <item>¿Vas a hacer algo?</item>
+        <item>A moverse</item>
+    </string-array>
+    <string-array name="onboardingTitles">
+        <item>Todo sobre proveedores</item>
+        <item>Descarga los itinerarios</item>
+        <item>Y listo!</item>
+        <item>E incluso hay más!</item>
+    </string-array>
+    <string-array name="onboardingDescriptions">
+        <item>A cada servicio de tránsito se le llama un proveedor, estos contienen toda la información para ese servicio.</item>
+        <item>Añadiendo un proveedor a favoritos descargará toda su información y la almacenará en tu dispositivo automaticamente.</item>
+        <item>Una vez está todo listo, podrás buscar, guardar, y comprobar las estimaciones para cada proveedor que hayas añadido en el mismo sitio.</item>
+        <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
+    </string-array>
+</resources>
