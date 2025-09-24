@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4721febda1ec0f80c297961126efd820",
+    "identityHash": "7d0a233a1676871e698e36a499b6d0ab",
     "entities": [
       {
         "tableName": "providers",
@@ -159,7 +159,7 @@
       },
       {
         "tableName": "stops",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` INTEGER NOT NULL, `comId` INTEGER NOT NULL, `providerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `lines` TEXT NOT NULL, `geoX` REAL, `geoY` REAL, `notifications` TEXT NOT NULL, FOREIGN KEY(`providerId`) REFERENCES `providers`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` INTEGER NOT NULL, `comId` INTEGER, `providerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `lines` TEXT NOT NULL, `geoX` REAL, `geoY` REAL, `notifications` TEXT NOT NULL, FOREIGN KEY(`providerId`) REFERENCES `providers`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "localId",
@@ -176,8 +176,7 @@
           {
             "fieldPath": "comId",
             "columnName": "comId",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "providerId",
@@ -258,7 +257,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4721febda1ec0f80c297961126efd820')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d0a233a1676871e698e36a499b6d0ab')"
     ]
   }
 }

@@ -19,7 +19,7 @@ import io.github.azakidev.move.data.StopItem
 data class StopEntity(
     @PrimaryKey(autoGenerate = true) val localId: Long = 0, // Auto-generated local primary key
     val id: Int, // Original ID from the Provider
-    val comId: Int, // Commercial ID from the Provider, in case it differs
+    val comId: Int?, // Commercial ID from the Provider, in case it differs
     val providerId: Int, // Foreign key to ProviderEntity
 
     val name: String,

@@ -63,8 +63,9 @@ fun LinesPage(
     val scope = rememberCoroutineScope()
 
     val results = model.stops.collectAsState().value.filter {
-        it.name.lowercase().replace(" ", "")
-            .contains(textFieldState.text.toString().lowercase().replace(" ", ""))
+        val name = it.name.lowercase().replace(" ", "")
+        val text = textFieldState.text.toString().lowercase().replace(" ", "")
+        name.contains(text) || (it.comId != null && it.comId.toString().contains(text))
     }
 
     val inputField = @Composable {
