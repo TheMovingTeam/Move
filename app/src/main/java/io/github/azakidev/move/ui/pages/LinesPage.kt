@@ -79,7 +79,11 @@ fun LinesPage(
                     sheetModel.showBottomSheet = true
                 }
             },
-            placeholder = { Text("Where to go...") },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.searchPlaceholder)
+                )
+            },
             leadingIcon = {
                 if (searchBarState.currentValue == SearchBarValue.Collapsed && !searchBarState.isAnimating) {
                     Icon(
@@ -253,7 +257,11 @@ fun LinesPagePreview() {
             searchBarState = searchBarState,
             textFieldState = textFieldState,
             onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = { Text("Where to go...") },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.searchPlaceholder)
+                )
+            },
         )
     }
     val lineItems = listOf(
@@ -311,7 +319,11 @@ fun EmptyLinesPreview() {
             searchBarState = searchBarState,
             textFieldState = textFieldState,
             onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = { Text("Where to go...") },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.searchPlaceholder)
+                )
+            },
         )
     }
     Scaffold(

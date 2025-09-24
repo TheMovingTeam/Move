@@ -80,7 +80,11 @@ fun MapPage() {
             searchBarState = searchBarState,
             textFieldState = textFieldState,
             onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = { Text("Where to go...") },
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.searchPlaceholder)
+                )
+            },
         )
     }
 
