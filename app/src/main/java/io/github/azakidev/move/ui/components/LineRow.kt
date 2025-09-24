@@ -134,7 +134,7 @@ fun StopEntries(
                         )
                         StopEmblemRow(
                             stopItem = stopItem,
-                            lines = lines.filterNot { it == lineItem }
+                            lines = lines.filterNot { it.emblem == lineItem.emblem }
                         )
                     }
                 }
