@@ -51,6 +51,10 @@ android {
     }
 }
 
+ksp {
+    arg(RoomSchemaArgProvider(File(projectDir, "schemas")))
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -101,4 +105,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+class RoomSchemaArgProvider(
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val schemaDir: File
+) : CommandLineArgumentProvider {
+
+    override fun asArguments(): Iterable<String> {
+        // Note: If you're using KAPT and javac, change the line below to
+        // return listOf("-Aroom.schemaLocation=${schemaDir.path}").
+        return listOf("room.schemaLocation=${schemaDir.path}")
+    }
 }

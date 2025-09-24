@@ -52,4 +52,5 @@
         <item>Una vez está todo listo, podrás buscar, guardar, y comprobar las estimaciones para cada proveedor que hayas añadido en el mismo sitio.</item>
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
+    <string name="searchPlaceholder">A donde ir...</string>
 </resources>

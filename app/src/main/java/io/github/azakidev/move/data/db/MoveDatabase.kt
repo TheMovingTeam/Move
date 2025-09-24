@@ -9,7 +9,7 @@ import androidx.room.TypeConverters
 @Database(
     entities = [ProviderEntity::class, LineEntity::class, StopEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class MoveDatabase : RoomDatabase() {

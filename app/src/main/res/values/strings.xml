@@ -52,4 +52,5 @@
         <item>Once everything has been set up, you can search, save and check the estimations for every provider you have added in one place.</item>
         <item>If you like the app, please consider supporting the development with a donation after using it for a while. That way more features can be added to Move in the future.</item>
     </string-array>
+    <string name="searchPlaceholder">Where to go...</string>
 </resources>
