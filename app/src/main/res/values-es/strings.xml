@@ -7,11 +7,13 @@
     <string name="home">Inicio</string>
     <string name="lines">Líneas</string>
     <string name="map">Mapa</string>
+    <string name="stops">Paradas</string>
     <string name="search">Buscar</string>
     <string name="favouriteStops">Paradas favoritas</string>
     <string name="recentStops">Paradas recientes</string>
     <string name="noFavStops">No se ha añadido ninguna parada a favoritos</string>
     <string name="noRecentStops">No se ha visto ninguna parada recientemente</string>
+    <string name="noResults">No se ha encontrado ningun resultado</string>
     <string name="noLines">No se ha añadido ninguna línea</string>
     <string name="settings">Ajustes</string>
     <string name="about">Sobre la app</string>

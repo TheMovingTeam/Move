@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.listShape
+import kotlin.math.exp
 
 @Composable
 fun LineEntry(line: LineItem) {
@@ -146,20 +148,23 @@ fun StopEntries(
 
 @Composable
 fun LineRow(
+    modifier: Modifier = Modifier,
     stops: List<StopItem>,
     lines: List<LineItem>,
     lineItem: LineItem,
     shape: Shape = MaterialTheme.shapes.large,
     expanded: MutableState<Boolean>,
+    expandable: Boolean = true,
+    background: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     onClick: (StopItem) -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
             .clip(shape = shape)
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+            .background(color = background)
             .clickable(
+                enabled = expandable,
                 onClick = {
                     expanded.value = !expanded.value
                 }
