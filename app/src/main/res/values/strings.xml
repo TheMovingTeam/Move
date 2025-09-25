@@ -24,7 +24,6 @@
     <string name="reset">Reset</string>
     <string name="resetDesc">Reset lines, stops, and providers</string>
     <string name="resetOnboarding">Restart onboarding</string>
-    <string name="noProviders">No providers have been found</string>
     <string name="qrScan">Scan</string>
     <string name="qrNotFound">URL not recognized</string>
     <string name="noQrProviders">No providers found with support for QR codes</string>
@@ -52,5 +51,5 @@
         <item>Once everything has been set up, you can search, save and check the estimations for every provider you have added in one place.</item>
         <item>If you like the app, please consider supporting the development with a donation after using it for a while. That way more features can be added to Move in the future.</item>
     </string-array>
-    <string name="searchPlaceholder">Where to go...</string>
+    <string name="searchPlaceholder">Where to go…</string>
 </resources>

@@ -24,7 +24,6 @@
     <string name="reset">Restaurar</string>
     <string name="resetDesc">Restaurar líneas, paradas y proveedores</string>
     <string name="resetOnboarding">Reiniciar presentación</string>
-    <string name="noProviders">No se han encontrado proveedores</string>
     <string name="qrScan">Escanear</string>
     <string name="qrNotFound">URL no reconocída</string>
     <string name="noQrProviders">No se han encontrado proveedores que soporten códigos QR</string>
@@ -52,5 +51,5 @@
         <item>Una vez está todo listo, podrás buscar, guardar, y comprobar las estimaciones para cada proveedor que hayas añadido en el mismo sitio.</item>
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
-    <string name="searchPlaceholder">A donde ir...</string>
+    <string name="searchPlaceholder">A donde ir…</string>
 </resources>

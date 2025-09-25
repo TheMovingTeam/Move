@@ -1,6 +1,5 @@
 package io.github.azakidev.move.ui.pages
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -186,8 +185,8 @@ fun HomePageView(
                             ) {
                                 Text(
                                     modifier = Modifier
-                                        .fillMaxWidth(0.65f)
-                                        .padding(12.dp),
+                                        .fillMaxWidth(0.62f)
+                                        .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
                                     text = stopItem.name
                                         .replace("-", " - ")
                                         .replace(".", ". ")
@@ -198,6 +197,7 @@ fun HomePageView(
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 StopEmblemRow(
+                                    modifier = Modifier.padding(end = 12.dp),
                                     stopItem = stopItem,
                                     lines = lines
                                 )
@@ -214,7 +214,7 @@ fun HomePageView(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = stringResource(R.string.noFavStops),
+                                    text = stringResource(R.string.noRecentStops),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -233,8 +233,8 @@ fun HomePagePreview() {
     val backStack = rememberNavBackStack(MainView)
     val lastStops = listOf(
         StopItem(
-            name = "A stop with a really long name",
-            lines = listOf(1, 2)
+            name = "A stop with a really really really long name",
+            lines = listOf(1, 2, 3)
         )
     )
     val lineItems = listOf(
