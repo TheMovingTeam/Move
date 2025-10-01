@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -193,43 +194,40 @@ fun HomePageView(
                                     }
                                 }
                                 else -> {
-                                    lastStops.forEach { stopItem ->
-                                        val shape = listShape(lastStops.indexOf(stopItem), lastStops.count())
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(bottom = 4.dp)
-                                                .clip(shape = shape)
-                                                .clickable(
-                                                    onClick = { onRecentOpen(stopItem) }
-                                                )
-                                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                                .animateItem(
-                                                    fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-                                                    placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-                                                    fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
-                                                ),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
+                                    Column {
+                                        lastStops.forEach { stopItem ->
+                                            val shape = listShape(lastStops.indexOf(stopItem), lastStops.count())
+                                            Row(
                                                 modifier = Modifier
-                                                    .fillMaxWidth(0.62f)
-                                                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
-                                                text = stopItem.name
-                                                    .replace("-", " - ")
-                                                    .replace(".", ". ")
-                                                    .replace("  ", " "),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                fontSize = 16.sp,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                            )
-                                            StopEmblemRow(
-                                                modifier = Modifier.padding(end = 12.dp),
-                                                stopItem = stopItem,
-                                                lines = lines
-                                            )
+                                                    .fillMaxWidth()
+                                                    .padding(bottom = 4.dp)
+                                                    .clip(shape = shape)
+                                                    .clickable(
+                                                        onClick = { onRecentOpen(stopItem) }
+                                                    )
+                                                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.62f)
+                                                        .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
+                                                    text = stopItem.name
+                                                        .replace("-", " - ")
+                                                        .replace(".", ". ")
+                                                        .replace("  ", " "),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    fontSize = 16.sp,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                )
+                                                StopEmblemRow(
+                                                    modifier = Modifier.padding(end = 12.dp),
+                                                    stopItem = stopItem,
+                                                    lines = lines
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -250,6 +248,14 @@ fun HomePagePreview() {
         StopItem(
             name = "A stop with a really really really long name",
             lines = listOf(1, 2, 3)
+        ),
+        StopItem(
+            name = "A stop with a mildly long name",
+            lines = listOf(2, 3)
+        ),
+        StopItem(
+            name = "A stop",
+            lines = listOf(1)
         )
     )
     val lineItems = listOf(
