@@ -125,7 +125,7 @@ fun slowTimer(
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
-        period = 1000,
+        period = 15000,
         action = {
             model.fetchTimes(stopItem)
         }
