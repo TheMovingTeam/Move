@@ -20,15 +20,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
@@ -36,6 +42,7 @@ import androidx.compose.material.icons.rounded.AddRoad
 import androidx.compose.material.icons.rounded.AlternateEmail
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -62,6 +69,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -87,7 +95,7 @@ fun SettingsPage(
         initialText = providerRepo.value,
     )
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         topBar = {
@@ -121,36 +129,39 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        val scrollState = rememberScrollState()
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = 0.dp
+                )
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(scrollState)
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer),
         ) {
-            item {
-                AboutSection()
-            }
-            item {
-                ProviderSection(
-                    state,
-                    providerRepo,
-                    onProviderReset,
-                    onBack = {
-                        backStack.add(Providers)
-                    },
-                    onboardingIsComplete
+            AboutSection()
+            ProviderSection(
+                state,
+                providerRepo,
+                onProviderReset,
+                onBack = {
+                    backStack.add(Providers)
+                },
+                onboardingIsComplete
+            )
+            if (onboardingIsComplete) {
+                ResetSection(
+                    onAppReset = onAppReset,
+                    onOnboardingReset = onOnboardingReset
                 )
             }
-            if (onboardingIsComplete) {
-                item {
-                    ResetSection(
-                        onAppReset = onAppReset,
-                        onOnboardingReset = onOnboardingReset
-                    )
-                }
-            }
+            Spacer(
+                modifier = Modifier.height(18.dp)
+            )
         }
     }
 }
@@ -335,6 +346,11 @@ fun AboutSection(
             icon = Icons.Rounded.AlternateEmail,
             description = R.string.socialMedia,
             link = "https://twitter.com/movetransit"
+        ),
+        AboutElement(
+            icon = Icons.Rounded.Info,
+            description = R.string.privacyPolicy,
+            link = "https://themovingteam.github.io/privacy/"
         ),
     )
 

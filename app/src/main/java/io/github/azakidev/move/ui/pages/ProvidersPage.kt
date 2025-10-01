@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
@@ -47,6 +49,7 @@ import androidx.navigation3.runtime.NavKey
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
@@ -146,90 +149,109 @@ fun ProvidersList(
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) {
-        if (providers.count() != 0) {
-            LazyColumn(
-                modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                items(providers.count()) { i ->
-                    val provider = providers[i]
-                    val shape = listShape(i, providers.count())
-                    val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
-                    var icon = iconMut.collectAsState().value
-                    if (provider.id in savedProviders) {
-                        icon = Icons.Default.Favorite
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(shape = shape)
-                            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+        val visibleProviders = if (!BuildConfig.APPLICATION_ID.contains("debug")) {
+            providers.filterNot { it.name.contains("Dummy") }
+        } else {
+            providers
+        }
+        AnimatedContent(visibleProviders.count()) { count ->
+            when (count) {
+                0 -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        LoadingIndicator(
+                            modifier = Modifier.size(86.dp),
+                            polygons = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons
+                        )
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .nestedScroll(scrollBehavior.nestedScrollConnection)
+                            .padding(start = 8.dp, end = 8.dp, top = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(visibleProviders.count()) { i ->
+                            val provider = visibleProviders[i]
+                            val shape = listShape(i, providers.count())
+                            val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
+                            var icon = iconMut.collectAsState().value
+                            if (provider.id in savedProviders) {
+                                icon = Icons.Default.Favorite
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(shape = shape)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                    .animateItem(
+                                        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                    ),
                             ) {
-                                val imgUrl =
-                                    providerRepo + "/" + provider.name + "/res/provider.png"
-                                AsyncImage(
+                                Row(
                                     modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(MaterialTheme.shapes.large),
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(imgUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                    placeholder = painterResource(R.drawable.placeholderstop),
-                                    error = painterResource(R.drawable.placeholderstop),
-                                    contentScale = ContentScale.Crop,
-                                    contentDescription = provider.name,
-                                )
-                                Text(
-                                    text = provider.name,
-                                    style = MaterialTheme.typography.titleLarge,
-                                )
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        val imgUrl =
+                                            providerRepo + "/" + provider.name + "/res/provider.png"
+                                        AsyncImage(
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(MaterialTheme.shapes.large),
+                                            model = ImageRequest.Builder(LocalContext.current)
+                                                .data(imgUrl)
+                                                .crossfade(true)
+                                                .build(),
+                                            placeholder = painterResource(R.mipmap.placeholderstop),
+                                            error = painterResource(R.mipmap.placeholderstop),
+                                            contentScale = ContentScale.Crop,
+                                            contentDescription = provider.name,
+                                        )
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth(.8f),
+                                            text = provider.name,
+                                            overflow = TextOverflow.Ellipsis,
+                                            maxLines = 2,
+                                            style = MaterialTheme.typography.titleLarge,
+                                        )
+                                    }
+                                    IconButton(
+                                        shape = CircleShape,
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                        ),
+                                        onClick = { onFavoriteClick(i, iconMut) }
+                                    ) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                                if (provider.description.isNotEmpty()) {
+                                    Text(
+                                        modifier = Modifier
+                                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 8.dp),
+                                        text = provider.description,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
-                            IconButton(
-                                shape = CircleShape,
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                                ),
-                                onClick = { onFavoriteClick(i, iconMut) }
-                            ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                        if (provider.description.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                text = provider.description,
-                                style = MaterialTheme.typography.bodySmall
-                            )
                         }
                     }
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator(
-                    modifier = Modifier.size(86.dp),
-                    polygons = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons
-                )
             }
         }
     }
@@ -240,10 +262,15 @@ fun ProvidersList(
 fun ProvidersListPreview() {
     val providers = listOf(
         ProviderItem(
+            name = "FictionalProvider",
             description = "This is a placeholder provider, if you see this it's probably in a preview"
         ),
-        ProviderItem(),
-        ProviderItem()
+        ProviderItem(
+            name = "PossibleProvider",
+            ),
+        ProviderItem(
+            name = "A provider that happens to have a really long name that's kinda silly"
+        )
     )
     val savedProviders = emptyList<Int>()
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
@@ -263,10 +290,15 @@ fun ProvidersListPreview() {
 fun ProvidersPagePreview() {
     val providers = listOf(
         ProviderItem(
+            name = "FictionalProvider",
             description = "This is a placeholder provider, if you see this it's probably in a preview"
         ),
-        ProviderItem(),
-        ProviderItem()
+        ProviderItem(
+            name = "PossibleProvider",
+        ),
+        ProviderItem(
+            name = "A provider that happens to have a really long name that's kinda silly"
+        )
     )
     val savedProviders = emptyList<Int>()
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }

@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,8 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -127,11 +131,13 @@ fun HomePageView(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.size(64.dp),
                 onClick = {
                     backStack.add(QrScanner)
                 }
             ) {
                 Icon(
+                    modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
                     imageVector = Icons.Rounded.QrCode,
                     contentDescription = null
                 )
@@ -167,57 +173,66 @@ fun HomePageView(
                             color = MaterialTheme.colorScheme.secondary,
                         )
                     }
-                    if (lastStops.count() > 0) {
-                        items(lastStops.count()) {
-                            val stopItem = lastStops[it]
-                            val shape = listShape(it, lastStops.count())
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp)
-                                    .clip(shape = shape)
-                                    .clickable(
-                                        onClick = { onRecentOpen(stopItem) }
-                                    )
-                                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.62f)
-                                        .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
-                                    text = stopItem.name
-                                        .replace("-", " - ")
-                                        .replace(".", ". ")
-                                        .replace("  ", " "),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                StopEmblemRow(
-                                    modifier = Modifier.padding(end = 12.dp),
-                                    stopItem = stopItem,
-                                    lines = lines
-                                )
-                            }
-                        }
-                    } else {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .height(208.dp)
-                                    .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.extraLarge)
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.noRecentStops),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                    item {
+                        AnimatedContent(lastStops.count()) { count ->
+                            when (count) {
+                                0 -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(208.dp)
+                                            .fillMaxWidth()
+                                            .clip(MaterialTheme.shapes.extraLarge)
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.noRecentStops),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                else -> {
+                                    lastStops.forEach { stopItem ->
+                                        val shape = listShape(lastStops.indexOf(stopItem), lastStops.count())
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 4.dp)
+                                                .clip(shape = shape)
+                                                .clickable(
+                                                    onClick = { onRecentOpen(stopItem) }
+                                                )
+                                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                                .animateItem(
+                                                    fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                                    placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                                    fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                                ),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.62f)
+                                                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
+                                                text = stopItem.name
+                                                    .replace("-", " - ")
+                                                    .replace(".", ". ")
+                                                    .replace("  ", " "),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                fontSize = 16.sp,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                            StopEmblemRow(
+                                                modifier = Modifier.padding(end = 12.dp),
+                                                stopItem = stopItem,
+                                                lines = lines
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.EaseInCirc
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
@@ -39,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
@@ -76,6 +79,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val model = viewModel<MoveViewModel>()
+
+            val sheetState = rememberModalBottomSheetState()
+            val sheetModel = viewModel<SheetStopViewModel>()
+
+            val blur by animateFloatAsState(
+                targetValue = if (sheetModel.showBottomSheet) 20f else 0f,
+                label = "Blur",
+                animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
+            )
+
             MoveTheme {
                 Surface(
                     modifier = Modifier
@@ -83,18 +96,17 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background)
                 ) {
                     if (model.onboardingStatus.collectAsState().value) {
+
                         model.fetchProviders()
-
                         model.fetchInfoForProviders(model.savedProviders.collectAsState().value)
-
-                        val sheetState = rememberModalBottomSheetState()
-                        val sheetModel = viewModel<SheetStopViewModel>()
 
                         val backStack = rememberNavBackStack(MainView)
 
                         val context = LocalContext.current
 
                         NavDisplay(
+                            modifier = Modifier
+                                .blur(blur.dp),
                             backStack = backStack,
                             onBack = { backStack.removeLastOrNull() },
                             transitionSpec = {

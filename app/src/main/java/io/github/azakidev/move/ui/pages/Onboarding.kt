@@ -66,6 +66,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
@@ -223,12 +225,35 @@ fun WelcomePage(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         bottomBar = {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                val uriHandler = LocalUriHandler.current
+                Button(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth(),
+                    onClick = {
+                        uriHandler.openUri("https://themovingteam.github.io/privacy/")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onBackground
+                    )
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.privacyPolicy), fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
                 Button(
                     modifier = Modifier
                         .height(48.dp)
@@ -262,11 +287,11 @@ fun WelcomePage(
                 modifier = Modifier
                     .blur(25.dp)
                     .padding(padding.dp)
-                    .offset((-(size + padding)/2).dp, (-(size + padding)/2).dp)
+                    .offset((-(size + padding) / 2).dp, (-(size + padding) / 2).dp)
                     .size(size.dp)
                     .scale(2f)
                     .aspectRatio(1f)
-                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value/2).toInt()))
+                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 2).toInt()))
                     .background(
                         Color(color.red, color.green, color.blue, .8f)
                     )
@@ -276,11 +301,11 @@ fun WelcomePage(
                 modifier = Modifier
                     .blur(25.dp)
                     .padding(padding.dp)
-                    .offset(((size + padding)/2).dp, ((size + padding)/2).dp)
+                    .offset(((size + padding) / 2).dp, ((size + padding) / 2).dp)
                     .size(size.dp)
                     .scale(2f)
                     .aspectRatio(1f)
-                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value/3).toInt()))
+                    .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 3).toInt()))
                     .background(
                         Color(color.red, color.green, color.blue, .4f)
                     )
@@ -390,8 +415,8 @@ fun FeaturePage(
                     .fillMaxWidth()
                     .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .aspectRatio(16/9f),
-                painter = painterResource(R.drawable.placeholderstop),
+                    .aspectRatio(16 / 9f),
+                painter = painterResource(R.mipmap.placeholderstop),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Feature banner"
             )

@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -116,7 +117,6 @@ fun StopPage(
             ?: ProviderItem()
     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
-//    val nestedScroll = rememberNestedScrollInteropConnection()
     Surface {
         Box(
             modifier = Modifier
@@ -221,8 +221,8 @@ fun StopPagePreview() {
                     .data(imgUrl)
                     .crossfade(true)
                     .build(),
-                placeholder = painterResource(R.drawable.placeholderstop),
-                error = painterResource(R.drawable.placeholderstop),
+                placeholder = painterResource(R.mipmap.placeholderstop),
+                error = painterResource(R.mipmap.placeholderstop),
                 contentScale = ContentScale.Crop,
                 contentDescription = sheetModel.sheetStop.name,
             )
@@ -310,91 +310,98 @@ fun StopPagePreview() {
             color = MaterialTheme.colorScheme.secondary,
         )
         val lineTimes = sheetModel.sheetStop.lineTimes.collectAsState().value
-        if (lineTimes.count() > 0) {
-            Column(
-                modifier = modifier,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                var count = 0
-                lineTimes
-                    .sortedBy { it.nextTimeFirst }
-                    .forEach {
-                        val line =
-                            lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
-                        val provider =
-                            providers.find { providerItem -> providerItem.id == line.provider }
-                                ?: ProviderItem()
+        AnimatedContent(
+            targetState = lineTimes.count(),
+        ) { count ->
+            when (count) {
+                0 -> {
+                    Box(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingIndicator()
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = modifier,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        var count = 0
+                        lineTimes
+                            .sortedBy { it.nextTimeFirst }
+                            .forEach {
+                                val line =
+                                    lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
+                                val provider =
+                                    providers.find { providerItem -> providerItem.id == line.provider }
+                                        ?: ProviderItem()
 
-                        val shape = listShape(count, lineTimes.count())
-                        count++
+                                val shape = listShape(count, lineTimes.count())
+                                count++
 
-                        Box(
-                            modifier = Modifier
-                                .clip(shape)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = 16.dp)
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                    .clip(shape),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Box(
+                                    modifier = Modifier
+                                        .clip(shape)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 ) {
-                                    EmblemShape(
+                                    Row(
                                         modifier = Modifier
-                                            .padding(8.dp)
-                                            .size(48.dp),
-                                        line = line
-                                    )
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(.60f),
-                                        text = line.name
-                                            .replace("-", " - ")
-                                            .replace(".", ". ")
-                                            .replace("  ", " "),
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 2
-                                    )
-                                }
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    val text =
-                                        if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
-                                    Text(
-                                        text = text
-                                    )
-                                    if (provider.capabilities.contains(Capabilities.DoubleTime) and (it.nextTimeSecond != null)) {
-                                        Text(
-                                            text = "/"
-                                        )
-                                        Text(
-                                            text = it.nextTimeSecond.toString() + "m."
-                                        )
+                                            .fillMaxWidth()
+                                            .padding(end = 16.dp)
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .clip(shape),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            EmblemShape(
+                                                modifier = Modifier
+                                                    .padding(8.dp)
+                                                    .size(48.dp),
+                                                line = line
+                                            )
+                                            Text(
+                                                modifier = Modifier.fillMaxWidth(.60f),
+                                                text = line.name
+                                                    .replace("-", " - ")
+                                                    .replace(".", ". ")
+                                                    .replace("  ", " "),
+                                                overflow = TextOverflow.Ellipsis,
+                                                maxLines = 2
+                                            )
+                                        }
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            val text =
+                                                if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
+                                            Text(
+                                                text = text
+                                            )
+                                            if (provider.capabilities.contains(Capabilities.DoubleTime) and (it.nextTimeSecond != null)) {
+                                                Text(
+                                                    text = "/"
+                                                )
+                                                Text(
+                                                    text = it.nextTimeSecond.toString() + "m."
+                                                )
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        }
 
+                            }
                     }
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .height(150.dp)
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator()
+                }
             }
         }
     }
@@ -453,38 +460,45 @@ fun StopPagePreview() {
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.secondary,
         )
-        if (notifications.count() > 0) {
-            var count = 0
-            Column {
-                notifications.forEach {
-                    Row(
+        AnimatedContent(
+            targetState = notifications.count(),
+        ) { count ->
+            when (count) {
+                0 -> {
+                    Box(
                         modifier = Modifier
+                            .height(208.dp)
                             .fillMaxWidth()
-                            .clip(listShape(count, notifications.count()))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = it
+                            text = stringResource(R.string.noAlerts),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    count++
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .height(208.dp)
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.noAlerts),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                else -> {
+                    var count = 0
+                    Column {
+                        notifications.forEach {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(listShape(count, notifications.count()))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(16.dp),
+                                    text = it
+                                )
+                            }
+                            count++
+                        }
+                    }
+                }
             }
         }
     }

@@ -3,8 +3,6 @@ package io.github.azakidev.move.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -16,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
@@ -41,8 +40,9 @@ fun LogoHero(
             ), contentAlignment = Alignment.Center
     ) {
         Icon(
-            modifier = Modifier.size( min(128, (size-60)).dp ),
-            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+            modifier = Modifier
+                    .size( min(256, (size-30)).dp ),
+            painter = painterResource(R.mipmap.logo_arrow),
             contentDescription = null,
             tint = Color.White
         )

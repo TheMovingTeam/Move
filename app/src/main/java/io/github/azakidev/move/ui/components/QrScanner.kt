@@ -1,22 +1,30 @@
 package io.github.azakidev.move.ui.components
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.annotation.OptIn
+import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
+import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -24,6 +32,10 @@ import com.google.mlkit.vision.common.InputImage
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.Capabilities
 import io.github.azakidev.move.data.ProviderItem
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import java.util.concurrent.Executors
 
 class BarcodeAnalyser(
@@ -54,66 +66,81 @@ class BarcodeAnalyser(
     }
 }
 
-@ExperimentalGetImage
+class CameraPreviewViewModel(analyzerCallBack: (String) -> Unit) : ViewModel() {
+
+    private val executor = Executors.newSingleThreadExecutor()
+
+    // Used to set up a link between the Camera and your UI.
+    private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
+    val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
+
+    private val cameraPreviewUseCase = Preview.Builder().build().apply {
+        setSurfaceProvider { newSurfaceRequest ->
+            _surfaceRequest.update { newSurfaceRequest }
+        }
+    }
+
+    private val imageCaptureUseCase = ImageCapture.Builder().build()
+
+    val imageAnalyzerUseCase = ImageAnalysis.Builder().build().also {
+        it.setAnalyzer(executor, BarcodeAnalyser { url ->
+            analyzerCallBack(url)
+        })
+    }
+
+
+    suspend fun bindToCamera(appContext: Context, lifecycleOwner: LifecycleOwner) {
+        val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
+        processCameraProvider.bindToLifecycle(
+            lifecycleOwner,
+            CameraSelector.DEFAULT_BACK_CAMERA,
+            cameraPreviewUseCase,
+            imageCaptureUseCase,
+            imageAnalyzerUseCase
+        )
+
+        // Cancellation signals we're done with the camera
+        try { awaitCancellation() } finally { processCameraProvider.unbindAll() }
+    }
+}
+
 @Composable
-fun QrScanner(
+fun QrScannerViewFinder(
     modifier: Modifier = Modifier,
     providers: List<ProviderItem>,
-    callback: (Pair<Int, ProviderItem>) -> Unit
+    callback: (Pair<Int, ProviderItem>) -> Unit,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 ) {
+    val context = LocalContext.current
     val msg = stringResource(R.string.qrNotFound)
-    AndroidView(
-        { context ->
-            val cameraExecutor = Executors.newSingleThreadExecutor()
-            val previewView = PreviewView(context).also {
-                it.scaleType = PreviewView.ScaleType.FILL_CENTER
-            }
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-            cameraProviderFuture.addListener({
-                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder().build().also {
-                    it.surfaceProvider = previewView.surfaceProvider
-                }
-
-                val imageCapture = ImageCapture.Builder().build()
-
-                val imageAnalyzer = ImageAnalysis.Builder().build().also {
-                    it.setAnalyzer(cameraExecutor, BarcodeAnalyser { url ->
-                        try {
-                            val parsed = parseQr(
-                                providers = providers, url = url
-                            )
-                            callback(parsed)
-                        } catch (e: Exception) {
-                            Log.e("WARNING", "URL not recognized", e)
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                        }
-                    })
-                }
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
+    val viewModel = viewModel {
+        CameraPreviewViewModel(
+            analyzerCallBack = { url ->
                 try {
-                    // Unbind use cases before rebinding
-                    cameraProvider.unbindAll()
-
-                    // Bind use cases to camera
-                    cameraProvider.bindToLifecycle(
-                        context as ComponentActivity,
-                        cameraSelector,
-                        preview,
-                        imageCapture,
-                        imageAnalyzer
+                    val parsed = parseQr(
+                        providers = providers, url = url
                     )
-
-                } catch (exc: Exception) {
-                    Log.e("DEBUG", "Use case binding failed", exc)
+                    callback(parsed)
+                } catch (e: Exception) {
+                    Log.e("WARNING", "URL not recognized", e)
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
-            }, ContextCompat.getMainExecutor(context))
-            previewView
-        }, modifier = modifier
-    )
+            }
+        )
+    }
+    val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
+
+    LaunchedEffect(lifecycleOwner) {
+        viewModel.bindToCamera(context.applicationContext, lifecycleOwner)
+    }
+
+    surfaceRequest?.let { request ->
+        CameraXViewfinder(
+            surfaceRequest = request,
+            modifier = modifier
+        )
+    }
 }
 
 fun parseQr(

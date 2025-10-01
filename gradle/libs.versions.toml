@@ -35,6 +35,7 @@ comGoogleDevtoolsKspGradlePlugin = "2.2.0-2.0.2"
 ksp = "2.2.10-2.0.2"
 roomRuntime = "2.8.0"
 roomCompiler = "2.8.0"
+cameraCompose = "1.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
@@ -82,6 +83,7 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 com-google-devtools-ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "cameraCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

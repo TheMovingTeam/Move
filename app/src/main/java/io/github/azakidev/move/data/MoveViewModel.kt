@@ -375,10 +375,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             } else if (currentLastStops.last() != stopId) {
                 currentLastStops.remove(stopId)
                 _userStore.saveLastStops(currentLastStops)
-                currentLastStops.add(
-                    index = currentLastStops.count(),
-                    element = stopId
-                )
+                currentLastStops += stopId
                 _userStore.saveLastStops(currentLastStops)
             }
             if (currentLastStops.count() > 5) {

@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
@@ -74,42 +77,45 @@ fun FavStopCarousel(
         }
     }
 
-    if (sortedFavStops.count() != 0) {
-        HorizontalCenteredHeroCarousel(
-            state = rememberCarouselState { sortedFavStops.count() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(top = 16.dp, bottom = 16.dp),
-            itemSpacing = 8.dp,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-        ) { i ->
-            val stopItem = sortedFavStops[i]
-            val provider =
-                model.providers.collectAsState().value.find { it -> it.id == stopItem.id }
-                    ?: ProviderItem()
-            val url = "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
-            HeroCarrouselItem(
-                modifier = Modifier
-                    .height(208.dp)
-                    .maskClip(MaterialTheme.shapes.extraLarge)
-                    .clickable(
-                        enabled = true,
-                        onClickLabel = null,
-                        role = Role.Button,
-                        onClick = {
-                            sheetModel.sheetStop = stopItem
-                            sheetModel.showBottomSheet = true
-                        }
-                    ),
-                stopItem = stopItem,
-                lineItems = model.lines.collectAsState().value,
-                imgUrl = url,
-                sheetModel = sheetModel
-            )
+    AnimatedContent(sortedFavStops.count()) { count ->
+        when (count) {
+            0 -> { EmptyCarrousel() }
+            else -> {
+                HorizontalCenteredHeroCarousel(
+                    state = rememberCarouselState { sortedFavStops.count() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(top = 16.dp, bottom = 16.dp),
+                    itemSpacing = 8.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                ) { i ->
+                    val stopItem = sortedFavStops[i]
+                    val provider =
+                        model.providers.collectAsState().value.find { it -> it.id == stopItem.id }
+                            ?: ProviderItem()
+                    val url = "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
+                    HeroCarrouselItem(
+                        modifier = Modifier
+                            .height(208.dp)
+                            .maskClip(MaterialTheme.shapes.extraLarge)
+                            .clickable(
+                                enabled = true,
+                                onClickLabel = null,
+                                role = Role.Button,
+                                onClick = {
+                                    sheetModel.sheetStop = stopItem
+                                    sheetModel.showBottomSheet = true
+                                }
+                            ),
+                        stopItem = stopItem,
+                        lineItems = model.lines.collectAsState().value,
+                        imgUrl = url,
+                        sheetModel = sheetModel
+                    )
+                }
+            }
         }
-    } else {
-        EmptyCarrousel()
     }
 }
 
@@ -119,7 +125,7 @@ fun slowTimer(
 ): TimerTask {
     return Timer().schedule(
         delay = 1000,
-        period = 30000,
+        period = 1000,
         action = {
             model.fetchTimes(stopItem)
         }
@@ -142,6 +148,7 @@ fun fastTimer(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HeroCarrouselItem(
     modifier: Modifier,
@@ -150,13 +157,17 @@ fun HeroCarrouselItem(
     imgUrl: String,
     sheetModel: SheetStopViewModel
 ) {
+    val sortedLineTimes = stopItem.lineTimes.collectAsState().value
+        .sortedBy { it.nextTimeFirst }
+        .take(3)
+        .reversed()
     Box(
         modifier = modifier
     ) {
         Image(
             modifier = Modifier
                 .height(205.dp),
-            painter = painterResource(R.drawable.placeholderstop),
+            painter = painterResource(R.mipmap.placeholderstop),
             contentDescription = stopItem.name,
             contentScale = ContentScale.Crop,
         )
@@ -165,12 +176,12 @@ fun HeroCarrouselItem(
                 .data(imgUrl)
                 .crossfade(true)
                 .build(),
-            placeholder = painterResource(R.drawable.placeholderstop),
-            error = painterResource(R.drawable.placeholderstop),
+            placeholder = painterResource(R.mipmap.placeholderstop),
+            error = painterResource(R.mipmap.placeholderstop),
             contentScale = ContentScale.Crop,
             contentDescription = sheetModel.sheetStop.name,
         )
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
@@ -187,62 +198,67 @@ fun HeroCarrouselItem(
                 alignment = Alignment.Bottom
             ),
         ) {
-            Text(
-                modifier = Modifier
-                    .padding(start = 12.dp, bottom = 4.dp),
-                text = stopItem.name
-                    .replace("-", " - ")
-                    .replace(".", ". ")
-                    .replace("  ", " "),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            stopItem.lineTimes.collectAsState().value
-                .sortedBy { it.nextTimeFirst }
-                .take(3)
-                .reversed()
-                .forEach {
-                    val line = lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
-                    val lineName = line.name
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(start = 12.dp, bottom = 4.dp),
+                    text = stopItem.name
+                        .replace("-", " - ")
+                        .replace(".", ". ")
+                        .replace("  ", " "),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            items(sortedLineTimes.count()) { lineTimeId ->
+                val lineTime = sortedLineTimes[lineTimeId]
+                val line = lineItems.find { lineItem -> lineItem.id == lineTime.lineId } ?: LineItem()
+                val lineName = line.name
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .animateItem(
+                            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                        ),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier.fillMaxWidth(.85f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(.85f),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            EmblemShape(
-                                modifier = Modifier.size(26.dp),
-                                line = line,
-                                textStyle = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = lineName
-                                    .replace("-", " - ")
-                                    .replace(".", ". ")
-                                    .replace("  ", " "),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Light,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        val text = if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
+                        EmblemShape(
+                            modifier = Modifier.size(26.dp),
+                            line = line,
+                            textStyle = MaterialTheme.typography.titleSmall
+                        )
                         Text(
-                            text = text,
+                            text = lineName
+                                .replace("-", " - ")
+                                .replace(".", ". ")
+                                .replace("  ", " "),
                             maxLines = 1,
-                            overflow = TextOverflow.Visible,
-                            textAlign = TextAlign.End,
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Light,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    val text = if (lineTime.nextTimeFirst == 0) stringResource(R.string.soon) else lineTime.nextTimeFirst.toString() + "m."
+                    Text(
+                        text = text,
+                        maxLines = 1,
+                        overflow = TextOverflow.Visible,
+                        textAlign = TextAlign.End,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
+            }
         }
     }
 }

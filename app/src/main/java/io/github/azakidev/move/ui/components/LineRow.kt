@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,12 +32,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.listShape
-import kotlin.math.exp
 
 @Composable
 fun LineEntry(line: LineItem) {
@@ -68,13 +69,15 @@ fun StopEntries(
     isExpanded: Boolean,
     onClick: (StopItem) -> Unit
 ) {
+    val spacialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+    val effectSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     // Opening Animation
     val expandTransition = remember {
         expandVertically(
             expandFrom = Alignment.Top,
-            animationSpec = tween(300)
+            animationSpec = spacialSpec
         ) + fadeIn(
-            animationSpec = tween(300)
+            animationSpec = effectSpec
         )
     }
 
@@ -82,9 +85,9 @@ fun StopEntries(
     val collapseTransition = remember {
         shrinkVertically(
             shrinkTowards = Alignment.Top,
-            animationSpec = tween(300)
+            animationSpec = spacialSpec
         ) + fadeOut(
-            animationSpec = tween(300)
+            animationSpec = effectSpec
         )
     }
 

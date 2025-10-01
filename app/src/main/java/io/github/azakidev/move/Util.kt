@@ -88,8 +88,8 @@ fun parseTimes(
 fun listShape(
     count: Int,
     total: Int,
-    roundingLarge: Dp = 8.dp,
-    roundingSmall: Dp = 2.dp
+    roundingLarge: Dp = 12.dp,
+    roundingSmall: Dp = 4.dp
 ): Shape {
     if (total == 1) {
         return RoundedCornerShape(

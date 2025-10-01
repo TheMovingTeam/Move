@@ -1,6 +1,13 @@
 package io.github.azakidev.move.ui.pages
 
-import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +25,12 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Backspace
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
@@ -28,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -87,33 +100,80 @@ fun LinesPage(
             searchBarState = searchBarState,
             textFieldState = textFieldState,
             onSearch = {
-                scope.launch { searchBarState.animateToCollapsed() }
                 if (textFieldState.text.isNotEmpty()) {
+                    scope.launch { searchBarState.animateToCollapsed() }
                     textFieldState.edit { delete(0, textFieldState.text.length) }
                     sheetModel.sheetStop = stopResults.first()
                     sheetModel.showBottomSheet = true
                 }
             },
             placeholder = {
-                Text(
-                    text = stringResource(R.string.searchPlaceholder)
-                )
+                Text(stringResource(R.string.searchPlaceholder))
             },
             leadingIcon = {
-                if (searchBarState.currentValue == SearchBarValue.Collapsed && !searchBarState.isAnimating) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
+                val isCollapsed =
+                    searchBarState.currentValue == SearchBarValue.Collapsed && !searchBarState.isAnimating
+                AnimatedContent(
+                    targetState = isCollapsed
+                ) { isCollapsed ->
+                    when (isCollapsed) {
+                        true -> {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null
+                            )
+                        }
+
+                        false -> {
+                            IconButton(
+                                onClick = {
+                                    scope.launch { searchBarState.animateToCollapsed() }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            trailingIcon = {
+                val enterTransition = remember {
+                    slideInHorizontally(
+                        initialOffsetX = { it / 2 },
+                        animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+                    ) + fadeIn(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    ) + scaleIn(
+                        initialScale = 0.8f,
+                        animationSpec = MotionScheme.expressive().defaultSpatialSpec()
                     )
-                } else {
+                }
+                val exitTransition = remember {
+                    slideOutHorizontally(
+                        targetOffsetX = { it / 2 },
+                        animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+                    ) + fadeOut(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    ) + scaleOut(
+                        targetScale = 0.8f,
+                        animationSpec = MotionScheme.expressive().defaultSpatialSpec()
+                    )
+                }
+                AnimatedVisibility(
+                    visible = (searchBarState.currentValue != SearchBarValue.Collapsed && !searchBarState.isAnimating),
+                    enter = enterTransition,
+                    exit = exitTransition
+                ) {
                     IconButton(
                         onClick = {
                             textFieldState.edit { delete(0, textFieldState.text.length) }
-                            scope.launch { searchBarState.animateToCollapsed() }
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Rounded.Backspace,
                             contentDescription = "Back"
                         )
                     }
@@ -145,7 +205,16 @@ fun LinesPage(
                         if (stopResults.count() != 0) {
                             item {
                                 Text(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = 16.dp,
+                                            vertical = 4.dp
+                                        )
+                                        .animateItem(
+                                            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                        ),
                                     text = stringResource(id = R.string.stops),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
@@ -156,7 +225,13 @@ fun LinesPage(
                                 val shape = listShape(it, stopResults.count())
                                 val result = stopResults[it]
                                 SearchResultStop(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateItem(
+                                            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                        ),
                                     stopItem = result,
                                     lines = model.lines.collectAsState().value,
                                     shape = shape,
@@ -164,7 +239,12 @@ fun LinesPage(
                                         sheetModel.sheetStop = result
                                         sheetModel.showBottomSheet = true
                                         model.saveLastStop(sheetModel.sheetStop.id)
-                                        textFieldState.edit { delete(0, textFieldState.text.length) }
+                                        textFieldState.edit {
+                                            delete(
+                                                0,
+                                                textFieldState.text.length
+                                            )
+                                        }
                                         scope.launch { searchBarState.animateToCollapsed() }
                                     }
                                 )
@@ -173,7 +253,16 @@ fun LinesPage(
                         if (lineResults.count() != 0) {
                             item {
                                 Text(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = 16.dp,
+                                            vertical = 4.dp
+                                        )
+                                        .animateItem(
+                                            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                        ),
                                     text = stringResource(id = R.string.lines),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
@@ -185,7 +274,12 @@ fun LinesPage(
                                 val expanded = remember { mutableStateOf(true) }
                                 val result = lineResults[it]
                                 LineRow(
-                                    modifier = Modifier,
+                                    modifier = Modifier
+                                        .animateItem(
+                                            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                        ),
                                     lineItem = result,
                                     lines = model.lines.collectAsState().value,
                                     stops = model.stops.collectAsState().value,
@@ -197,7 +291,12 @@ fun LinesPage(
                                         sheetModel.sheetStop = stopItem
                                         sheetModel.showBottomSheet = true
                                         model.saveLastStop(sheetModel.sheetStop.id)
-                                        textFieldState.edit { delete(0, textFieldState.text.length) }
+                                        textFieldState.edit {
+                                            delete(
+                                                0,
+                                                textFieldState.text.length
+                                            )
+                                        }
                                         scope.launch { searchBarState.animateToCollapsed() }
                                     }
                                 )
@@ -206,7 +305,13 @@ fun LinesPage(
 
                         if (stopResults.count() + lineResults.count() == 0) {
                             item {
-                                SearchNoResults()
+                                SearchNoResults(
+                                    modifier = Modifier.animateItem(
+                                        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                                        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                                    )
+                                )
                             }
                         }
                     }
@@ -237,10 +342,13 @@ fun LinesPage(
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable @Preview
-fun SearchNoResults() {
+@Composable
+@Preview
+fun SearchNoResults(
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -311,7 +419,7 @@ fun SearchResultStop(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LineList(
     modifier: Modifier = Modifier,
@@ -328,7 +436,13 @@ fun LineList(
             val expanded = rememberSaveable { mutableStateOf(false) }
             val shape = listShape(it, lineItems.count())
             LineRow(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .animateItem(
+                        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                    ),
                 stops = stopItems,
                 lines = lineItems,
                 lineItem = lineItem,

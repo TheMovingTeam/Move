@@ -34,12 +34,21 @@
     <string name="soon">Soon</string>
     <string name="alerts">Alerts</string>
     <string name="noAlerts">There are no alerts for this stop</string>
+    <string name="privacyPolicy">Privacy Policy</string>
 
     <string-array name="greetings">
         <item>Going somewhere?</item>
         <item>Let\'s go!</item>
         <item>Doing something?</item>
         <item>Let\'s get moving</item>
+        <item>Nice weather, huh?</item>
+        <item>Looking for something?</item>
+        <item>Move it, Move it</item>
+        <item>Where to next?</item>
+        <item>Let\'s ride!</item>
+        <item>On the move again?</item>
+        <item>Hey there, traveler!</item>
+        <item>What\'s the plan?</item>
     </string-array>
     <string-array name="onboardingTitles">
         <item>All about providers</item>
