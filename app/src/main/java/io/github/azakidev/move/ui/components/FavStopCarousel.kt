@@ -167,7 +167,7 @@ fun HeroCarrouselItem(
                 .data(imgUrl)
                 .crossfade(true)
                 .build(),
-            placeholder = painterResource(R.drawable.banner),
+            placeholder = painterResource(R.drawable.placeholder_banner),
             error = painterResource(R.drawable.banner),
             contentScale = ContentScale.Crop,
             contentDescription = sheetModel.sheetStop.name,
