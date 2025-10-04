@@ -1,12 +1,10 @@
 package io.github.azakidev.move.ui.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -164,20 +162,13 @@ fun HeroCarrouselItem(
     Box(
         modifier = modifier
     ) {
-        Image(
-            modifier = Modifier
-                .height(205.dp),
-            painter = painterResource(R.mipmap.placeholderstop),
-            contentDescription = stopItem.name,
-            contentScale = ContentScale.Crop,
-        )
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imgUrl)
                 .crossfade(true)
                 .build(),
-            placeholder = painterResource(R.drawable.placeholder),
-            error = painterResource(R.drawable.placeholder),
+            placeholder = painterResource(R.drawable.banner),
+            error = painterResource(R.drawable.banner),
             contentScale = ContentScale.Crop,
             contentDescription = sheetModel.sheetStop.name,
         )

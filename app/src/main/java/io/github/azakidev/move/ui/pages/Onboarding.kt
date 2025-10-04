@@ -422,7 +422,7 @@ fun FeaturePage(
         ) {
             Image(
                 modifier = Modifier.matchParentSize(),
-                painter = painterResource(R.drawable.placeholder),
+                painter = painterResource(R.drawable.banner),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )
@@ -543,7 +543,7 @@ fun FeaturePage(
                         .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                         .clip(MaterialTheme.shapes.large)
                         .aspectRatio(16 / 9f),
-                    painter = painterResource(R.drawable.placeholder),
+                    painter = painterResource(R.drawable.banner),
                     contentScale = ContentScale.Crop,
                     contentDescription = null
                 )
@@ -741,7 +741,7 @@ fun ProviderContent(
         ) {
             Image(
                 modifier = Modifier.matchParentSize(),
-                painter = painterResource(R.drawable.placeholder),
+                painter = painterResource(R.drawable.banner),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )

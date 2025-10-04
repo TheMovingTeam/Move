@@ -219,8 +219,8 @@ fun ProvidersList(
                                                 .data(imgUrl)
                                                 .crossfade(true)
                                                 .build(),
-                                            placeholder = painterResource(R.mipmap.placeholderstop),
-                                            error = painterResource(R.mipmap.placeholderstop),
+                                            placeholder = painterResource(R.drawable.placeholder_provider),
+                                            error = painterResource(R.drawable.placeholder_provider),
                                             contentScale = ContentScale.Crop,
                                             contentDescription = provider.name,
                                         )
