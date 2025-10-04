@@ -29,7 +29,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -50,6 +53,7 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -61,19 +65,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -82,6 +88,7 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.R
 import io.github.azakidev.move.Settings
 import io.github.azakidev.move.data.MoveViewModel
@@ -196,11 +203,12 @@ fun OnboardingPage(model: MoveViewModel) {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-@Preview
 fun WelcomePage(
-    onNext: () -> Unit = {}
+    initialRevealed: Boolean = false,
+    onNext: () -> Unit
 ) {
-    val revealed = rememberSaveable { mutableStateOf(false) }
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val revealed = rememberSaveable { mutableStateOf(initialRevealed) }
     val blur by animateFloatAsState(
         targetValue = if (revealed.value) 0f else 20f,
         label = "Blur",
@@ -220,6 +228,13 @@ fun WelcomePage(
         revealed.value = true
     })
 
+    val modifier =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            Modifier.width((windowSizeClass.minWidthDp / 1.75).dp)
+        } else {
+            Modifier.fillMaxWidth()
+        }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -234,9 +249,8 @@ fun WelcomePage(
             ) {
                 val uriHandler = LocalUriHandler.current
                 Button(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .fillMaxWidth(),
+                    modifier = modifier
+                        .height(48.dp),
                     onClick = {
                         uriHandler.openUri("https://themovingteam.github.io/privacy/")
                     },
@@ -250,14 +264,14 @@ fun WelcomePage(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.privacyPolicy), fontWeight = FontWeight.SemiBold
+                            text = stringResource(R.string.privacyPolicy),
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
                 Button(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .fillMaxWidth(),
+                    modifier = modifier
+                        .height(48.dp),
                     onClick = onNext,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(R.color.purple_brand),
@@ -275,12 +289,18 @@ fun WelcomePage(
                 }
             }
         }) { paddingValues ->
+        val scale =
+            if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                1.25f
+            } else {
+                1f
+            }
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(-1f)
         ) {
-            val size = 200
+            val size = 200f * scale
             val padding = 40
             val color = colorResource(R.color.purple_shadow)
             Box(
@@ -289,7 +309,7 @@ fun WelcomePage(
                     .padding(padding.dp)
                     .offset((-(size + padding) / 2).dp, (-(size + padding) / 2).dp)
                     .size(size.dp)
-                    .scale(2f)
+                    .scale(scale * 2f)
                     .aspectRatio(1f)
                     .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 2).toInt()))
                     .background(
@@ -303,7 +323,7 @@ fun WelcomePage(
                     .padding(padding.dp)
                     .offset(((size + padding) / 2).dp, ((size + padding) / 2).dp)
                     .size(size.dp)
-                    .scale(2f)
+                    .scale(scale * 2f)
                     .aspectRatio(1f)
                     .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 3).toInt()))
                     .background(
@@ -318,10 +338,9 @@ fun WelcomePage(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+            Column( horizontalAlignment = Alignment.CenterHorizontally) {
                 LogoHero(
+                    size = (208 * scale).toInt(),
                     shapeAngle = shapeAngle.value.toInt()
                 )
                 AnimatedVisibility(
@@ -363,80 +382,220 @@ fun WelcomePage(
 
 @Composable
 @Preview
+fun WelcomePagePreview() {
+    WelcomePage(
+        initialRevealed = true,
+        onNext = {}
+    )
+}
+
+@Composable
+@Preview(device = PIXEL_FOLD, showSystemUi = true)
+fun WelcomeMediumPagePreview() {
+    WelcomePage(
+        initialRevealed = true,
+        onNext = {}
+    )
+}
+
+@Composable
+@Preview(device = PIXEL_TABLET, showSystemUi = true)
+fun WelcomeWidePagePreview() {
+    WelcomePage(
+        initialRevealed = true,
+        onNext = {}
+    )
+}
+
+@Composable
 fun FeaturePage(
-    onBack: () -> Unit = {}, onNext: () -> Unit = {}
+    onBack: () -> Unit,
+    onNext: () -> Unit
 ) {
     val entryTitles = stringArrayResource(R.array.onboardingTitles)
     val entryDescriptions = stringArrayResource(R.array.onboardingDescriptions)
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    modifier = Modifier.size(48.dp),
-                    onClick = onBack,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back"
-                    )
-                }
-                IconButton(
-                    modifier = Modifier.size(48.dp),
-                    onClick = onNext,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Next"
-                    )
-                }
-            }
-        }) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
         ) {
             Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, start = 8.dp, end = 8.dp)
-                    .clip(MaterialTheme.shapes.large)
-                    .aspectRatio(16 / 9f),
+                modifier = Modifier.matchParentSize(),
                 painter = painterResource(R.drawable.placeholder),
                 contentScale = ContentScale.Crop,
-                contentDescription = "Feature banner"
+                contentDescription = null
             )
-            Text(
-                modifier = Modifier.padding(vertical = (12-4).dp),
-                text = stringResource(R.string.whatIsMove),
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            entryTitles.forEach {
-                ExplainingRow(
-                    index = entryTitles.indexOf(it) + 1,
-                    shape = listShape(entryTitles.indexOf(it), entryTitles.count()),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    title = it,
-                    description = entryDescriptions[entryTitles.indexOf(it)]
+            Scaffold(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 64.dp)
+                    .width((windowSizeClass.minWidthDp / 2).dp)
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(MaterialTheme.colorScheme.background)
+                    .shadow(4.dp),
+                bottomBar = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(
+                            modifier = Modifier.size(48.dp),
+                            onClick = onBack,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back"
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier.size(48.dp),
+                            onClick = onNext,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Next"
+                            )
+                        }
+                    }
+                }) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        text = stringResource(R.string.whatIsMove),
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(entryTitles.count()) { i ->
+                            ExplainingRow(
+                                index = i + 1,
+                                shape = listShape(i, entryTitles.count()),
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                title = entryTitles[i],
+                                description = entryDescriptions[i]
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(
+                        modifier = Modifier.size(48.dp),
+                        onClick = onBack,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back"
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(48.dp),
+                        onClick = onNext,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Next"
+                        )
+                    }
+                }
+            }) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .aspectRatio(16 / 9f),
+                    painter = painterResource(R.drawable.placeholder),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
                 )
+                Text(
+                    modifier = Modifier.padding(vertical = (12 - 4).dp),
+                    text = stringResource(R.string.whatIsMove),
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(entryTitles.count()) { i ->
+                        ExplainingRow(
+                            index = i + 1,
+                            shape = listShape(i, entryTitles.count()),
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            title = entryTitles[i],
+                            description = entryDescriptions[i]
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+@Preview
+fun FeaturePagePreview() {
+    FeaturePage(
+        onBack = {},
+        onNext = {}
+    )
+}
+
+@Composable
+@Preview(device = PIXEL_FOLD, showSystemUi = true)
+fun FeatureMediumPagePreview() {
+    FeaturePage(
+        onBack = {},
+        onNext = {}
+    )
+}
+
+@Composable
+@Preview(device = PIXEL_TABLET, showSystemUi = true)
+fun FeatureWidePagePreview() {
+    FeaturePage(
+        onBack = {},
+        onNext = {}
+    )
 }
 
 @Composable
@@ -506,7 +665,10 @@ fun ExplainingRowPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPage(
-    model: MoveViewModel, onBack: () -> Unit = {}, onEnd: () -> Unit = {}, onSettings: () -> Unit
+    model: MoveViewModel,
+    onBack: () -> Unit = {},
+    onEnd: () -> Unit = {},
+    onSettings: () -> Unit
 ) {
     var shouldLoad = model.providers.collectAsState().value.count() == 0
 
@@ -547,15 +709,16 @@ fun ProviderPage(
                 savedProviders = model.savedProviders.collectAsState().value,
                 onFavoriteClick = onFavoriteClick
             )
-        })
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderContent(
-    onBack: () -> Unit = {},
-    onEnd: () -> Unit = {},
-    onSettings: () -> Unit = {},
+    onBack: () -> Unit,
+    onEnd: () -> Unit,
+    onSettings: () -> Unit,
     providerCount: Int,
     providerList: @Composable (() -> Unit)
 ) {
@@ -569,71 +732,158 @@ fun ProviderContent(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        topBar = {
-            TopAppBar(
-                scrollBehavior = null,
-                title = {
-                    Text(
-                        text = stringResource(R.string.chooseProvider),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
+    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            Image(
+                modifier = Modifier.matchParentSize(),
+                painter = painterResource(R.drawable.placeholder),
+                contentScale = ContentScale.Crop,
+                contentDescription = null
+            )
+            Scaffold(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 64.dp)
+                    .width((windowSizeClass.minWidthDp / 2).dp)
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .background(MaterialTheme.colorScheme.background)
+                    .shadow(4.dp),
+                topBar = {
+                    TopAppBar(
+                        scrollBehavior = null,
+                        title = {
+                            Text(
+                                text = stringResource(R.string.chooseProvider),
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = onSettings
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Settings,
+                                    contentDescription = stringResource(R.string.settings)
+                                )
+                            }
+                        }
                     )
                 },
-                actions = {
+                bottomBar = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(
+                            modifier = Modifier.size(48.dp),
+                            onClick = onBack,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier.size(48.dp),
+                            onClick = onEnd,
+                            enabled = providerCount > 0,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = color, contentColor = iconColor
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check, contentDescription = "Done"
+                            )
+                        }
+                    }
+                }) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                ) {
+                    providerList()
+                }
+            }
+        }
+    } else {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            topBar = {
+                TopAppBar(
+                    scrollBehavior = null,
+                    title = {
+                        Text(
+                            text = stringResource(R.string.chooseProvider),
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = onSettings
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
+                                contentDescription = stringResource(R.string.settings)
+                            )
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     IconButton(
-                        onClick = onSettings
+                        modifier = Modifier.size(48.dp),
+                        onClick = onBack,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Settings,
-                            contentDescription = stringResource(R.string.settings)
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.size(48.dp),
+                        onClick = onEnd,
+                        enabled = providerCount > 0,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = color, contentColor = iconColor
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check, contentDescription = "Done"
                         )
                     }
                 }
-            )
-        },
-        bottomBar = {
-            Row(
+            }) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .fillMaxSize()
+                    .padding(paddingValues),
             ) {
-                IconButton(
-                    modifier = Modifier.size(48.dp),
-                    onClick = onBack,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-                IconButton(
-                    modifier = Modifier.size(48.dp),
-                    onClick = onEnd,
-                    enabled = providerCount > 0,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = color, contentColor = iconColor
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check, contentDescription = "Done"
-                    )
-                }
+                providerList()
             }
-        }) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            providerList()
         }
     }
 }
@@ -642,7 +892,36 @@ fun ProviderContent(
 @Preview
 fun ProviderPagePreview() {
     ProviderContent(
-        providerCount = 0
+        providerCount = 0,
+        onBack = {},
+        onEnd = {},
+        onSettings = {},
+    ) {
+        ProvidersListPreview()
+    }
+}
+
+@Composable
+@Preview(device = PIXEL_FOLD, showSystemUi = true)
+fun ProviderMediumPagePreview() {
+    ProviderContent(
+        providerCount = 0,
+        onBack = {},
+        onEnd = {},
+        onSettings = {},
+    ) {
+        ProvidersListPreview()
+    }
+}
+
+@Composable
+@Preview(device = PIXEL_TABLET, showSystemUi = true)
+fun ProviderWidePagePreview() {
+    ProviderContent(
+        providerCount = 0,
+        onBack = {},
+        onEnd = {},
+        onSettings = {},
     ) {
         ProvidersListPreview()
     }
