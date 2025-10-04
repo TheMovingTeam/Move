@@ -176,6 +176,11 @@ fun ProvidersList(
                     ) {
                         items(visibleProviders.count()) { i ->
                             val provider = visibleProviders[i]
+                            val id = if (!BuildConfig.APPLICATION_ID.contains("debug")) {
+                                i+1
+                            } else {
+                                i
+                            }
                             val shape = listShape(i, providers.count())
                             val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
                             var icon = iconMut.collectAsState().value
@@ -232,7 +237,7 @@ fun ProvidersList(
                                         colors = IconButtonDefaults.iconButtonColors(
                                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                                         ),
-                                        onClick = { onFavoriteClick(i, iconMut) }
+                                        onClick = { onFavoriteClick(id, iconMut) }
                                     ) {
                                         Icon(
                                             imageVector = icon,

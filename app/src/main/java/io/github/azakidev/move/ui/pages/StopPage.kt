@@ -221,8 +221,8 @@ fun StopPagePreview() {
                     .data(imgUrl)
                     .crossfade(true)
                     .build(),
-                placeholder = painterResource(R.mipmap.placeholderstop),
-                error = painterResource(R.mipmap.placeholderstop),
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder),
                 contentScale = ContentScale.Crop,
                 contentDescription = sheetModel.sheetStop.name,
             )

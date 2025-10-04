@@ -348,7 +348,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addFavStop(stopId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
             if (!currentFavStops.contains(stopId)) {
                 currentFavStops.add(stopId)
@@ -358,7 +358,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun removeFavStop(stopId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
             if (currentFavStops.remove(stopId)) {
                 _userStore.saveFavouriteStops(currentFavStops)
@@ -367,7 +367,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun saveLastStop(stopId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentLastStops = lastStops.value.toMutableList()
             if (!currentLastStops.contains(stopId)) {
                 currentLastStops.add(stopId)
@@ -386,7 +386,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearLastStops() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _userStore.saveLastStops(emptyList())
         }
     }

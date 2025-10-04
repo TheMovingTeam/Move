@@ -416,7 +416,7 @@ fun FeaturePage(
                     .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                     .clip(MaterialTheme.shapes.large)
                     .aspectRatio(16 / 9f),
-                painter = painterResource(R.mipmap.placeholderstop),
+                painter = painterResource(R.drawable.placeholder),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Feature banner"
             )
