@@ -10,9 +10,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.data.providers.VectaliaResponse
 import io.github.azakidev.move.data.providers.parseTramResponse
-import io.github.azakidev.move.data.providers.parseVectaliaResponse
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
 
