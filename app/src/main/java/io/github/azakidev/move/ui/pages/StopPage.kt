@@ -217,6 +217,7 @@ fun StopPagePreview() {
                 .aspectRatio(16 / 9f)
         ) {
             AsyncImage(
+                modifier = Modifier.matchParentSize(),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imgUrl)
                     .crossfade(true)

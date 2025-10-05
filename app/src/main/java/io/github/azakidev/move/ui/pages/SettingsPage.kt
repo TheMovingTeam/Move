@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -147,7 +146,7 @@ fun SettingsPage(
             ProviderSection(
                 state,
                 providerRepo,
-                onProviderReset,
+                onClick = onProviderReset,
                 onBack = {
                     backStack.add(Providers)
                 },
@@ -273,7 +272,9 @@ fun ProviderSection(
                         exit = exitTransition
                     ) {
                         IconButton(
-                            onClick = { onClick(state.text.toString()) }
+                            onClick = {
+                                onClick(state.text.toString())
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Save,

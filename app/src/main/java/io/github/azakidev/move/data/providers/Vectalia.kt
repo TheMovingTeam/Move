@@ -2,6 +2,8 @@ package io.github.azakidev.move.data.providers
 
 import android.util.Log
 import android.util.Xml
+import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.LineTime
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -74,4 +76,29 @@ fun parseVectaliaResponse(xmlString: String): List<VectaliaResponse> {
         eventType = parser.next()
     }
     return estimations
+}
+
+fun parseVectaliaTimes(
+    response:String,
+    lines: List<LineItem>
+): List<LineTime> {
+    val estimations = parseVectaliaResponse(response)
+    val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
+        val matchingLine = lines.find { line ->
+            line.name.equals(estimation.destination, ignoreCase = true) ||
+                    line.emblem == estimation.lineEmblem // Fallback or additional check using emblem
+        }
+        val time =
+            if ((matchingLine != null) && (estimation.firstEstimateSeconds != null)) {
+                LineTime(
+                    lineId = matchingLine.id,
+                    nextTimeFirst = estimation.firstEstimateSeconds.div(60),
+                    nextTimeSecond = estimation.secondEstimateSeconds?.div(60)
+                )
+            } else {
+                null
+            }
+        time
+    }
+    return timeList
 }

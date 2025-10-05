@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.data.db.toLineEntity
 import io.github.azakidev.move.data.db.toLineItem
@@ -40,7 +41,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), // Keep active for 5s after last subscriber
-            initialValue = "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main" // Initial fallback
+            initialValue = if (BuildConfig.APPLICATION_ID.contains("debug")) // Initial fallback
+                "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/testing"
+            else "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
         )
     var providerRepo: MutableState<String> = mutableStateOf(_providerRepo.value)
     private val _providers: MutableStateFlow<List<ProviderItem>> = MutableStateFlow(emptyList())
@@ -413,13 +416,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun saveRepo(url: String) {
-        if (tryRepo(url)) {
-            viewModelScope.launch {
-                _userStore.saveProviderRepoUrl(url)
-            }
-        } else {
-            // Handle invalid repo URL (e.g., show an error message)
-            Log.e("Error", "Attempted to save invalid repo URL: $url")
+        println(url)
+        viewModelScope.launch {
+            _userStore.saveProviderRepoUrl(url)
         }
     }
 

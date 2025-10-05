@@ -11,7 +11,9 @@ import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.data.providers.VectaliaResponse
+import io.github.azakidev.move.data.providers.parseTramResponse
 import io.github.azakidev.move.data.providers.parseVectaliaResponse
+import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -49,8 +51,8 @@ fun parseTimes(
         }
 
         "Vectalia Alicante" -> {
-            val estimations: List<VectaliaResponse> = try {
-                parseVectaliaResponse(response)
+            val estimations: List<LineTime> = try {
+                parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
                     "MoveViewModel",
@@ -59,24 +61,21 @@ fun parseTimes(
                 )
                 return null
             }
-            val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
-                val matchingLine = lines.find { line ->
-                    line.name.equals(estimation.destination, ignoreCase = true) ||
-                            line.emblem == estimation.lineEmblem // Fallback or additional check using emblem
-                }
-                val time =
-                    if ((matchingLine != null) && (estimation.firstEstimateSeconds != null)) {
-                        LineTime(
-                            lineId = matchingLine.id,
-                            nextTimeFirst = estimation.firstEstimateSeconds.div(60),
-                            nextTimeSecond = estimation.secondEstimateSeconds?.div(60)
-                        )
-                    } else {
-                        null
-                    }
-                time
+            return estimations
+        }
+
+        "Tram Alacant" -> {
+            val estimations: List<LineTime> = try {
+                parseTramResponse(response)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Tram Alacant times in ${e.message}",
+                    e
+                )
+                return null
             }
-            return timeList
+            return estimations
         }
 
         else -> {

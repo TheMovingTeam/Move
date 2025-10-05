@@ -163,6 +163,7 @@ fun HeroCarrouselItem(
         modifier = modifier
     ) {
         AsyncImage(
+            modifier = Modifier.matchParentSize(),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imgUrl)
                 .crossfade(true)

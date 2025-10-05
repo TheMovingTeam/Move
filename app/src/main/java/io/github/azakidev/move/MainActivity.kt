@@ -159,10 +159,7 @@ class MainActivity : ComponentActivity() {
                                         model.providerRepo,
                                         backStack,
                                         onProviderReset = { url ->
-                                            if (URLUtil.isValidUrl(url) && model.tryRepo(
-                                                    url
-                                                )
-                                            ) {
+                                            if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
                                                 model.saveRepo(url)
                                                 model.flushInfo()
                                             } else {
