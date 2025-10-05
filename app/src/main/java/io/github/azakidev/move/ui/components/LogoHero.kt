@@ -42,7 +42,7 @@ fun LogoHero(
         Icon(
             modifier = Modifier
                     .size( min(256, (size-30)).dp ),
-            painter = painterResource(R.mipmap.logo_arrow),
+            painter = painterResource(R.drawable.logo_arrow),
             contentDescription = null,
             tint = Color.White
         )

@@ -26,11 +26,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Backspace
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.Backspace
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
@@ -92,7 +88,7 @@ fun LinesPage(
     val lineResults = model.lines.collectAsState().value.filter {
         val name = it.name.lowercase().replace(" ", "")
         val text = textFieldState.text.toString().lowercase().replace(" ", "")
-        name.contains(text) || (it.emblem.contains(text))
+        name.contains(text) || (it.emblem.lowercase().contains(text))
     }
 
     val inputField = @Composable {
