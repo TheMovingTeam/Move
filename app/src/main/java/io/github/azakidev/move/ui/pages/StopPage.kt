@@ -371,7 +371,7 @@ fun StopPagePreview() {
                                             )
                                             Text(
                                                 modifier = Modifier.fillMaxWidth(.60f),
-                                                text = line.name
+                                                text = (it.destination ?: line.name)
                                                     .replace("-", " - ")
                                                     .replace(".", ". ")
                                                     .replace("  ", " "),

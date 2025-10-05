@@ -30,21 +30,30 @@ data class TramTrain(
 
 fun parseTramResponse(response: String): List<LineTime> {
     val responseJson = Json.decodeFromString<TramResponse>(response)
-    val estimates = responseJson.previsiones.map { it.trains }.flatten().groupBy { it.id }
+    val estimatesByDestination = responseJson.previsiones.map { it.trains }.flatten().groupBy { it.destino }
 
-    return estimates.map { (key, value) ->
-        if (value.count() >= 2) {
-            LineTime(
-                lineId = key,
-                nextTimeFirst = value[0].seconds / 60,
-                nextTimeSecond = value[1].seconds / 60
-            )
-        } else {
-            LineTime(
-                lineId = key,
-                nextTimeFirst = value[0].seconds / 60,
-                nextTimeSecond = null
-            )
+    val response = mutableListOf<LineTime>()
+
+    estimatesByDestination.forEach { (_, value) ->
+        val estimates = value.groupBy { it.id }
+        println(estimates)
+        response += estimates.map { (key, value) ->
+            if (value.count() >= 2) {
+                LineTime(
+                    lineId = key,
+                    destination = value[0].destino,
+                    nextTimeFirst = value[0].seconds / 60,
+                    nextTimeSecond = value[1].seconds / 60
+                )
+            } else {
+                LineTime(
+                    lineId = key,
+                    destination = value[0].destino,
+                    nextTimeFirst = value[0].seconds / 60,
+                    nextTimeSecond = null
+                )
+            }
         }
     }
+    return response
 }

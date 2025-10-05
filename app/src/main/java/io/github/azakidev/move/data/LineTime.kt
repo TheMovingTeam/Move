@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class LineTime(
     val lineId: Int = 0,
     var nextTimeFirst: Int = 0,
-    var nextTimeSecond: Int? = null
+    var nextTimeSecond: Int? = null,
+    val destination: String? = null
 )

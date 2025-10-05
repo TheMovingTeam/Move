@@ -229,7 +229,7 @@ fun HeroCarrouselItem(
                             textStyle = MaterialTheme.typography.titleSmall
                         )
                         Text(
-                            text = lineName
+                            text = (lineTime.destination ?: line.name)
                                 .replace("-", " - ")
                                 .replace(".", ". ")
                                 .replace("  ", " "),
