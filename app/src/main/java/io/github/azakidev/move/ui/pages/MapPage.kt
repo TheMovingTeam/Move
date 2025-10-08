@@ -1,7 +1,9 @@
 package io.github.azakidev.move.ui.pages
 
+import android.Manifest
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.content.pm.PackageManager
+import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,42 +35,74 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.utsman.osmandcompose.CameraProperty
-import com.utsman.osmandcompose.CameraState
+import androidx.core.app.ActivityCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.utsman.osmandcompose.DefaultMapProperties
 import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.ZoomButtonVisibility
+import com.utsman.osmandcompose.rememberCameraState
 import io.github.azakidev.move.R
 import kotlinx.coroutines.launch
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalPermissionsApi::class
+)
 @Composable
-@Preview
-fun MapPage() {
+fun MapPage(
+    fusedLocationProviderClient: FusedLocationProviderClient
+) {
     val context = LocalContext.current.applicationContext
-    var cameraState by remember {
-        mutableStateOf(
-            CameraState(
-                CameraProperty(
-                    geoPoint = GeoPoint(0.0, 0.0), zoom = 14.0
+
+    val locationFinePermissionState = rememberPermissionState(
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+
+    var lat = 0.0
+    var lon = 0.0
+
+    LaunchedEffect(key1 = null) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationFinePermissionState.launchPermissionRequest()
+        }
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                lat = location.latitude
+                lon = location.longitude
+            }
+        }
+    }
+
+    val cameraState = rememberCameraState {
+        geoPoint = GeoPoint(lat, lon)
+        zoom = 20.0
+    }
+
+    LaunchedEffect(key1 = null) {
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                lat = location.latitude
+                lon = location.longitude
+                cameraState.animateTo(
+                    point = GeoPoint(lat, lon),
+                    pZoom = 20.0
                 )
-            )
-        )
+            }
+        }
     }
-    LaunchedEffect(cameraState.zoom) {
-        val zoom = cameraState.zoom
-        val geoPoint = cameraState.geoPoint
-        cameraState = CameraState(
-            CameraProperty(
-                geoPoint = geoPoint, zoom = zoom
-            )
-        )
-    }
+
     var mapProperties by remember { mutableStateOf(DefaultMapProperties) }
 
     val textFieldState = rememberTextFieldState()
@@ -89,10 +123,13 @@ fun MapPage() {
     }
 
     SideEffect {
-        mapProperties = mapProperties.copy(tileSources = TileSourceFactory.MAPNIK)
-            .copy(isEnableRotationGesture = false)
-            .copy(zoomButtonVisibility = ZoomButtonVisibility.NEVER).copy(isFlingEnable = true)
-            .copy(isAnimating = false).copy(minZoomLevel = 5.0)
+        mapProperties = mapProperties
+            .copy(tileSources = TileSourceFactory.MAPNIK)
+            .copy(isEnableRotationGesture = true)
+            .copy(zoomButtonVisibility = ZoomButtonVisibility.NEVER)
+            .copy(isFlingEnable = true)
+            .copy(isAnimating = false)
+            .copy(minZoomLevel = 5.0)
     }
     Scaffold(
         topBar = {
@@ -110,10 +147,21 @@ fun MapPage() {
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.padding(8.dp),
-                onClick = { Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show() },
                 shape = FloatingActionButtonDefaults.largeShape,
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = {
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
+                        location?.let {
+                            lat = location.latitude
+                            lon = location.longitude
+                            cameraState.animateTo(
+                                point = GeoPoint(lat, lon),
+                                pZoom = 20.0
+                            )
+                        }
+                    }
+                }
             ) {
                 Icon(
                     modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
@@ -129,7 +177,8 @@ fun MapPage() {
             OpenStreetMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraState = cameraState,
-                properties = mapProperties
+                properties = mapProperties,
+
             )
         }
     }

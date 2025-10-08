@@ -10,7 +10,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.data.providers.parseTramResponse
+import io.github.azakidev.move.data.providers.parseFGVResponse
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
 
@@ -64,11 +64,25 @@ fun parseTimes(
 
         "Tram Alacant" -> {
             val estimations: List<LineTime> = try {
-                parseTramResponse(response)
+                parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
                     "MoveViewModel",
                     "Couldn't parse Tram Alacant times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Metrovalencia" -> {
+            val estimations: List<LineTime> = try {
+                parseFGVResponse(response)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Metrovalencia times in ${e.message}",
                     e
                 )
                 return null

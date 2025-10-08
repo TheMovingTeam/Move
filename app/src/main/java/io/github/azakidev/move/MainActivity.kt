@@ -7,10 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
@@ -22,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -47,7 +51,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,24 +60,28 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.ui.pages.HomePage
-import io.github.azakidev.move.ui.pages.HomePagePreview
 import io.github.azakidev.move.ui.pages.LinesPage
+import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
-import io.github.azakidev.move.ui.pages.StopPagePreview
 import io.github.azakidev.move.ui.theme.MoveTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
+//    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         installSplashScreen()
         enableEdgeToEdge()
         setContent {
@@ -148,7 +155,12 @@ class MainActivity : ComponentActivity() {
                             },
                             entryProvider = entryProvider {
                                 entry<MainView> {
-                                    AppNavigator(model, sheetState, sheetModel, backStack)
+                                    AppNavigator(
+                                        model,
+                                        sheetState,
+                                        sheetModel,
+//                                        fusedLocationClient ,
+                                        backStack)
                                 }
                                 entry<Providers> {
                                     ProvidersPage(model, backStack)
@@ -206,16 +218,16 @@ enum class AppDestinations(
 //    MAP(R.string.map, Icons.Default.LocationOn, R.string.map)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppNavigator(
     model: MoveViewModel,
     sheetState: SheetState,
     sheetModel: SheetStopViewModel,
+//    fusedLocationProviderClient: FusedLocationProviderClient,
     backStack: NavBackStack<NavKey>
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -228,13 +240,26 @@ fun AppNavigator(
                     },
                     label = { Text(stringResource(it.label)) },
                     selected = it == currentDestination,
-                    onClick = { currentDestination = it })
+                    onClick = { currentDestination = it }
+                )
             }
-        }) {
-        when (currentDestination) {
-            AppDestinations.HOME -> HomePage(model, sheetModel, backStack)
-            AppDestinations.LINES -> LinesPage(model, sheetModel)
-//            AppDestinations.MAP -> MapPage()
+        }
+    ) {
+        AnimatedContent(
+            targetState = currentDestination,
+            transitionSpec = {
+                fadeIn(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                ) togetherWith fadeOut(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                )
+            }
+        ) { currentDestination ->
+            when (currentDestination) {
+                AppDestinations.HOME -> HomePage(model, sheetModel, backStack)
+                AppDestinations.LINES -> LinesPage(model, sheetModel)
+//                AppDestinations.MAP -> MapPage(fusedLocationProviderClient)
+            }
         }
     }
 
@@ -250,27 +275,6 @@ fun AppNavigator(
             dragHandle = { },
         ) {
             StopPage(model = model, sheetModel = sheetModel)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable @Preview
-fun BottomSheetPreview() {
-    val sheetState = rememberModalBottomSheetState()
-    val sheetModel = viewModel<SheetStopViewModel>()
-    sheetModel.sheetStop = StopItem()
-    sheetModel.showBottomSheet = true
-    HomePagePreview()
-    if (sheetModel.showBottomSheet) {
-        ModalBottomSheet(
-            modifier = Modifier
-                .fillMaxHeight(),
-            onDismissRequest = { sheetModel.showBottomSheet = false },
-            sheetState = sheetState,
-            dragHandle = {  },
-        ) {
-            StopPagePreview()
         }
     }
 }

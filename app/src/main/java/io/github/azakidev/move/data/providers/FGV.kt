@@ -9,27 +9,27 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable @JsonIgnoreUnknownKeys
-data class TramResponse(
-    val previsiones: List<TramTimeEstimate>
+data class FGVResponse(
+    val previsiones: List<FGVTimeEstimate>
 )
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable @JsonIgnoreUnknownKeys
-data class TramTimeEstimate(
+data class FGVTimeEstimate(
     @SerialName("line_id") val id: Int,
-    val trains: List<TramTrain>
+    val trains: List<FGVTrain>
 )
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable @JsonIgnoreUnknownKeys
-data class TramTrain(
+data class FGVTrain(
     val destino: String,
     val seconds: Int,
     @SerialName("line_id") val id: Int
 )
 
-fun parseTramResponse(response: String): List<LineTime> {
-    val responseJson = Json.decodeFromString<TramResponse>(response)
+fun parseFGVResponse(response: String): List<LineTime> {
+    val responseJson = Json.decodeFromString<FGVResponse>(response)
     val estimatesByDestination = responseJson.previsiones.map { it.trains }.flatten().groupBy { it.destino }
 
     val response = mutableListOf<LineTime>()

@@ -88,9 +88,7 @@ fun QrPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .clip(
-                            RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                        )
+                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -103,16 +101,13 @@ fun QrPage(
                             .matchParentSize()
                             .drawWithContent {
                                 drawContent()
-                                drawRect(
-                                    color = Color.Black.copy(alpha = 0.85f),
-                                    size = size,
-                                )
+                                drawRect(Color.Black.copy(alpha = 0.85f))
                                 drawRoundRect(
                                     color = outlineColor,
                                     size = Size(outlineSize, outlineSize),
                                     topLeft = Offset(
-                                        x = (size.width / 2) - (outlineSize / 2),
-                                        y = (size.height / 2) - (outlineSize / 2)
+                                        x = (size.width - outlineSize) / 2,
+                                        y = (size.height - outlineSize) / 2
                                     ),
                                     cornerRadius = CornerRadius(outlineSize / 8, outlineSize / 8),
                                 )
@@ -120,8 +115,8 @@ fun QrPage(
                                     color = Color(0xFFFFFFFF),
                                     size = Size(squareSize, squareSize),
                                     topLeft = Offset(
-                                        x = (size.width / 2) - (squareSize / 2),
-                                        y = (size.height / 2) - (squareSize / 2)
+                                        x = (size.width - squareSize) / 2,
+                                        y = (size.height - squareSize) / 2
                                     ),
                                     cornerRadius = CornerRadius(squareSize / 8, squareSize / 8),
                                     blendMode = BlendMode.DstOut,
@@ -187,7 +182,8 @@ fun QrPage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable @Preview
+@Composable
+@Preview
 fun QrPreview() {
     Scaffold(
         topBar = {
@@ -203,7 +199,7 @@ fun QrPreview() {
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        onClick = {  }
+                        onClick = { }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

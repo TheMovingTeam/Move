@@ -205,7 +205,6 @@ fun HeroCarrouselItem(
             items(sortedLineTimes.count()) { lineTimeId ->
                 val lineTime = sortedLineTimes[lineTimeId]
                 val line = lineItems.find { lineItem -> lineItem.id == lineTime.lineId } ?: LineItem()
-                val lineName = line.name
 
                 Row(
                     modifier = Modifier

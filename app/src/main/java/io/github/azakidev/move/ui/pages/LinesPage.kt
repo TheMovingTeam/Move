@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,6 +70,8 @@ import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.LineRow
 import io.github.azakidev.move.ui.components.StopEmblemRow
 import kotlinx.coroutines.launch
+import kotlin.streams.toList
+import kotlin.text.indexOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -424,11 +427,20 @@ fun LineList(
     onClick: (StopItem) -> Unit
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(lineItems.count()) {
-            val lineItem = lineItems.sortedBy { line -> line.emblem }[it]
+            val lineItem = lineItems
+                .sortedBy { line -> line.emblem }
+                .sortedBy { line ->
+                    val emblem =
+                        if (line.emblem.first().isDigit()) line.emblem.drop(1) else line.emblem
+                    emblem
+                        .removePrefix("L")
+                        .takeWhile { c -> c.isDigit() }
+                        .toIntOrNull() ?: Int.MAX_VALUE
+                }[it]
             val expanded = rememberSaveable { mutableStateOf(false) }
             val shape = listShape(it, lineItems.count())
             LineRow(
