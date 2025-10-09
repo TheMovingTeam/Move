@@ -53,6 +53,7 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -689,12 +690,12 @@ fun ProviderPage(
     }
 
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> ->
-        if (model.providers.value[i].id !in model.savedProviders.value) {
+        if (i !in model.savedProviders.value) {
             icon.value = Icons.Default.Favorite
-            model.addSavedProvider(model.providers.value[i].id)
+            model.addSavedProvider(i)
         } else {
             icon.value = Icons.Default.FavoriteBorder
-            model.removeSavedProvider(model.providers.value[i].id)
+            model.removeSavedProvider(i)
         }
     }
     ProviderContent(
@@ -707,7 +708,7 @@ fun ProviderPage(
                 providerRepo = model.providerRepo.value,
                 providers = model.providers.collectAsState().value,
                 savedProviders = model.savedProviders.collectAsState().value,
-                onFavoriteClick = onFavoriteClick
+                onFavoriteClick = onFavoriteClick,
             )
         }
     )

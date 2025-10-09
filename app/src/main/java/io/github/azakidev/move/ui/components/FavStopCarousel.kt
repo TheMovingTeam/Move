@@ -48,6 +48,7 @@ import coil3.request.crossfade
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
+import io.github.azakidev.move.fmt
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -194,10 +195,7 @@ fun HeroCarrouselItem(
                 Text(
                     modifier = Modifier
                         .padding(start = 12.dp, bottom = 4.dp),
-                    text = stopItem.name
-                        .replace("-", " - ")
-                        .replace(".", ". ")
-                        .replace("  ", " "),
+                    text = stopItem.name.fmt(),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -229,9 +227,8 @@ fun HeroCarrouselItem(
                         )
                         Text(
                             text = (lineTime.destination ?: line.name)
-                                .replace("-", " - ")
-                                .replace(".", ". ")
-                                .replace("  ", " "),
+                                .fmt()
+                                .replace(" - ", " > "),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.titleSmall,

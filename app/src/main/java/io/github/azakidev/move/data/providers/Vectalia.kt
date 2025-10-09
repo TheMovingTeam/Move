@@ -82,6 +82,7 @@ fun parseVectaliaTimes(
     response:String,
     lines: List<LineItem>
 ): List<LineTime> {
+    println(response)
     val estimations = parseVectaliaResponse(response)
     val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
         val matchingLine = lines.find { line ->

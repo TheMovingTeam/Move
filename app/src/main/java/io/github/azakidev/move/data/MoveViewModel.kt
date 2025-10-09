@@ -433,7 +433,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
-            val url = provider.timeSource.replace("@stop", stopItem.id.toString())
+            val url = provider.timeSource
+                .replace("@stop", stopItem.id.toString())
+                .replace("@comId", stopItem.comId.toString())
             val client = OkHttpClient()
             val request = Request.Builder()
             if (provider.name.contains("Vectalia")) {

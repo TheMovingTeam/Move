@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastJoinToString
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
@@ -13,6 +14,7 @@ import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.data.providers.parseFGVResponse
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
+import java.util.Locale
 
 @Serializable
 internal data object MainView : NavKey
@@ -49,6 +51,62 @@ fun parseTimes(
         }
 
         "Vectalia Alicante" -> {
+            val estimations: List<LineTime> = try {
+                parseVectaliaTimes(response, lines)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Vectalia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Vectalia Albacete" -> {
+            val estimations: List<LineTime> = try {
+                parseVectaliaTimes(response, lines)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Vectalia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Vectalia Cáceres" -> {
+            val estimations: List<LineTime> = try {
+                parseVectaliaTimes(response, lines)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Vectalia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Vectalia Alcoi" -> {
+            val estimations: List<LineTime> = try {
+                parseVectaliaTimes(response, lines)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse Vectalia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Vectalia Mérida" -> {
             val estimations: List<LineTime> = try {
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
@@ -132,4 +190,41 @@ fun listShape(
             )
         }
     }
+}
+
+fun String.fmt(): String {
+    return this
+        .lowercase()
+        .replace("-", " - ")
+        .replace("–", " - ")
+        .replace("—", " - ")
+        .replace(">", " > ")
+        .replace("(", " ( ")
+        .replace(".", ". ")
+        .replace("'", "' ")
+        .replace("\"", "")
+        .replace("_", " ")
+        .replace("c/", "C/")
+        .replace("C/", "C/ ")
+        .replace("avda", "av.")
+        .replace("- obres", "( obres )")
+        .replace("..", ".")
+        .replace("  ", " ")
+        .replace("- >", ">")
+        .split(' ')
+        .map { word ->
+            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        }
+        .fastJoinToString(" ")
+        .replace("' ", "'")
+        .replace("( ", "(")
+        .replace(" )", ")")
+}
+
+fun String.fmtSearch(): String {
+    return this
+        .lowercase()
+        .toList()
+        .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
+        .joinToString("")
 }

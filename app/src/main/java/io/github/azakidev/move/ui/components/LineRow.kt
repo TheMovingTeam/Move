@@ -3,7 +3,6 @@
 package io.github.azakidev.move.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 
 @Composable
@@ -53,7 +52,9 @@ fun LineEntry(line: LineItem) {
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
-            text = line.name.replace("-", " - ").replace("  ", " "),
+            text = line.name
+                .fmt()
+                .replace(" - ", " > "),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleLarge,
@@ -131,7 +132,7 @@ fun StopEntries(
                             modifier = Modifier
                                 .padding(vertical = 6.dp)
                                 .fillMaxWidth(.6f),
-                            text = stopItem.name.replace("-", " - ").replace("  ", " "),
+                            text = stopItem.name.fmt(),
                             fontSize = 16.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

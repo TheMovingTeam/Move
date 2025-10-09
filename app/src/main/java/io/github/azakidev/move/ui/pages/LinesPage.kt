@@ -66,12 +66,12 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.fmt
+import io.github.azakidev.move.fmtSearch
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.LineRow
 import io.github.azakidev.move.ui.components.StopEmblemRow
 import kotlinx.coroutines.launch
-import kotlin.streams.toList
-import kotlin.text.indexOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -83,14 +83,14 @@ fun LinesPage(
     val scope = rememberCoroutineScope()
 
     val stopResults = model.stops.collectAsState().value.filter {
-        val name = it.name.lowercase().replace(" ", "")
-        val text = textFieldState.text.toString().lowercase().replace(" ", "")
+        val name = it.name.fmtSearch()
+        val text = textFieldState.text.toString().fmtSearch()
         name.contains(text) || (it.comId != null && it.comId.toString().contains(text))
     }
 
     val lineResults = model.lines.collectAsState().value.filter {
-        val name = it.name.lowercase().replace(" ", "")
-        val text = textFieldState.text.toString().lowercase().replace(" ", "")
+        val name = it.name.fmtSearch()
+        val text = textFieldState.text.toString().fmtSearch()
         name.contains(text) || (it.emblem.lowercase().contains(text))
     }
 
@@ -197,7 +197,7 @@ fun LinesPage(
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {
                 LazyColumn(
                     modifier = Modifier
-                        .padding(8.dp),
+                        .padding(horizontal = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     if (textFieldState.text.isNotEmpty()) {
@@ -285,7 +285,7 @@ fun LinesPage(
                                     shape = shape,
                                     expandable = false,
                                     expanded = expanded,
-                                    background = MaterialTheme.colorScheme.surfaceContainer,
+                                    background = MaterialTheme.colorScheme.background,
                                     onClick = { stopItem ->
                                         sheetModel.sheetStop = stopItem
                                         sheetModel.showBottomSheet = true
@@ -403,10 +403,7 @@ fun SearchResultStop(
             Text(
                 modifier = Modifier
                     .fillMaxWidth(0.65f),
-                text = stopItem.name
-                    .replace("-", " - ")
-                    .replace(".", ". ")
-                    .replace("  ", " "),
+                text = stopItem.name.fmt(),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -435,7 +432,7 @@ fun LineList(
                 .sortedBy { line -> line.emblem }
                 .sortedBy { line ->
                     val emblem =
-                        if (line.emblem.first().isDigit()) line.emblem.drop(1) else line.emblem
+                        if (!line.emblem.first().isDigit()) line.emblem.drop(1) else line.emblem
                     emblem
                         .removePrefix("L")
                         .takeWhile { c -> c.isDigit() }

@@ -83,12 +83,12 @@ fun ProvidersPage(
     }
 
     val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> ->
-        if (model.providers.value[i].id !in model.savedProviders.value) {
+        if (!model.savedProviders.value.contains(i)) {
             icon.value = Icons.Default.Favorite
-            model.addSavedProvider(model.providers.value[i].id)
+            model.addSavedProvider(i)
         } else {
             icon.value = Icons.Default.FavoriteBorder
-            model.removeSavedProvider(model.providers.value[i].id)
+            model.removeSavedProvider(i)
         }
     }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -144,7 +144,7 @@ fun ProvidersList(
     providers: List<ProviderItem>,
     savedProviders: List<Int>,
     onFavoriteClick: (Int, MutableStateFlow<ImageVector>) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.background)
@@ -168,19 +168,14 @@ fun ProvidersList(
                     }
                 }
                 else -> {
+                    val modifier = if (scrollBehavior != null) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
                     LazyColumn(
-                        modifier = Modifier
-                            .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        modifier = modifier
                             .padding(start = 8.dp, end = 8.dp, top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         items(visibleProviders.count()) { i ->
-                            val provider = visibleProviders[i]
-                            val id = if (!BuildConfig.APPLICATION_ID.contains("debug")) {
-                                i+1
-                            } else {
-                                i
-                            }
+                            val provider = visibleProviders.sortedBy { it.name }[i]
                             val shape = listShape(i, providers.count())
                             val iconMut = remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
                             var icon = iconMut.collectAsState().value
@@ -237,7 +232,7 @@ fun ProvidersList(
                                         colors = IconButtonDefaults.iconButtonColors(
                                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                                         ),
-                                        onClick = { onFavoriteClick(id, iconMut) }
+                                        onClick = { onFavoriteClick(provider.id, iconMut) }
                                     ) {
                                         Icon(
                                             imageVector = icon,

@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +53,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
@@ -213,10 +213,7 @@ fun HomePageView(
                                                     modifier = Modifier
                                                         .fillMaxWidth(0.62f)
                                                         .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
-                                                    text = stopItem.name
-                                                        .replace("-", " - ")
-                                                        .replace(".", ". ")
-                                                        .replace("  ", " "),
+                                                    text = stopItem.name.fmt(),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                     fontSize = 16.sp,

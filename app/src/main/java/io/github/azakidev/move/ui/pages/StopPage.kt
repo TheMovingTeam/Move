@@ -63,6 +63,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
 import java.util.Timer
@@ -253,10 +254,7 @@ fun StopPagePreview() {
                         .padding(16.dp)
                         .fillMaxWidth(width)
                         .align(Alignment.BottomStart),
-                    text = sheetModel.sheetStop.name
-                        .replace("-", " - ")
-                        .replace(".", ". ")
-                        .replace("  ", " "),
+                    text = sheetModel.sheetStop.name.fmt(),
                     style = style,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -372,9 +370,8 @@ fun StopPagePreview() {
                                             Text(
                                                 modifier = Modifier.fillMaxWidth(.60f),
                                                 text = (it.destination ?: line.name)
-                                                    .replace("-", " - ")
-                                                    .replace(".", ". ")
-                                                    .replace("  ", " "),
+                                                    .fmt()
+                                                    .replace(" - ", " > "),
                                                 overflow = TextOverflow.Ellipsis,
                                                 maxLines = 2
                                             )
