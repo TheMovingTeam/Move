@@ -10,11 +10,11 @@ import java.io.IOException
 import java.io.StringReader
 
 data class VectaliaResponse(
-    val lineEmblem: String, // The "line" field, e.g., "09"
-    val destination: String, // The "destino" field
+    val lineEmblem: String,
+    val destination: String,
     val imageUrl: String,
-    val firstEstimateSeconds: Int?, // Nullable if a value might be missing
-    val secondEstimateSeconds: Int? // Nullable if a value might be missing
+    val firstEstimateSeconds: Int?,
+    val secondEstimateSeconds: Int?
 )
 
 @Throws(XmlPullParserException::class, IOException::class)

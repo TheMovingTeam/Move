@@ -60,8 +60,6 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
@@ -76,16 +74,14 @@ import io.github.azakidev.move.ui.theme.MoveTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
-//    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         installSplashScreen()
         enableEdgeToEdge()
         setContent {
             val model = viewModel<MoveViewModel>()
+            model.fetchProviders()
+            model.fetchInfoForProviders(model.savedProviders.collectAsState().value)
 
             val sheetState = rememberModalBottomSheetState()
             val sheetModel = viewModel<SheetStopViewModel>()
@@ -103,12 +99,7 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background)
                 ) {
                     if (model.onboardingStatus.collectAsState().value) {
-
-                        model.fetchProviders()
-                        model.fetchInfoForProviders(model.savedProviders.collectAsState().value)
-
                         val backStack = rememberNavBackStack(MainView)
-
                         val context = LocalContext.current
 
                         NavDisplay(
@@ -159,7 +150,6 @@ class MainActivity : ComponentActivity() {
                                         model,
                                         sheetState,
                                         sheetModel,
-//                                        fusedLocationClient ,
                                         backStack)
                                 }
                                 entry<Providers> {
@@ -224,7 +214,6 @@ fun AppNavigator(
     model: MoveViewModel,
     sheetState: SheetState,
     sheetModel: SheetStopViewModel,
-//    fusedLocationProviderClient: FusedLocationProviderClient,
     backStack: NavBackStack<NavKey>
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }

@@ -436,14 +436,27 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val url = provider.timeSource
                 .replace("@stop", stopItem.id.toString())
                 .replace("@comId", stopItem.comId.toString())
+
             val client = OkHttpClient()
             val request = Request.Builder()
-            if (provider.name.contains("Vectalia")) {
+
+            if (provider.name.contains("Vectalia")) { // Vectalia headers
                 request
                     .header("Accept", "*/*")
                     .header("responseType", "ResponseType.json")
                     .header("followRedirects", "true")
             }
+            if (provider.name.contains("EMT")) { // EMT headers
+                request
+                    .header(
+                        "X-WSSE",
+                        "UsernameToken Username=\"7gH8m45w7A\", " +
+                                "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " +
+                                "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " +
+                                "Created=\"1760182100\""
+                    )
+            }
+
             try {
                 val requestBuilt = request.url(url)
                     .get()
@@ -453,7 +466,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 val responseText = response.body!!.string()
                 try {
-                    val times = parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
+                    val times =
+                        parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
                     if (times.isNotEmpty()) {
                         stopItem.setTimeTable(times)
                     }

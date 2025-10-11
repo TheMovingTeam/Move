@@ -11,6 +11,7 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.providers.parseEMTTimes
 import io.github.azakidev.move.data.providers.parseFGVResponse
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
@@ -141,6 +142,20 @@ fun parseTimes(
                 Log.e(
                     "MoveViewModel",
                     "Couldn't parse Metrovalencia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "EMT Valencia" -> {
+            val estimations: List<LineTime> = try {
+                parseEMTTimes(response)
+            } catch (e: Exception) {
+                Log.e(
+                    "MoveViewModel",
+                    "Couldn't parse EMT times in ${e.message}",
                     e
                 )
                 return null

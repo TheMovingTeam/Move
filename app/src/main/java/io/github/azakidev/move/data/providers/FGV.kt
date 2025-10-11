@@ -36,7 +36,6 @@ fun parseFGVResponse(response: String): List<LineTime> {
 
     estimatesByDestination.forEach { (_, value) ->
         val estimates = value.groupBy { it.id }
-        println(estimates)
         response += estimates.map { (key, value) ->
             if (value.count() >= 2) {
                 LineTime(
