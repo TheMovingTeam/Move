@@ -70,7 +70,7 @@ fun FavStopCarousel(
     }.reversed()
 
     sortedFavStops.parallelStream().forEach { stopItem ->
-        slowTimer(model, stopItem).run()
+        model.addToFetchLoop(stopItem.id)
         if (stopItem.lineTimes.value.isEmpty()) {
             fastTimer(model, stopItem).run()
         }
@@ -116,19 +116,6 @@ fun FavStopCarousel(
             }
         }
     }
-}
-
-fun slowTimer(
-    model: MoveViewModel,
-    stopItem: StopItem,
-): TimerTask {
-    return Timer().schedule(
-        delay = 1000,
-        period = 15000,
-        action = {
-            model.fetchTimes(stopItem)
-        }
-    )
 }
 
 fun fastTimer(

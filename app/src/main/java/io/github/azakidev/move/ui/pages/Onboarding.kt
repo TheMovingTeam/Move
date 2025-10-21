@@ -53,7 +53,6 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -176,10 +175,7 @@ fun OnboardingPage(model: MoveViewModel) {
                     model.providerRepo,
                     backStack,
                     onProviderReset = { url ->
-                        if (URLUtil.isValidUrl(url) && model.tryRepo(
-                                url
-                            )
-                        ) {
+                        if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
                             model.saveRepo(url)
                             model.flushInfo()
                         } else {
@@ -299,6 +295,7 @@ fun WelcomePage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .blur(25.dp)
                 .zIndex(-1f)
         ) {
             val size = 200f * scale
@@ -306,7 +303,6 @@ fun WelcomePage(
             val color = colorResource(R.color.purple_shadow)
             Box(
                 modifier = Modifier
-                    .blur(25.dp)
                     .padding(padding.dp)
                     .offset((-(size + padding) / 2).dp, (-(size + padding) / 2).dp)
                     .size(size.dp)
@@ -320,7 +316,6 @@ fun WelcomePage(
             ) {}
             Box(
                 modifier = Modifier
-                    .blur(25.dp)
                     .padding(padding.dp)
                     .offset(((size + padding) / 2).dp, ((size + padding) / 2).dp)
                     .size(size.dp)

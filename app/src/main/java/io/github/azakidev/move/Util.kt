@@ -35,6 +35,7 @@ fun parseTimes(
     stopItem: StopItem,
     lines: List<LineItem>
 ): List<LineTime>? {
+    Log.d("Networking", "Fetching for stop: ${stopItem.name}")
     when (provider.name) {
         "DummyProvider" -> {
             val times = Regex("\\w+").findAll(response).toList().map { it.value.toInt() }

@@ -27,7 +27,10 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URL
+import java.util.Timer
 import java.util.concurrent.LinkedBlockingDeque
+import kotlin.concurrent.schedule
+import kotlin.concurrent.thread
 
 class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _database = MoveDatabase.getDatabase(application.applicationContext)
@@ -79,7 +82,15 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = true
         )
 
+    val stopsToLoad: MutableList<Int> = mutableListOf()
+
     init {
+        viewModelScope.launch { // Collect provider repo value DO NOT DELETE
+            _providerRepo.collect { savedUrl ->
+                providerRepo.value = savedUrl
+            }
+        }
+        // Set up data from DB
         viewModelScope.launch {
             savedProviders.collect { savedProviderIds ->
                 if (savedProviderIds.isNotEmpty()) {
@@ -112,6 +123,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
         // Initial load of providers from DB when ViewModel is created
         loadProvidersFromDb()
+        // Initiate stop fetching
+        startFetchLoop()
     }
 
     fun fetchProviders() {
@@ -396,7 +409,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     fun tryRepo(url: String): Boolean {
         val isValid = LinkedBlockingDeque<Boolean>()
-        viewModelScope.launch(Dispatchers.IO) {
+        thread {
             try {
                 val providerListJson = URL("${url}/providers.json").readText()
                 Json.decodeFromString<ProviderListResponse>(providerListJson)
@@ -408,15 +421,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     e
                 )
                 isValid.add(false)
-                return@launch
+                return@thread
             }
-
         }
         return isValid.take()
     }
 
     fun saveRepo(url: String) {
-        println(url)
         viewModelScope.launch {
             _userStore.saveProviderRepoUrl(url)
         }
@@ -487,6 +498,36 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 return@launch
             }
+        }
+    }
+
+    private fun startFetchLoop() {
+        // Initial adding of favourite stops
+        stopsToLoad += favouriteStops.value
+        // Start the timer
+        Timer().schedule(
+            delay = 1000,
+            period = 15000,
+            action = {
+                stopsToLoad.forEach { id ->
+                    val stop = stops.value.find { stop -> stop.id == id }
+                    if (stop != null) {
+                        fetchTimes(stop)
+                    }
+                }
+            }
+        )
+    }
+
+    fun addToFetchLoop(stopId: Int) {
+        if (!stopsToLoad.contains(stopId)) { // Avoid duplicates
+            stopsToLoad.add(stopId)
+        }
+    }
+
+    fun removeToFetchLoop(stopId: Int) {
+        if (!favouriteStops.value.contains(stopId)) { // Only remove if it's NOT in favourites
+            stopsToLoad.remove(stopId)
         }
     }
 

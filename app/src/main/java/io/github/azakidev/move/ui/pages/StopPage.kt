@@ -98,12 +98,8 @@ fun StopPage(
         }
         model.fetchTimes(sheetModel.sheetStop)
     }).run()
-    Timer().schedule(delay = 1000, period = 15000, action = {
-        if (!sheetModel.showBottomSheet) {
-            this.cancel()
-        }
-        model.fetchTimes(sheetModel.sheetStop)
-    }).run()
+
+    model.addToFetchLoop(sheetModel.sheetStop.id)
 
     val onClick = {
         if (sheetModel.sheetStop.id !in model.favouriteStops.value) {

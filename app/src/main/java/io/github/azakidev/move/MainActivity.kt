@@ -150,7 +150,8 @@ class MainActivity : ComponentActivity() {
                                         model,
                                         sheetState,
                                         sheetModel,
-                                        backStack)
+                                        backStack
+                                    )
                                 }
                                 entry<Providers> {
                                     ProvidersPage(model, backStack)
@@ -258,7 +259,10 @@ fun AppNavigator(
             modifier = Modifier
                 .fillMaxHeight()
                 .nestedScroll(nestedScroll),
-            onDismissRequest = { sheetModel.showBottomSheet = false },
+            onDismissRequest = {
+                sheetModel.showBottomSheet = false
+                model.removeToFetchLoop(sheetModel.sheetStop.id)
+            },
             containerColor = MaterialTheme.colorScheme.background,
             sheetState = sheetState,
             dragHandle = { },
