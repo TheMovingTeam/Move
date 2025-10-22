@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.azakidev.move.BuildConfig
+import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.data.db.toLineEntity
 import io.github.azakidev.move.data.db.toLineItem
@@ -82,10 +83,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = true
         )
 
-    val stopsToLoad: MutableList<Int> = mutableListOf()
+    private val _stopsToLoad: MutableList<Int> = mutableListOf()
 
     init {
-        viewModelScope.launch { // Collect provider repo value DO NOT DELETE
+        // Collect provider repo value DO NOT DELETE
+        viewModelScope.launch {
             _providerRepo.collect { savedUrl ->
                 providerRepo.value = savedUrl
             }
@@ -131,7 +133,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentRepoUrl = providerRepo.value
             if (currentRepoUrl.isEmpty()) {
-                Log.w("MoveViewModel", "Provider repo URL is empty, cannot fetch providers.")
+                Log.w(
+                    LogTags.MoveModel.name,
+                    "Provider repo URL is empty, cannot fetch providers."
+                )
                 // Optionally load from DB if repo URL is not set but you have cached providers
                 loadProvidersFromDb()
                 return@launch
@@ -170,7 +175,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     } catch (e: Exception) {
                         Log.e(
-                            "MoveViewModel",
+                            LogTags.Networking.name,
                             "Error fetching metadata for $providerName: ${e.localizedMessage}",
                             e
                         )
@@ -192,7 +197,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 )
 
             } catch (e: Exception) {
-                Log.e("MoveViewModel", "Error fetching providers list: ${e.localizedMessage}", e)
+                Log.e(
+                    LogTags.MoveModel.name,
+                    "Error fetching providers list: ${e.localizedMessage}", e)
                 // Fallback to loading from DB if network fails
                 loadProvidersFromDb()
             }
@@ -210,7 +217,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun fetchInfoForProviders(providerIds: List<Int>) {
         if (_providers.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
-                "MoveViewModel",
+                LogTags.MoveModel.name,
                 "Provider list is empty, attempting to load/fetch providers first."
             )
             // It's possible fetchProviders hasn't completed or loaded from DB yet.
@@ -219,7 +226,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
         val currentRepoUrl = providerRepo.value
         if (currentRepoUrl.isEmpty() && providerIds.isNotEmpty()) {
-            Log.w("MoveViewModel", "Repo URL is empty, cannot fetch new lines/stops data.")
+            Log.w(
+                LogTags.MoveModel.name,
+                "Repo URL is empty, cannot fetch new lines/stops data.")
             // Data will be loaded from DB via the collectors if available.
             return
         }
@@ -228,7 +237,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val provider = _providers.value.find { it.id == id }
             if (provider == null) {
                 Log.w(
-                    "MoveViewModel",
+                    LogTags.MoveModel.name,
                     "Provider with ID $id not found in current list for fetching info."
                 )
                 return@forEach
@@ -247,7 +256,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (needsRemoteFetch && currentRepoUrl.isNotEmpty()) {
                     Log.d(
-                        "MoveViewModel",
+                        LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
                     fetchLinesForProvider(provider, currentRepoUrl)
@@ -257,14 +266,14 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         .isEmpty()
                 ) { // Force a fetch for the first fetch
                     Log.d(
-                        "MoveViewModel",
+                        LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
                     fetchLinesForProvider(provider, currentRepoUrl)
                     fetchStopsForProvider(provider, currentRepoUrl)
                 } else {
                     Log.d(
-                        "MoveViewModel",
+                        LogTags.MoveModel.name,
                         "Lines/stops for provider ${provider.name} should be up-to-date or loaded from cache."
                     )
                 }
@@ -287,7 +296,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             // The Flow from lineDao will automatically update _lines.value
         } catch (e: Exception) {
             Log.e(
-                "MoveViewModel",
+                LogTags.MoveModel.name,
                 "Error fetching lines for ${provider.name}: ${e.localizedMessage}",
                 e
             )
@@ -309,7 +318,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             // The Flow from stopDao will automatically update _stops.value
         } catch (e: Exception) {
             Log.e(
-                "MoveViewModel",
+                LogTags.MoveModel.name,
                 "Error fetching stops for ${provider.name}: ${e.localizedMessage}",
                 e
             )
@@ -337,7 +346,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 // Remove related data from local database
                 _lineDao.deleteLinesForProvider(providerId)
                 _stopDao.deleteStopsForProvider(providerId)
-                Log.d("MoveViewModel", "Removed provider $providerId and its data.")
+                Log.d(
+                    LogTags.MoveModel.name,
+                    "Removed provider $providerId and its data.")
             }
         }
     }
@@ -416,7 +427,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 isValid.add(true)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.MoveModel.name,
                     "The repo at $url could not be verified: ${e.message}",
                     e
                 )
@@ -484,7 +495,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 } catch (e: Exception) {
                     Log.e(
-                        "MoveViewModel",
+                        LogTags.MoveModel.name,
                         "Could not parse times for ${stopItem.name}: $e",
                         e
                     )
@@ -492,7 +503,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.MoveModel.name,
                     "Could not get times for ${stopItem.name}: $e",
                     e
                 )
@@ -503,13 +514,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun startFetchLoop() {
         // Initial adding of favourite stops
-        stopsToLoad += favouriteStops.value
+        _stopsToLoad += favouriteStops.value
         // Start the timer
         Timer().schedule(
             delay = 1000,
             period = 15000,
             action = {
-                stopsToLoad.forEach { id ->
+                _stopsToLoad.forEach { id ->
                     val stop = stops.value.find { stop -> stop.id == id }
                     if (stop != null) {
                         fetchTimes(stop)
@@ -520,14 +531,14 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addToFetchLoop(stopId: Int) {
-        if (!stopsToLoad.contains(stopId)) { // Avoid duplicates
-            stopsToLoad.add(stopId)
+        if (!_stopsToLoad.contains(stopId)) { // Avoid duplicates
+            _stopsToLoad.add(stopId)
         }
     }
 
     fun removeToFetchLoop(stopId: Int) {
         if (!favouriteStops.value.contains(stopId)) { // Only remove if it's NOT in favourites
-            stopsToLoad.remove(stopId)
+            _stopsToLoad.remove(stopId)
         }
     }
 

@@ -2,6 +2,7 @@ package io.github.azakidev.move.data.providers
 
 import android.util.Log
 import android.util.Xml
+import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import org.xmlpull.v1.XmlPullParser
@@ -50,7 +51,11 @@ fun parseVectaliaResponse(xmlString: String): List<VectaliaResponse> {
                                 secondsList.add(text.toInt())
                             } catch (e: NumberFormatException) {
                                 // Handle cases where 'seconds' is not a valid integer
-                                Log.w("XmlParser", "Invalid number format for seconds: $text")
+                                Log.w(
+                                    LogTags.Parser.name,
+                                    "Invalid number format for seconds: $text",
+                                    e
+                                )
                             }
                         }
                     }
@@ -82,7 +87,6 @@ fun parseVectaliaTimes(
     response:String,
     lines: List<LineItem>
 ): List<LineTime> {
-    println(response)
     val estimations = parseVectaliaResponse(response)
     val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
         val matchingLine = lines.find { line ->

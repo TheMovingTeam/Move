@@ -17,6 +17,7 @@ import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
 import java.util.Locale
 
+// App locations
 @Serializable
 internal data object MainView : NavKey
 
@@ -29,13 +30,20 @@ internal data object Providers : NavKey
 @Serializable
 internal data object QrScanner : NavKey
 
+// Log tags
+enum class LogTags {
+    MoveModel,
+    Networking,
+    Parser,
+}
+
 fun parseTimes(
     response: String,
     provider: ProviderItem,
     stopItem: StopItem,
     lines: List<LineItem>
 ): List<LineTime>? {
-    Log.d("Networking", "Fetching for stop: ${stopItem.name}")
+    Log.d(LogTags.Networking.name, "Fetching for stop: ${stopItem.name}")
     when (provider.name) {
         "DummyProvider" -> {
             val times = Regex("\\w+").findAll(response).toList().map { it.value.toInt() }
@@ -57,7 +65,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Vectalia times in ${e.message}",
                     e
                 )
@@ -71,7 +79,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Vectalia times in ${e.message}",
                     e
                 )
@@ -85,7 +93,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Vectalia times in ${e.message}",
                     e
                 )
@@ -99,7 +107,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Vectalia times in ${e.message}",
                     e
                 )
@@ -113,7 +121,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Vectalia times in ${e.message}",
                     e
                 )
@@ -127,7 +135,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Tram Alacant times in ${e.message}",
                     e
                 )
@@ -141,7 +149,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse Metrovalencia times in ${e.message}",
                     e
                 )
@@ -155,7 +163,7 @@ fun parseTimes(
                 parseEMTTimes(response)
             } catch (e: Exception) {
                 Log.e(
-                    "MoveViewModel",
+                    LogTags.Networking.name,
                     "Couldn't parse EMT times in ${e.message}",
                     e
                 )
