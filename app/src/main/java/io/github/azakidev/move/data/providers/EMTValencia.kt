@@ -79,7 +79,7 @@ fun parseEMTResponse(xmlString: String): List<EMTResponse> {
     return estimations
 }
 
-fun parseEMTTimes(
+fun parseEMTValencia(
     response: String,
 ): List<LineTime> {
     val estimations = parseEMTResponse(response)

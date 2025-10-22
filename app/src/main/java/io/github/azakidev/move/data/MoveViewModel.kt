@@ -15,6 +15,7 @@ import io.github.azakidev.move.data.db.toProviderEntity
 import io.github.azakidev.move.data.db.toProviderItem
 import io.github.azakidev.move.data.db.toStopEntity
 import io.github.azakidev.move.data.db.toStopItem
+import io.github.azakidev.move.formRequest
 import io.github.azakidev.move.parseTimes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -462,27 +463,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val client = OkHttpClient()
             val request = Request.Builder()
 
-            if (provider.name.contains("Vectalia")) { // Vectalia headers
-                request
-                    .header("Accept", "*/*")
-                    .header("responseType", "ResponseType.json")
-                    .header("followRedirects", "true")
-            }
-            if (provider.name.contains("EMT")) { // EMT headers
-                request
-                    .header(
-                        "X-WSSE",
-                        "UsernameToken Username=\"7gH8m45w7A\", " +
-                                "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " +
-                                "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " +
-                                "Created=\"1760182100\""
-                    )
-            }
-
             try {
-                val requestBuilt = request.url(url)
-                    .get()
-                    .build()
+                val requestBuilt = request.formRequest(client, provider).url(url).build()
 
                 val response = client.newCall(requestBuilt).execute()
 
@@ -503,7 +485,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.MoveModel.name,
+                    LogTags.Networking.name,
                     "Could not get times for ${stopItem.name}: $e",
                     e
                 )
@@ -520,6 +502,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             delay = 1000,
             period = 15000,
             action = {
+                Log.d(
+                    LogTags.MoveModel.name,
+                    "Stops to fetch: $_stopsToLoad"
+                )
                 _stopsToLoad.forEach { id ->
                     val stop = stops.value.find { stop -> stop.id == id }
                     if (stop != null) {

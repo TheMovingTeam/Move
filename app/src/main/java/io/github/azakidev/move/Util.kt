@@ -11,10 +11,16 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.data.providers.parseEMTTimes
+import io.github.azakidev.move.data.providers.fetchEMTMadridToken
+import io.github.azakidev.move.data.providers.parseEMTMadrid
+import io.github.azakidev.move.data.providers.parseEMTValencia
 import io.github.azakidev.move.data.providers.parseFGVResponse
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.Locale
 
 // App locations
@@ -35,6 +41,54 @@ enum class LogTags {
     MoveModel,
     Networking,
     Parser,
+}
+
+fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): Request.Builder {
+
+    if (provider.name.contains("Vectalia")) { // Vectalia headers
+        return this
+            .header("Accept", "*/*")
+            .header("responseType", "ResponseType.json")
+            .header("followRedirects", "true")
+            .get()
+    }
+
+    if (provider.name.contains("EMT Valencia")) { // EMT Valencia headers
+        return this
+            .header(
+                "X-WSSE",
+                "UsernameToken Username=\"7gH8m45w7A\", " +
+                        "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " +
+                        "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " +
+                        "Created=\"1760182100\""
+            )
+            .get()
+    }
+
+    if (provider.name.contains("EMT Madrid")) {
+        val token = fetchEMTMadridToken(client)
+        val content =
+            "{\n" +
+                "\"statistics\":\"\",\n" +
+                "\"cultureInfo\":\"\",\n" +
+                "\"Text_StopRequired_YN\":\"N\",\n" +
+                "\"Text_EstimationsRequired_YN\":\"Y\",\n" +
+                "\"Text_IncidencesRequired_YN\":\"N\",\n" +
+                "\"DateTime_Referenced_Incidencies_YYYYMMDD\":\"20180823\"\n" +
+            "}"
+        return this
+            .header(
+                "accessToken",
+                token
+            )
+            .post(
+                content.toRequestBody(
+                    "application/json".toMediaTypeOrNull()
+                )
+            )
+    }
+
+    return this.get() // If none match, don't add any headers
 }
 
 fun parseTimes(
@@ -160,11 +214,25 @@ fun parseTimes(
 
         "EMT Valencia" -> {
             val estimations: List<LineTime> = try {
-                parseEMTTimes(response)
+                parseEMTValencia(response)
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name,
-                    "Couldn't parse EMT times in ${e.message}",
+                    "Couldn't parse EMT Valencia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "EMT Madrid" -> {
+            val estimations: List<LineTime> = try {
+                parseEMTMadrid(response)
+            } catch (e: Exception) {
+                Log.e(
+                    LogTags.Networking.name,
+                    "Couldn't parse EMT Madrid times in ${e.message}",
                     e
                 )
                 return null
