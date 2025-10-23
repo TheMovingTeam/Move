@@ -22,6 +22,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.Locale
+import kotlin.streams.toList
 
 // App locations
 @Serializable
@@ -228,7 +229,7 @@ fun parseTimes(
 
         "EMT Madrid" -> {
             val estimations: List<LineTime> = try {
-                parseEMTMadrid(response)
+                parseEMTMadrid(response, lines)
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name,
@@ -292,12 +293,11 @@ fun String.fmt(): String {
         .replace("—", " - ")
         .replace(">", " > ")
         .replace("(", " ( ")
+        .replace("/", " / ")
         .replace(".", ". ")
         .replace("'", "' ")
         .replace("\"", "")
         .replace("_", " ")
-        .replace("c/", "C/")
-        .replace("C/", "C/ ")
         .replace("avda", "av.")
         .replace("- obres", "( obres )")
         .replace("..", ".")
@@ -305,12 +305,19 @@ fun String.fmt(): String {
         .replace("- >", ">")
         .split(' ')
         .map { word ->
-            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            if (word.uppercase().chars().allMatch { "MDCLXVI".chars().toList().contains(it) }) { // Check if it's a roman numeral
+                word.uppercase()
+            } else {
+                word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            }
         }
         .fastJoinToString(" ")
+        .replace("c/", "C/")
+        .replace("C/", "C/ ")
         .replace("' ", "'")
         .replace("( ", "(")
         .replace(" )", ")")
+        .replace(" / ", "/")
 }
 
 fun String.fmtSearch(): String {
