@@ -230,7 +230,8 @@ fun ProvidersList(
                                     IconButton(
                                         shape = CircleShape,
                                         colors = IconButtonDefaults.iconButtonColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                            containerColor = MaterialTheme.colorScheme.secondaryFixedDim,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryFixed
                                         ),
                                         onClick = { onFavoriteClick(provider.id, iconMut) }
                                     ) {

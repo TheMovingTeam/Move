@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -20,8 +19,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
@@ -35,6 +36,7 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,6 +53,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,10 +64,14 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
+import io.github.azakidev.move.ui.pages.HomePagePreview
+import io.github.azakidev.move.ui.pages.LargeScreenHome
 import io.github.azakidev.move.ui.pages.LinesPage
+import io.github.azakidev.move.ui.pages.LinesPagePreview
 import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
@@ -216,40 +225,51 @@ fun AppNavigator(
     sheetModel: SheetStopViewModel,
     backStack: NavBackStack<NavKey>
 ) {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            imageVector = it.icon,
-                            contentDescription = stringResource(it.contentDescription)
-                        )
-                    },
-                    label = { Text(stringResource(it.label)) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+        LargeScreenHome(model, sheetModel, backStack)
+    } else {
+        var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                AppDestinations.entries.forEach {
+                    item(
+                        icon = {
+                            Icon(
+                                imageVector = it.icon,
+                                contentDescription = stringResource(it.contentDescription)
+                            )
+                        },
+                        label = { Text(stringResource(it.label)) },
+                        selected = it == currentDestination,
+                        onClick = { currentDestination = it }
+                    )
+                }
             }
-        }
-    ) {
-        AnimatedContent(
-            targetState = currentDestination,
-            transitionSpec = {
-                fadeIn(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                ) togetherWith fadeOut(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                )
-            }
-        ) { currentDestination ->
-            when (currentDestination) {
-                AppDestinations.HOME -> HomePage(model, sheetModel, backStack)
-                AppDestinations.LINES -> LinesPage(model, sheetModel)
+        ) {
+            AnimatedContent(
+                targetState = currentDestination,
+                transitionSpec = {
+                    fadeIn(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    ) togetherWith fadeOut(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    )
+                }
+            ) { currentDestination ->
+                when (currentDestination) {
+                    AppDestinations.HOME -> HomePage(
+                        model = model,
+                        sheetModel = sheetModel,
+                        backStack = backStack
+                    )
+
+                    AppDestinations.LINES -> LinesPage(model = model, sheetModel = sheetModel)
 //                AppDestinations.MAP -> MapPage(fusedLocationProviderClient)
+                }
             }
         }
+
     }
 
     if (sheetModel.showBottomSheet) {

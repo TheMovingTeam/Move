@@ -62,6 +62,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -377,25 +378,9 @@ fun WelcomePage(
 
 @Composable
 @Preview
-fun WelcomePagePreview() {
-    WelcomePage(
-        initialRevealed = true,
-        onNext = {}
-    )
-}
-
-@Composable
 @Preview(device = PIXEL_FOLD, showSystemUi = true)
-fun WelcomeMediumPagePreview() {
-    WelcomePage(
-        initialRevealed = true,
-        onNext = {}
-    )
-}
-
-@Composable
 @Preview(device = PIXEL_TABLET, showSystemUi = true)
-fun WelcomeWidePagePreview() {
+fun WelcomePagePreview() {
     WelcomePage(
         initialRevealed = true,
         onNext = {}
@@ -413,10 +398,13 @@ fun FeaturePage(
     if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
+            contentAlignment = Alignment.BottomCenter
         ) {
             Image(
-                modifier = Modifier.matchParentSize(),
+                modifier = Modifier
+                    .matchParentSize()
+                    .alpha(0.4f)
+                    .blur(60.dp),
                 painter = painterResource(R.drawable.banner),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
@@ -568,25 +556,9 @@ fun FeaturePage(
 
 @Composable
 @Preview
-fun FeaturePagePreview() {
-    FeaturePage(
-        onBack = {},
-        onNext = {}
-    )
-}
-
-@Composable
 @Preview(device = PIXEL_FOLD, showSystemUi = true)
-fun FeatureMediumPagePreview() {
-    FeaturePage(
-        onBack = {},
-        onNext = {}
-    )
-}
-
-@Composable
 @Preview(device = PIXEL_TABLET, showSystemUi = true)
-fun FeatureWidePagePreview() {
+fun FeaturePagePreview() {
     FeaturePage(
         onBack = {},
         onNext = {}
@@ -646,17 +618,6 @@ fun ExplainingRow(
     }
 }
 
-@Composable
-@Preview
-fun ExplainingRowPreview() {
-    val title = "Explaining goes here"
-    val description = "This is like, the description that actually does the explaining and stuff."
-    ExplainingRow(
-        title = title,
-        description = description
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPage(
@@ -708,7 +669,7 @@ fun ProviderPage(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProviderContent(
     onBack: () -> Unit,
@@ -732,10 +693,13 @@ fun ProviderContent(
     if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
+            contentAlignment = Alignment.BottomCenter
         ) {
             Image(
-                modifier = Modifier.matchParentSize(),
+                modifier = Modifier
+                    .matchParentSize()
+                    .alpha(0.4f)
+                    .blur(60.dp),
                 painter = painterResource(R.drawable.banner),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
@@ -746,16 +710,22 @@ fun ProviderContent(
                     .padding(top = 64.dp)
                     .width((windowSizeClass.minWidthDp / 2).dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(MaterialTheme.colorScheme.background)
-                    .shadow(4.dp),
+                    .background(MaterialTheme.colorScheme.background),
                 topBar = {
                     TopAppBar(
                         scrollBehavior = null,
                         title = {
                             Text(
-                                text = stringResource(R.string.chooseProvider),
+                                text = stringResource(R.string.providerTitle),
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.onBackground
+                            )
+                        },
+                        subtitle = {
+                            Text(
+                                text = stringResource(R.string.chooseProvider),
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.outline
                             )
                         },
                         actions = {
@@ -822,9 +792,16 @@ fun ProviderContent(
                     scrollBehavior = null,
                     title = {
                         Text(
-                            text = stringResource(R.string.chooseProvider),
+                            text = stringResource(R.string.providerTitle),
                             style = MaterialTheme.typography.headlineLarge,
                             color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    subtitle = {
+                        Text(
+                            text = stringResource(R.string.chooseProvider),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     },
                     actions = {
@@ -885,33 +862,9 @@ fun ProviderContent(
 
 @Composable
 @Preview
-fun ProviderPagePreview() {
-    ProviderContent(
-        providerCount = 0,
-        onBack = {},
-        onEnd = {},
-        onSettings = {},
-    ) {
-        ProvidersListPreview()
-    }
-}
-
-@Composable
 @Preview(device = PIXEL_FOLD, showSystemUi = true)
-fun ProviderMediumPagePreview() {
-    ProviderContent(
-        providerCount = 0,
-        onBack = {},
-        onEnd = {},
-        onSettings = {},
-    ) {
-        ProvidersListPreview()
-    }
-}
-
-@Composable
 @Preview(device = PIXEL_TABLET, showSystemUi = true)
-fun ProviderWidePagePreview() {
+fun ProviderPagePreview() {
     ProviderContent(
         providerCount = 0,
         onBack = {},

@@ -62,6 +62,7 @@ import io.github.azakidev.move.ui.components.StopEmblemRow
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
+    modifier: Modifier = Modifier,
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
     backStack: NavBackStack<NavKey>
@@ -75,6 +76,7 @@ fun HomePage(
         }
         .reversed()
     HomePageView(
+        modifier = modifier,
         backStack = backStack,
         favStopCarrousel = { FavStopCarousel(model, sheetModel) },
         lastStops = lastStops,
@@ -90,6 +92,7 @@ fun HomePage(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePageView(
+    modifier: Modifier = Modifier,
     backStack: NavBackStack<NavKey>,
     lastStops: List<StopItem>,
     lines: List<LineItem>,
@@ -100,6 +103,7 @@ fun HomePageView(
     greetings.shuffle()
     val greeting = rememberSaveable { greetings.first() }
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -239,7 +243,9 @@ fun HomePageView(
 
 @Composable
 @Preview
-fun HomePagePreview() {
+fun HomePagePreview(
+    modifier: Modifier = Modifier,
+) {
     val backStack = rememberNavBackStack(MainView)
     val lastStops = listOf(
         StopItem(
@@ -261,6 +267,7 @@ fun HomePagePreview() {
         LineItem(id = 3, emblem = "LONG"),
     )
     HomePageView(
+        modifier = modifier,
         backStack = backStack,
         lastStops = lastStops,
         lines = lineItems,

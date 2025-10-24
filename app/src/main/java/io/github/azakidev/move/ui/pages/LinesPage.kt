@@ -76,7 +76,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LinesPage(
-    model: MoveViewModel, sheetModel: SheetStopViewModel
+    modifier: Modifier = Modifier,
+    model: MoveViewModel,
+    sheetModel: SheetStopViewModel,
+    appBarCanScroll: Boolean = true,
 ) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -181,16 +184,22 @@ fun LinesPage(
         )
     }
 
-    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+    val scrollBehavior = if (appBarCanScroll) {
+        SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+    } else {
+        null
+    }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppBarWithSearch(
                 modifier = Modifier.padding(bottom = 8.dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
-                    appBarContainerColor = Color.Transparent
+                    appBarContainerColor = Color.Transparent,
+                    scrolledAppBarContainerColor = Color.Transparent,
                 ),
                 scrollBehavior = scrollBehavior
             )
@@ -318,10 +327,10 @@ fun LinesPage(
             }
         },
     ) { padding ->
+        val modifier = if (scrollBehavior != null) { Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) } else {Modifier}
         if (model.lines.collectAsState().value.count() != 0) {
             LineList(
-                modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                modifier = modifier
                     .padding(padding)
                     .background(MaterialTheme.colorScheme.background),
                 lineItems = model.lines.collectAsState().value,
@@ -467,7 +476,9 @@ fun LineList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun LinesPagePreview() {
+fun LinesPagePreview(
+    modifier: Modifier = Modifier,
+) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
     val scope = rememberCoroutineScope()
@@ -490,13 +501,15 @@ fun LinesPagePreview() {
         LineItem(id = 3),
     )
     Scaffold(
+        modifier = modifier,
         topBar = {
             AppBarWithSearch(
                 modifier = Modifier.padding(bottom = 8.dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
-                    appBarContainerColor = Color.Transparent
+                    appBarContainerColor = Color.Transparent,
+                    scrolledAppBarContainerColor = Color.Transparent,
                 ),
             )
             ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}

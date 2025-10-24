@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="welcomeTo">Bienvenido a</string>
-    <string name="start">Chachi, comenzemos</string>
-    <string name="chooseProvider">Selecciona un proveedor</string>
+    <string name="start">Chachi! Comenzemos</string>
+    <string name="chooseProvider">Selecciona al menos un proveedor</string>
     <string name="whatIsMove">¿Qué es Move?</string>
     <string name="home">Inicio</string>
     <string name="lines">Líneas</string>
