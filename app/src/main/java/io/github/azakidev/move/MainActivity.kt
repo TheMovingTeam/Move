@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
@@ -259,12 +260,17 @@ fun AppNavigator(
             ) { currentDestination ->
                 when (currentDestination) {
                     AppDestinations.HOME -> HomePage(
+                        modifier = Modifier.padding(bottom = 0.dp),
                         model = model,
                         sheetModel = sheetModel,
                         backStack = backStack
                     )
 
-                    AppDestinations.LINES -> LinesPage(model = model, sheetModel = sheetModel)
+                    AppDestinations.LINES -> LinesPage(
+                        modifier = Modifier.padding(bottom = 0.dp),
+                        model = model,
+                        sheetModel = sheetModel
+                    )
 //                AppDestinations.MAP -> MapPage(fusedLocationProviderClient)
                 }
             }

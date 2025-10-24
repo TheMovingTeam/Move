@@ -67,6 +67,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -132,7 +134,8 @@ fun SettingsPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding(),
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
                     start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                     end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                     bottom = 0.dp
@@ -167,6 +170,8 @@ fun SettingsPage(
 
 @Composable
 @Preview
+@Preview(device = PIXEL_FOLD, showSystemUi = true)
+@Preview(device = PIXEL_TABLET, showSystemUi = true)
 fun SettingsPagePreview() {
     val providerRepo = remember { mutableStateOf("") }
     val backStack = rememberNavBackStack(MainView)
@@ -404,7 +409,6 @@ data class AboutElement(
 )
 
 @Composable
-@Preview
 fun AboutEntry(
     shape: Shape = RoundedCornerShape(24.dp),
     icon: ImageVector = Icons.Rounded.BugReport,
@@ -480,7 +484,6 @@ fun ResetSection(
 }
 
 @Composable
-@Preview
 fun ResetEntry(
     shape: Shape = RoundedCornerShape(24.dp),
     icon: ImageVector = Icons.Rounded.BugReport,

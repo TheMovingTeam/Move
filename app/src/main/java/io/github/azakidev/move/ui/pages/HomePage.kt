@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
@@ -57,6 +60,7 @@ import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
+import io.github.azakidev.move.ui.components.QrFAB
 import io.github.azakidev.move.ui.components.StopEmblemRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -65,7 +69,8 @@ fun HomePage(
     modifier: Modifier = Modifier,
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    backStack: NavBackStack<NavKey>
+    backStack: NavBackStack<NavKey>,
+    fabShouldAppear: Boolean = true,
 ) {
     val unorderedLastStops = model.stops.collectAsState().value
         .filter { model.lastStops.collectAsState().value.contains(it.id) }
@@ -78,14 +83,15 @@ fun HomePage(
     HomePageView(
         modifier = modifier,
         backStack = backStack,
-        favStopCarrousel = { FavStopCarousel(model, sheetModel) },
         lastStops = lastStops,
         lines = model.lines.collectAsState().value,
         onRecentOpen = { stopItem ->
             sheetModel.sheetStop = stopItem
             sheetModel.showBottomSheet = true
             model.saveLastStop(sheetModel.sheetStop.id)
-        }
+        },
+        favStopCarrousel = { FavStopCarousel(model, sheetModel) },
+        fabShouldAppear
     )
 }
 
@@ -97,13 +103,14 @@ fun HomePageView(
     lastStops: List<StopItem>,
     lines: List<LineItem>,
     onRecentOpen: (StopItem) -> Unit,
-    favStopCarrousel: @Composable() () -> Unit
+    favStopCarrousel: @Composable() () -> Unit,
+    fabShouldAppear: Boolean = true
 ) {
     val greetings = stringArrayResource(R.array.greetings)
     greetings.shuffle()
     val greeting = rememberSaveable { greetings.first() }
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 0.dp),
         topBar = {
             TopAppBar(
                 title = {
@@ -135,24 +142,21 @@ fun HomePageView(
                 })
         },
         floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.size(64.dp),
-                onClick = {
-                    backStack.add(QrScanner)
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
-                    imageVector = Icons.Rounded.QrCode,
-                    contentDescription = null
-                )
+            if (fabShouldAppear) {
+                QrFAB(backStack = backStack)
             }
         },
-        content = { padding ->
+        content = { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                        bottom = 0.dp
+                    )
+                    .padding(bottom = 0.dp)
                     .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
             ) {
@@ -245,6 +249,7 @@ fun HomePageView(
 @Preview
 fun HomePagePreview(
     modifier: Modifier = Modifier,
+    fabShouldAppear: Boolean = true,
 ) {
     val backStack = rememberNavBackStack(MainView)
     val lastStops = listOf(
@@ -271,7 +276,8 @@ fun HomePagePreview(
         backStack = backStack,
         lastStops = lastStops,
         lines = lineItems,
+        onRecentOpen = {},
         favStopCarrousel = { FavStopCarouselPreview() },
-        onRecentOpen = {}
+        fabShouldAppear = fabShouldAppear
     )
 }

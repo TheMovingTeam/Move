@@ -57,7 +57,7 @@ fun EmblemShape(
 
     Box(
         modifier = modifier
-            .clip(shape = shapeFromId(line.emblem.hashCode()))
+            .clip(shape = shapeFromId(line.emblem.hashCode() + line.provider.hashCode()))
             .background(color),
         contentAlignment = Alignment.Center
     ) {

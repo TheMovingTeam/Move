@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,6 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.LineItem
@@ -326,12 +329,17 @@ fun LinesPage(
                 }
             }
         },
-    ) { padding ->
+    ) { paddingValues ->
         val modifier = if (scrollBehavior != null) { Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) } else {Modifier}
         if (model.lines.collectAsState().value.count() != 0) {
             LineList(
                 modifier = modifier
-                    .padding(padding)
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                        bottom = 0.dp
+                    )
                     .background(MaterialTheme.colorScheme.background),
                 lineItems = model.lines.collectAsState().value,
                 stopItems = model.stops.collectAsState().value,
