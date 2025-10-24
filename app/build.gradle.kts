@@ -19,8 +19,8 @@ android {
         applicationId = "io.github.azakidev.move"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.9"
+        versionCode = 10
+        versionName = "0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
