@@ -90,15 +90,21 @@ data class EMTMadridEstimates(
 )
 
 fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
+    Log.d(LogTags.Parser.name, response)
     val responseJson = Json.decodeFromString<EMTMadridEstimateResponse>(response)
-    val estimatesByDestination = responseJson.data.first().estimates.groupBy { it.destination }
+    val estimatesByDestination = responseJson.data.first().estimates
+        .filterNot { it.estimateArrive == 999999 }
+        .groupBy { it.destination }
 
     val response = mutableListOf<LineTime>()
 
-    estimatesByDestination.forEach { (_, value) ->
+    estimatesByDestination
+        .forEach { (_, value) ->
         val estimates = value.groupBy { it.line }
         response += estimates.mapNotNull { (key, value) ->
+
             val line = lines.find { it.emblem == key }
+
             if (line != null) {
                 if (value.count() >= 2) {
                     LineTime(

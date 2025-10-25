@@ -114,6 +114,8 @@ fun StopPage(
             ?: ProviderItem()
     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
+    val lines = model.lines.collectAsState().value.filter { it.provider == provider.id }
+
     Surface {
         Box(
             modifier = Modifier
@@ -142,8 +144,8 @@ fun StopPage(
                     .padding(16.dp),
             ) {
                 StopTimes(
-                    lineItems = model.lines.collectAsState().value,
-                    providers = model.providers.collectAsState().value,
+                    lineItems = lines,
+                    provider = provider,
                     sheetModel = sheetModel
                 )
                 if (provider.capabilities.contains(Capabilities.Notifications)) {
@@ -294,7 +296,7 @@ fun StopPagePreview() {
     fun StopTimes(
         modifier: Modifier = Modifier,
         lineItems: List<LineItem>,
-        providers: List<ProviderItem>,
+        provider: ProviderItem,
         sheetModel: SheetStopViewModel
     ) {
         Text(
@@ -330,11 +332,8 @@ fun StopPagePreview() {
                         lineTimes
                             .sortedBy { it.nextTimeFirst }
                             .forEach {
-                                val line =
-                                    lineItems.find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
-                                val provider =
-                                    providers.find { providerItem -> providerItem.id == line.provider }
-                                        ?: ProviderItem()
+                                val line = lineItems
+                                    .find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
                                 val shape = listShape(count, lineTimes.count())
                                 count++
@@ -377,7 +376,8 @@ fun StopPagePreview() {
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             val text =
-                                                if (it.nextTimeFirst == 0) stringResource(R.string.soon) else it.nextTimeFirst.toString() + "m."
+                                                if (it.nextTimeFirst == 0) stringResource(R.string.soon)
+                                                else it.nextTimeFirst.toString() + "m."
                                             Text(
                                                 text = text
                                             )
@@ -438,7 +438,7 @@ fun StopPagePreview() {
         StopTimes(
             modifier = modifier,
             lineItems = lineItems,
-            providers = emptyList(),
+            provider = ProviderItem(),
             sheetModel = sheetModel
         )
     }

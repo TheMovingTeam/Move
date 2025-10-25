@@ -92,7 +92,7 @@ fun StopEntries(
         )
     }
 
-    val fetchedStops = stops.filter { lineItem.stops.contains(it.id) }
+    val fetchedStops = stops.filter { lineItem.stops.contains(it.id) && it.provider == lineItem.provider }
 
     val map = fetchedStops.associateBy { stopItem -> stopItem.id }
     val sortedStops = lineItem.stops.mapNotNull { id ->
@@ -140,7 +140,7 @@ fun StopEntries(
                         )
                         StopEmblemRow(
                             stopItem = stopItem,
-                            lines = lines.filterNot { it.emblem == lineItem.emblem }
+                            lines = lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) }
                         )
                     }
                 }

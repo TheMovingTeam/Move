@@ -230,7 +230,7 @@ fun HomePageView(
                                                 StopEmblemRow(
                                                     modifier = Modifier.padding(end = 12.dp),
                                                     stopItem = stopItem,
-                                                    lines = lines
+                                                    lines = lines.filter { it.provider == stopItem.provider }
                                                 )
                                             }
                                         }

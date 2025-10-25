@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +30,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastDistinctBy
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
+import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 
 @Composable
 fun EmblemShape(
-    line: LineItem, modifier: Modifier = Modifier, textStyle: TextStyle = MaterialTheme.typography.titleLarge
+    modifier: Modifier = Modifier,
+    line: LineItem,
+    textStyle: TextStyle = MaterialTheme.typography.titleLarge
 ) {
     val color = when (line.color) {
         null -> MaterialTheme.colorScheme.primary
@@ -62,6 +66,15 @@ fun EmblemShape(
         contentAlignment = Alignment.Center
     ) {
         val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
+        if (text == "DL") {
+            Log.w(
+                LogTags.MoveModel.name,
+                "DefaultLine encountered: \n" +
+                        "Line emblem: ${line.emblem} \n" +
+                        "Line name: ${line.name}\n" +
+                        "Line provider: ${line.provider}"
+            )
+        }
         Text(
             text = text,
             maxLines = 1,
@@ -119,7 +132,8 @@ fun ShapePreview() {
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
+                    val text =
+                        if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
                     Text(
                         text = text,
                         maxLines = 1,
@@ -141,7 +155,8 @@ fun ShapePreview() {
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
+                    val text =
+                        if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
                     Text(
                         text = text,
                         maxLines = 1,
@@ -180,7 +195,8 @@ fun ShapePreview() {
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                val text = if (line2.emblem.length <= 3) line2.emblem else line2.emblem.substring(0..2)
+                val text =
+                    if (line2.emblem.length <= 3) line2.emblem else line2.emblem.substring(0..2)
                 Text(
                     text = text,
                     maxLines = 1,
@@ -206,7 +222,8 @@ fun StopEmblemRow(
             alignment = Alignment.End
         )
     ) {
-        val lineItems = lines.filter { stopItem.lines.contains(it.id) }
+        val lineItems =
+            lines.filter { stopItem.lines.contains(it.id) && it.provider == stopItem.provider }
         val distinctLines = lineItems.fastDistinctBy { line -> line.emblem }.sortedBy { it.emblem }
         if (distinctLines.count() <= 3) {
             distinctLines.forEach { line ->
