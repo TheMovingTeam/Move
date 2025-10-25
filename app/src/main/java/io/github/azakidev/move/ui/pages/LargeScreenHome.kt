@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_9
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,6 +68,7 @@ fun LargeScreenHome(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape", showSystemUi = true)
 @Preview(device = PIXEL_FOLD, showSystemUi = true)
 @Preview(device = PIXEL_TABLET, showSystemUi = true)
 fun LargeScreenHomePagePreview(
@@ -87,18 +89,18 @@ fun LargeScreenHomePagePreview(
                     start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                     end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                     bottom = 0.dp
-                )
+                ),
         ) {
             HomePagePreview(
                 modifier = Modifier
                     .fillMaxWidth(.5f)
-                    .padding(start = 8.dp, bottom = 0.dp),
+                    .padding(0.dp),
                 fabShouldAppear = false
             )
             LinesPagePreview(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 0.dp)
+                    .padding(0.dp)
             )
         }
     }

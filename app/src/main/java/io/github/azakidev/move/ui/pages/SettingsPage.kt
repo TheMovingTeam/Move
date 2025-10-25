@@ -27,6 +27,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +60,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +68,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -75,12 +82,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.MainView
 import io.github.azakidev.move.Providers
 import io.github.azakidev.move.R
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.LogoHero
+import io.github.azakidev.move.ui.components.RowButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -95,8 +104,24 @@ fun SettingsPage(
     val state = rememberTextFieldState(
         initialText = providerRepo.value,
     )
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val gridCells = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+        StaggeredGridCells.Fixed(2)
+    } else {
+        StaggeredGridCells.Adaptive((WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND/2).dp)
+    }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+        null
+    } else {
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    }
+
+    val modifier = if (scrollBehavior != null) {
+        Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    } else {
+        Modifier
+    }
 
     Scaffold(
         topBar = {
@@ -130,9 +155,8 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
+        LazyVerticalStaggeredGrid(
+            modifier = modifier
                 .fillMaxSize()
                 .padding(
                     top = paddingValues.calculateTopPadding(),
@@ -140,30 +164,39 @@ fun SettingsPage(
                     end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                     bottom = 0.dp
                 )
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(scrollState)
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer),
+            columns = gridCells,
+            verticalItemSpacing = 8.dp
         ) {
-            AboutSection()
-            ProviderSection(
-                state,
-                providerRepo,
-                onClick = onProviderReset,
-                onBack = {
-                    backStack.add(Providers)
-                },
-                onboardingIsComplete
-            )
-            if (onboardingIsComplete) {
-                ResetSection(
-                    onAppReset = onAppReset,
-                    onOnboardingReset = onOnboardingReset
+            item {
+                LogoSection()
+            }
+            item {
+                AboutSection()
+            }
+            item {
+                ProviderSection(
+                    state,
+                    providerRepo,
+                    onClick = onProviderReset,
+                    onBack = {
+                        backStack.add(Providers)
+                    },
+                    onboardingIsComplete
                 )
             }
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            if (onboardingIsComplete) {
+                item {
+                    ResetSection(
+                        onAppReset = onAppReset,
+                        onOnboardingReset = onOnboardingReset
+                    )
+                    Spacer(
+                        modifier = Modifier.height(18.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -183,6 +216,125 @@ fun SettingsPagePreview() {
         onAppReset = {},
         onOnboardingReset = {}
     )
+}
+
+@Composable
+fun LogoSection(
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "moveCookieRotate")
+    val shapeAngle = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(6000, easing = LinearEasing), repeatMode = RepeatMode.Restart
+        ),
+    )
+    Column(
+        modifier = modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        LogoHero(
+            size = 128,
+            shapeAngle = shapeAngle.value.toInt()
+        )
+        val appName =
+            if (BuildConfig.DEBUG) stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME + "_BETA"
+            else stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = appName,
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
+}
+
+data class AboutElement(
+    val icon: ImageVector,
+    @param:StringRes val description: Int,
+    val link: String
+)
+
+@Composable
+fun AboutSection(
+    modifier: Modifier = Modifier
+) {
+    val elements = listOf(
+        AboutElement(
+            icon = Icons.Rounded.BugReport,
+            description = R.string.bugReport,
+            link = "mailto:zazaguichi@outlook.com"
+        ),
+        AboutElement(
+            icon = Icons.Rounded.AlternateEmail,
+            description = R.string.socialMedia,
+            link = "https://twitter.com/movetransit"
+        ),
+        AboutElement(
+            icon = Icons.Rounded.Info,
+            description = R.string.privacyPolicy,
+            link = "https://themovingteam.github.io/privacy/"
+        ),
+    )
+
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            text = stringResource(R.string.about),
+            style = MaterialTheme.typography.titleMedium
+        )
+        elements.forEach {
+            RowButton(
+                shape = listShape(elements.indexOf(it), elements.count(), 24.dp, 4.dp),
+                icon = it.icon,
+                description = stringResource(it.description),
+                onClick = {
+                    uriHandler.openUri(it.link)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ResetSection(
+    onAppReset: () -> Unit,
+    onOnboardingReset: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(R.string.reset),
+            style = MaterialTheme.typography.titleMedium
+        )
+        val shape = if (BuildConfig.DEBUG) listShape(0, 2, 24.dp, 4.dp)
+        else listShape(1, 1, 24.dp, 4.dp)
+        RowButton(
+            shape = shape,
+            icon = Icons.Rounded.Delete,
+            color = MaterialTheme.colorScheme.errorContainer,
+            description = stringResource(R.string.resetDesc),
+            onClick = onAppReset
+        )
+        if (BuildConfig.DEBUG) {
+            RowButton(
+                shape = listShape(1, 2, 24.dp, 4.dp),
+                icon = Icons.Rounded.BugReport,
+                color = MaterialTheme.colorScheme.errorContainer,
+                description = stringResource(R.string.resetOnboarding),
+                onClick = onOnboardingReset
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -325,203 +477,6 @@ fun ProviderSection(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun AboutSection(
-    modifier: Modifier = Modifier
-) {
-    val infiniteTransition = rememberInfiniteTransition(label = "moveCookieRotate")
-    val shapeAngle = infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing), repeatMode = RepeatMode.Restart
-        ),
-    )
-
-    val elements = listOf(
-        AboutElement(
-            icon = Icons.Rounded.BugReport,
-            description = R.string.bugReport,
-            link = "mailto:zazaguichi@outlook.com"
-        ),
-        AboutElement(
-            icon = Icons.Rounded.AlternateEmail,
-            description = R.string.socialMedia,
-            link = "https://twitter.com/movetransit"
-        ),
-        AboutElement(
-            icon = Icons.Rounded.Info,
-            description = R.string.privacyPolicy,
-            link = "https://themovingteam.github.io/privacy/"
-        ),
-    )
-
-    val uriHandler = LocalUriHandler.current
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Column(
-            modifier = modifier
-                .padding(top = 12.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            LogoHero(
-                size = 128,
-                shapeAngle = shapeAngle.value.toInt()
-            )
-            val appName =
-                if (BuildConfig.DEBUG) stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME + "_BETA"
-                else stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME
-            Text(
-                modifier = Modifier.padding(top = 8.dp),
-                text = appName,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            text = stringResource(R.string.about),
-            style = MaterialTheme.typography.titleMedium
-        )
-        elements.forEach {
-            AboutEntry(
-                shape = listShape(elements.indexOf(it), elements.count(), 24.dp, 4.dp),
-                icon = it.icon,
-                description = stringResource(it.description),
-                onClick = {
-                    uriHandler.openUri(it.link)
-                }
-            )
-        }
-    }
-}
-
-data class AboutElement(
-    val icon: ImageVector,
-    @param:StringRes val description: Int,
-    val link: String
-)
-
-@Composable
-fun AboutEntry(
-    shape: Shape = RoundedCornerShape(24.dp),
-    icon: ImageVector = Icons.Rounded.BugReport,
-    description: String = "Suggested action text",
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .clip(shape = shape)
-            .clickable(
-                onClick = onClick
-            )
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 12.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryFixed)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = description,
-                    tint = MaterialTheme.colorScheme.onSecondaryFixed
-                )
-            }
-            Text(
-                text = description
-            )
-        }
-    }
-}
-
-@Composable
-fun ResetSection(
-    onAppReset: () -> Unit,
-    onOnboardingReset: () -> Unit
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        text = stringResource(R.string.reset),
-        style = MaterialTheme.typography.titleMedium
-    )
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        val shape = if (BuildConfig.DEBUG) listShape(0, 2, 24.dp, 4.dp)
-        else listShape(1, 1, 24.dp, 4.dp)
-        ResetEntry(
-            shape = shape,
-            icon = Icons.Rounded.Delete,
-            description = stringResource(R.string.resetDesc),
-            onClick = onAppReset
-        )
-        if (BuildConfig.DEBUG) {
-            ResetEntry(
-                shape = listShape(1, 2, 24.dp, 4.dp),
-                icon = Icons.Rounded.BugReport,
-                description = stringResource(R.string.resetOnboarding),
-                onClick = onOnboardingReset
-            )
-        }
-    }
-}
-
-@Composable
-fun ResetEntry(
-    shape: Shape = RoundedCornerShape(24.dp),
-    icon: ImageVector = Icons.Rounded.BugReport,
-    description: String = "Destructive action text",
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .clip(shape = shape)
-            .clickable(
-                onClick = onClick
-            )
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 12.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = description,
-                    tint = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
-            Text(
-                text = description
-            )
         }
     }
 }
