@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 fun RowButton(
     shape: Shape = RoundedCornerShape(24.dp),
     color: Color = MaterialTheme.colorScheme.secondaryFixed,
+    iconColor: Color = MaterialTheme.colorScheme.onSecondaryFixed,
     icon: ImageVector = Icons.Rounded.BugReport,
     description: String = "Suggested action text",
     onClick: () -> Unit = {}
@@ -59,7 +60,7 @@ fun RowButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = description,
-                    tint = MaterialTheme.colorScheme.onSecondaryFixed
+                    tint = iconColor
                 )
             }
             Text(

@@ -15,6 +15,7 @@ import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
 import io.github.azakidev.move.data.providers.parseEMTValencia
 import io.github.azakidev.move.data.providers.parseFGVResponse
+import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -234,6 +235,20 @@ fun parseTimes(
                 Log.e(
                     LogTags.Networking.name,
                     "Couldn't parse EMT Madrid times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Tranvía de Murcia" -> {
+            val estimations: List<LineTime> = try {
+                parseTranviaMurcia(response)
+            } catch (e: Exception) {
+                Log.e(
+                    LogTags.Networking.name,
+                    "Couldn't parse Tranvía de Murcia times in ${e.message}",
                     e
                 )
                 return null

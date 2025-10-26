@@ -322,6 +322,7 @@ fun ResetSection(
             shape = shape,
             icon = Icons.Rounded.Delete,
             color = MaterialTheme.colorScheme.errorContainer,
+            iconColor = MaterialTheme.colorScheme.onErrorContainer,
             description = stringResource(R.string.resetDesc),
             onClick = onAppReset
         )
@@ -330,6 +331,7 @@ fun ResetSection(
                 shape = listShape(1, 2, 24.dp, 4.dp),
                 icon = Icons.Rounded.BugReport,
                 color = MaterialTheme.colorScheme.errorContainer,
+                iconColor = MaterialTheme.colorScheme.onErrorContainer,
                 description = stringResource(R.string.resetOnboarding),
                 onClick = onOnboardingReset
             )
