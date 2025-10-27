@@ -38,6 +38,7 @@ import io.github.azakidev.move.data.StopItem
 fun EmblemShape(
     modifier: Modifier = Modifier,
     line: LineItem,
+    emblemOverride: String? = null,
     textStyle: TextStyle = MaterialTheme.typography.titleLarge
 ) {
     val color = when (line.color) {
@@ -65,7 +66,8 @@ fun EmblemShape(
             .background(color),
         contentAlignment = Alignment.Center
     ) {
-        val text = if (line.emblem.length <= 3) line.emblem else line.emblem.substring(0..2)
+        val emblem = emblemOverride ?: line.emblem
+        val text = if (emblem.length <= 3) emblem else emblem.substring(0..2)
         if (text == "DL") {
             Log.w(
                 LogTags.MoveModel.name,

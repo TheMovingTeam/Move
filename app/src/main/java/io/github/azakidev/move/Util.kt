@@ -1,5 +1,6 @@
 package io.github.azakidev.move
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
@@ -22,8 +23,15 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.platform.Platform
+import java.security.cert.X509Certificate
 import java.util.Locale
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.streams.toList
+
 
 // App locations
 @Serializable
@@ -40,64 +48,81 @@ internal data object QrScanner : NavKey
 
 // Log tags
 enum class LogTags {
-    MoveModel,
-    Networking,
-    Parser,
+    MoveModel, Networking, Parser,
 }
 
 fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): Request.Builder {
 
     if (provider.name.contains("Vectalia")) { // Vectalia headers
-        return this
-            .header("Accept", "*/*")
-            .header("responseType", "ResponseType.json")
-            .header("followRedirects", "true")
-            .get()
+        return this.header("Accept", "*/*").header("responseType", "ResponseType.json")
+            .header("followRedirects", "true").get()
     }
 
     if (provider.name.contains("EMT Valencia")) { // EMT Valencia headers
-        return this
-            .header(
-                "X-WSSE",
-                "UsernameToken Username=\"7gH8m45w7A\", " +
-                        "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " +
-                        "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " +
-                        "Created=\"1760182100\""
-            )
-            .get()
+        return this.header(
+            "X-WSSE",
+            "UsernameToken Username=\"7gH8m45w7A\", " + "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " + "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " + "Created=\"1760182100\""
+        ).get()
     }
 
     if (provider.name.contains("EMT Madrid")) {
         val token = fetchEMTMadridToken(client)
         val content =
-            "{\n" +
-                "\"statistics\":\"\",\n" +
-                "\"cultureInfo\":\"\",\n" +
-                "\"Text_StopRequired_YN\":\"N\",\n" +
-                "\"Text_EstimationsRequired_YN\":\"Y\",\n" +
-                "\"Text_IncidencesRequired_YN\":\"N\",\n" +
-                "\"DateTime_Referenced_Incidencies_YYYYMMDD\":\"20180823\"\n" +
-            "}"
-        return this
-            .header(
-                "accessToken",
-                token
+            "{\n" + "\"statistics\":\"\",\n" + "\"cultureInfo\":\"\",\n" + "\"Text_StopRequired_YN\":\"N\",\n" + "\"Text_EstimationsRequired_YN\":\"Y\",\n" + "\"Text_IncidencesRequired_YN\":\"N\",\n" + "\"DateTime_Referenced_Incidencies_YYYYMMDD\":\"20180823\"\n" + "}"
+        return this.header(
+            "accessToken", token
+        ).post(
+            content.toRequestBody(
+                "application/json".toMediaTypeOrNull()
             )
-            .post(
-                content.toRequestBody(
-                    "application/json".toMediaTypeOrNull()
-                )
-            )
+        )
     }
 
     return this.get() // If none match, don't add any headers
 }
 
+fun OkHttpClient.Builder.trustSelfSignedCertsIfNeeded(provider: ProviderItem): OkHttpClient.Builder {
+
+    val trustManager = createInsecureTrustManager()
+    val sslSocketFactory = createInsecureSslSocketFactory(trustManager)
+
+    val insecureClient = this.sslSocketFactory(sslSocketFactory, trustManager)
+        .hostnameVerifier(createInsecureHostnameVerifier())
+
+    if (provider.name.contains("Tranvía de Murcia")) {
+        return insecureClient
+    }
+
+    return this // Default case
+}
+
+@SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
+private fun createInsecureTrustManager(): X509TrustManager = object : X509TrustManager {
+    override fun checkClientTrusted(
+        chain: Array<X509Certificate>,
+        authType: String,
+    ) {
+    }
+
+    override fun checkServerTrusted(
+        chain: Array<X509Certificate>,
+        authType: String,
+    ) {
+    }
+
+    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+}
+
+private fun createInsecureSslSocketFactory(trustManager: TrustManager): SSLSocketFactory =
+    Platform.get().newSSLContext().apply {
+        init(null, arrayOf(trustManager), null)
+    }.socketFactory
+
+private fun createInsecureHostnameVerifier(): HostnameVerifier = HostnameVerifier { _, _ -> true }
+
+
 fun parseTimes(
-    response: String,
-    provider: ProviderItem,
-    stopItem: StopItem,
-    lines: List<LineItem>
+    response: String, provider: ProviderItem, stopItem: StopItem, lines: List<LineItem>
 ): List<LineTime>? {
     Log.d(LogTags.Networking.name, "Fetching for stop: ${stopItem.name}")
     when (provider.name) {
@@ -121,9 +146,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Vectalia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -135,9 +158,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Vectalia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -149,9 +170,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Vectalia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -163,9 +182,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Vectalia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -177,9 +194,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Vectalia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -191,9 +206,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Tram Alacant times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Tram Alacant times in ${e.message}", e
                 )
                 return null
             }
@@ -205,9 +218,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse Metrovalencia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse Metrovalencia times in ${e.message}", e
                 )
                 return null
             }
@@ -219,9 +230,7 @@ fun parseTimes(
                 parseEMTValencia(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse EMT Valencia times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse EMT Valencia times in ${e.message}", e
                 )
                 return null
             }
@@ -233,9 +242,7 @@ fun parseTimes(
                 parseEMTMadrid(response, lines)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
-                    "Couldn't parse EMT Madrid times in ${e.message}",
-                    e
+                    LogTags.Networking.name, "Couldn't parse EMT Madrid times in ${e.message}", e
                 )
                 return null
             }
@@ -263,10 +270,7 @@ fun parseTimes(
 }
 
 fun listShape(
-    count: Int,
-    total: Int,
-    roundingLarge: Dp = 12.dp,
-    roundingSmall: Dp = 4.dp
+    count: Int, total: Int, roundingLarge: Dp = 12.dp, roundingSmall: Dp = 4.dp
 ): Shape {
     if (total == 1) {
         return RoundedCornerShape(
@@ -301,44 +305,23 @@ fun listShape(
 }
 
 fun String.fmt(): String {
-    return this
-        .lowercase()
-        .replace("-", " - ")
-        .replace("–", " - ")
-        .replace("—", " - ")
-        .replace(">", " > ")
-        .replace("(", " ( ")
-        .replace("/", " / ")
-        .replace(".", ". ")
-        .replace("'", "' ")
-        .replace("\"", "")
-        .replace("_", " ")
-        .replace("avda", "av.")
-        .replace("- obres", "( obres )")
-        .replace("..", ".")
-        .replace("  ", " ")
-        .replace("- >", ">")
-        .split(' ')
-        .map { word ->
-            if (word.uppercase().chars().allMatch { "MDCLXVI".chars().toList().contains(it) }) { // Check if it's a roman numeral
+    return this.lowercase().replace("-", " - ").replace("–", " - ").replace("—", " - ")
+        .replace(">", " > ").replace("(", " ( ").replace("/", " / ").replace(".", ". ")
+        .replace("'", "' ").replace("\"", "").replace("_", " ").replace("avda", "av.")
+        .replace("- obres", "( obres )").replace("..", ".").replace("  ", " ").replace("- >", ">")
+        .split(' ').map { word ->
+            if (word.uppercase().chars()
+                    .allMatch { "MDCLXVI".chars().toList().contains(it) }
+            ) { // Check if it's a roman numeral
                 word.uppercase()
             } else {
                 word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             }
-        }
-        .fastJoinToString(" ")
-        .replace("c/", "C/")
-        .replace("C/", "C/ ")
-        .replace("' ", "'")
-        .replace("( ", "(")
-        .replace(" )", ")")
-        .replace(" / ", "/")
+        }.fastJoinToString(" ").replace("c/", "C/").replace("C/", "C/ ").replace("' ", "'")
+        .replace("( ", "(").replace(" )", ")").replace(" / ", "/")
 }
 
 fun String.fmtSearch(): String {
-    return this
-        .lowercase()
-        .toList()
-        .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
+    return this.lowercase().toList().filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
         .joinToString("")
 }

@@ -17,6 +17,7 @@ import io.github.azakidev.move.data.db.toStopEntity
 import io.github.azakidev.move.data.db.toStopItem
 import io.github.azakidev.move.formRequest
 import io.github.azakidev.move.parseTimes
+import io.github.azakidev.move.trustSelfSignedCertsIfNeeded
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -460,13 +461,17 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 .replace("@stop", stopItem.id.toString())
                 .replace("@comId", stopItem.comId.toString())
 
-            val client = OkHttpClient()
+            val client = OkHttpClient.Builder()
+                .trustSelfSignedCertsIfNeeded(provider)
+                .build()
             val request = Request.Builder()
 
             try {
                 val requestBuilt = request.formRequest(client, provider).url(url).build()
 
-                val response = client.newCall(requestBuilt).execute()
+                val response = client
+                    .newCall(requestBuilt)
+                    .execute()
 
                 val responseText = response.body!!.string()
                 try {

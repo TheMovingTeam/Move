@@ -114,7 +114,8 @@ fun StopPage(
             ?: ProviderItem()
     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
-    val lines = model.lines.collectAsState().value.filter { it.provider == provider.id }
+    val lines = model.lines.collectAsState().value
+        .filter { it.provider == provider.id }
 
     Surface {
         Box(
@@ -332,6 +333,7 @@ fun StopPagePreview() {
                         lineTimes
                             .sortedBy { it.nextTimeFirst }
                             .forEach {
+
                                 val line = lineItems
                                     .find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
@@ -360,7 +362,8 @@ fun StopPagePreview() {
                                                 modifier = Modifier
                                                     .padding(8.dp)
                                                     .size(48.dp),
-                                                line = line
+                                                line = line,
+                                                emblemOverride = it.emblemOverride
                                             )
                                             Text(
                                                 modifier = Modifier.fillMaxWidth(.60f),

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.0"
+xmlutil = "0.91.2"
 kotlin = "2.2.21"
 junit = "4.13.2"
 activityCompose = "1.11.0"
@@ -84,6 +85,8 @@ com-google-devtools-ksp-gradle-plugin = { group = "com.google.devtools.ksp", nam
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "cameraCompose" }
+io-github-pdvrieze-xmlutil-core-android = { group = "io.github.pdvrieze.xmlutil", module = "io.github.pdvrieze.xmlutil:core-android", version.ref = "xmlutil" }
+io-github-pdvrieze-xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

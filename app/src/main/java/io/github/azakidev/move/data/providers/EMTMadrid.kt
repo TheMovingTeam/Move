@@ -3,6 +3,7 @@
 package io.github.azakidev.move.data.providers
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
@@ -90,7 +91,7 @@ data class EMTMadridEstimates(
 )
 
 fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
-    Log.d(LogTags.Parser.name, response)
+
     val responseJson = Json.decodeFromString<EMTMadridEstimateResponse>(response)
     val estimatesByDestination = responseJson.data.first().estimates
         .filterNot { it.estimateArrive == 999999 }
@@ -103,12 +104,18 @@ fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
         val estimates = value.groupBy { it.line }
         response += estimates.mapNotNull { (key, value) ->
 
-            val line = lines.find { it.emblem == key }
+            val line = lines.filter{it.provider == 10}.find { it.emblem == key }
+
+            val color = if (line?.color == LineItem().color) {
+                Color(0xff0072ce)
+            } else null
 
             if (line != null) {
                 if (value.count() >= 2) {
                     LineTime(
                         lineId = line.id,
+                        emblemOverride = key,
+                        colorOverride = color,
                         destination = value[0].destination,
                         nextTimeFirst = value[0].estimateArrive / 60,
                         nextTimeSecond = value[1].estimateArrive / 60
@@ -116,6 +123,8 @@ fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
                 } else {
                     LineTime(
                         lineId = line.id,
+                        emblemOverride = key,
+                        colorOverride = color,
                         destination = value[0].destination,
                         nextTimeFirst = value[0].estimateArrive / 60,
                         nextTimeSecond = null

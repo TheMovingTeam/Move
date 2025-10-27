@@ -3,6 +3,7 @@ package io.github.azakidev.move.data
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class StopItem(
@@ -19,8 +20,8 @@ data class StopItem(
 
     val notifications: List<String> = emptyList()
 ) {
-    private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())
-    val lineTimes = _lineTimes.asStateFlow()
+    @Transient private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())
+    @Transient val lineTimes = _lineTimes.asStateFlow()
     fun setTimeTable(times: List<LineTime>) {
         _lineTimes.value = times
     }

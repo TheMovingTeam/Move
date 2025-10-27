@@ -210,6 +210,7 @@ fun HeroCarrouselItem(
                         EmblemShape(
                             modifier = Modifier.size(26.dp),
                             line = line,
+                            emblemOverride = lineTime.emblemOverride,
                             textStyle = MaterialTheme.typography.titleSmall
                         )
                         Text(

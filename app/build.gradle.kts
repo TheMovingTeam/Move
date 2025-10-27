@@ -92,6 +92,8 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.gson)
     implementation(libs.com.google.devtools.ksp.gradle.plugin)
+    implementation(libs.io.github.pdvrieze.xmlutil.core.android)
+    implementation(libs.io.github.pdvrieze.xmlutil.serialization)
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)

@@ -1,11 +1,12 @@
 package io.github.azakidev.move.data
 
-import kotlinx.serialization.Serializable
+import androidx.compose.ui.graphics.Color
 
-@Serializable
 data class LineTime(
-    val lineId: Int = 0,
-    var nextTimeFirst: Int = 0,
+    val lineId: Int,
+    var nextTimeFirst: Int,
     var nextTimeSecond: Int? = null,
-    val destination: String? = null
+    val destination: String? = null,
+    val emblemOverride: String? = null,
+    val colorOverride: Color? = null
 )
