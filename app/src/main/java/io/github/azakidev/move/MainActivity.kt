@@ -19,10 +19,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -54,9 +52,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -69,10 +64,8 @@ import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.HomePage
-import io.github.azakidev.move.ui.pages.HomePagePreview
 import io.github.azakidev.move.ui.pages.LargeScreenHome
 import io.github.azakidev.move.ui.pages.LinesPage
-import io.github.azakidev.move.ui.pages.LinesPagePreview
 import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
