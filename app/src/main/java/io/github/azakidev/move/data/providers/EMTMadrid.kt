@@ -104,18 +104,12 @@ fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
         val estimates = value.groupBy { it.line }
         response += estimates.mapNotNull { (key, value) ->
 
-            val line = lines.filter{it.provider == 10}.find { it.emblem == key }
-
-            val color = if (line?.color == LineItem().color) {
-                Color(0xff0072ce)
-            } else null
+            val line = lines.find { it.emblem == key }
 
             if (line != null) {
                 if (value.count() >= 2) {
                     LineTime(
                         lineId = line.id,
-                        emblemOverride = key,
-                        colorOverride = color,
                         destination = value[0].destination,
                         nextTimeFirst = value[0].estimateArrive / 60,
                         nextTimeSecond = value[1].estimateArrive / 60
@@ -123,8 +117,6 @@ fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
                 } else {
                     LineTime(
                         lineId = line.id,
-                        emblemOverride = key,
-                        colorOverride = color,
                         destination = value[0].destination,
                         nextTimeFirst = value[0].estimateArrive / 60,
                         nextTimeSecond = null

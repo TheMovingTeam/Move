@@ -143,7 +143,7 @@ fun parseTimes(
 
         "Vectalia Alicante" -> {
             val estimations: List<LineTime> = try {
-                parseVectaliaTimes(response, lines)
+                parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
@@ -155,7 +155,7 @@ fun parseTimes(
 
         "Vectalia Albacete" -> {
             val estimations: List<LineTime> = try {
-                parseVectaliaTimes(response, lines)
+                parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
@@ -167,7 +167,7 @@ fun parseTimes(
 
         "Vectalia Cáceres" -> {
             val estimations: List<LineTime> = try {
-                parseVectaliaTimes(response, lines)
+                parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
@@ -179,7 +179,7 @@ fun parseTimes(
 
         "Vectalia Alcoi" -> {
             val estimations: List<LineTime> = try {
-                parseVectaliaTimes(response, lines)
+                parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
@@ -191,7 +191,7 @@ fun parseTimes(
 
         "Vectalia Mérida" -> {
             val estimations: List<LineTime> = try {
-                parseVectaliaTimes(response, lines)
+                parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
@@ -239,7 +239,7 @@ fun parseTimes(
 
         "EMT Madrid" -> {
             val estimations: List<LineTime> = try {
-                parseEMTMadrid(response, lines)
+                parseEMTMadrid(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
                     LogTags.Networking.name, "Couldn't parse EMT Madrid times in ${e.message}", e
@@ -305,23 +305,45 @@ fun listShape(
 }
 
 fun String.fmt(): String {
-    return this.lowercase().replace("-", " - ").replace("–", " - ").replace("—", " - ")
-        .replace(">", " > ").replace("(", " ( ").replace("/", " / ").replace(".", ". ")
-        .replace("'", "' ").replace("\"", "").replace("_", " ").replace("avda", "av.")
-        .replace("- obres", "( obres )").replace("..", ".").replace("  ", " ").replace("- >", ">")
-        .split(' ').map { word ->
-            if (word.uppercase().chars()
-                    .allMatch { "MDCLXVI".chars().toList().contains(it) }
+    return this
+        .lowercase()
+        .replace("-", " - ")
+        .replace("–", " - ")
+        .replace("—", " - ")
+        .replace(">", " > ")
+        .replace("(", " ( ")
+        .replace("/", " / ")
+        .replace(".", ". ")
+        .replace("'", "' ")
+        .replace("\"", "")
+        .replace("_", " ")
+        .replace("avda", "av.")
+        .replace("- obres", "( obres )")
+        .replace("..", ".")
+        .replace("  ", " ")
+        .replace("- >", ">")
+        .split(' ')
+        .map { word ->
+            if (word.uppercase().chars().allMatch { "MDCLXVI".chars().toList().contains(it) }
             ) { // Check if it's a roman numeral
                 word.uppercase()
             } else {
                 word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             }
-        }.fastJoinToString(" ").replace("c/", "C/").replace("C/", "C/ ").replace("' ", "'")
-        .replace("( ", "(").replace(" )", ")").replace(" / ", "/")
+        }
+        .fastJoinToString(" ")
+        .replace("c/", "C/")
+        .replace("C/", "C/ ")
+        .replace("' ", "'")
+        .replace("( ", "(")
+        .replace(" )", ")")
+        .replace(" / ", "/")
 }
 
 fun String.fmtSearch(): String {
-    return this.lowercase().toList().filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
+    return this
+        .lowercase()
+        .toList()
+        .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
         .joinToString("")
 }

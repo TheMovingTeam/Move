@@ -74,7 +74,6 @@ import kotlin.concurrent.schedule
 fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-//    nestedScroll: NestedScrollConnection
 ) {
     var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
     var roundness: Int
@@ -110,11 +109,15 @@ fun StopPage(
     }
 
     val provider =
-        model.providers.collectAsState().value.find { it.id == sheetModel.sheetStop.provider }
+        model.providers
+            .collectAsState().value
+            .find { it.id == sheetModel.sheetStop.provider }
             ?: ProviderItem()
+
     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
-    val lines = model.lines.collectAsState().value
+    val lines = model.lines
+        .collectAsState().value
         .filter { it.provider == provider.id }
 
     Surface {

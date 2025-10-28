@@ -68,15 +68,7 @@ fun EmblemShape(
     ) {
         val emblem = emblemOverride ?: line.emblem
         val text = if (emblem.length <= 3) emblem else emblem.substring(0..2)
-        if (text == "DL") {
-            Log.w(
-                LogTags.MoveModel.name,
-                "DefaultLine encountered: \n" +
-                        "Line emblem: ${line.emblem} \n" +
-                        "Line name: ${line.name}\n" +
-                        "Line provider: ${line.provider}"
-            )
-        }
+
         Text(
             text = text,
             maxLines = 1,
