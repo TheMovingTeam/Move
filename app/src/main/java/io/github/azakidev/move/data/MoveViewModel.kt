@@ -201,7 +201,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 Log.e(
                     LogTags.MoveModel.name,
-                    "Error fetching providers list: ${e.localizedMessage}", e)
+                    "Error fetching providers list: ${e.localizedMessage}", e
+                )
                 // Fallback to loading from DB if network fails
                 loadProvidersFromDb()
             }
@@ -230,7 +231,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         if (currentRepoUrl.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
                 LogTags.MoveModel.name,
-                "Repo URL is empty, cannot fetch new lines/stops data.")
+                "Repo URL is empty, cannot fetch new lines/stops data."
+            )
             // Data will be loaded from DB via the collectors if available.
             return
         }
@@ -340,6 +342,22 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     // When a saved provider is removed, also remove its lines and stops from the DB
     fun removeSavedProvider(providerId: Int) {
+
+        val stopsToStopLoading =
+            _stopsToLoad.filter { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+
+        val favStopsToKeep =
+            favouriteStops.value.filterNot { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+
+        val lastStopsToKeep =
+            lastStops.value.filterNot { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+        
+        viewModelScope.launch {
+            _stopsToLoad -= stopsToStopLoading
+            _userStore.saveFavouriteStops(favStopsToKeep)
+            _userStore.saveLastStops(lastStopsToKeep)
+        }
+
         viewModelScope.launch(Dispatchers.IO) { // Perform DB ops on IO dispatcher
             val currentSaved = savedProviders.value.toMutableList()
             if (currentSaved.remove(providerId)) {
@@ -348,9 +366,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 // Remove related data from local database
                 _lineDao.deleteLinesForProvider(providerId)
                 _stopDao.deleteStopsForProvider(providerId)
+
                 Log.d(
                     LogTags.MoveModel.name,
-                    "Removed provider $providerId and its data.")
+                    "Removed provider $providerId and its data."
+                )
             }
         }
     }
@@ -365,6 +385,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 removeSavedProvider(it)
             }
             clearLastStops()
+            _stopsToLoad.removeAll(_stopsToLoad)
             // Nuke all temporary data
             _providers.value = emptyList()
             _lines.value = emptyList()
