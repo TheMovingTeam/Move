@@ -36,6 +36,11 @@
     <string name="noAlerts">There are no alerts for this stop</string>
     <string name="privacyPolicy">Privacy Policy</string>
 
+    <string name="stopNameFilter">Stop name</string>
+    <string name="stopComIdFilter">Stop ID</string>
+    <string name="lineNameFilter">Line name</string>
+    <string name="lineEmblemFilter">Line emblem</string>
+
     <string-array name="greetings">
         <item>Going somewhere?</item>
         <item>Let\'s go!</item>

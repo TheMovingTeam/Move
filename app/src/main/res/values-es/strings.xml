@@ -36,6 +36,11 @@
     <string name="noAlerts">No hay ninguna alerta en esta parada</string>
     <string name="privacyPolicy">Política de Privacidad</string>
 
+    <string name="stopNameFilter">Nombre de parada</string>
+    <string name="stopComIdFilter">ID de parada</string>
+    <string name="lineNameFilter">Nombre de línea</string>
+    <string name="lineEmblemFilter">Emblema de línea</string>
+
     <string-array name="greetings">
         <item>¿Vas a algún sitio?</item>
         <item>¡Adelante!</item>
