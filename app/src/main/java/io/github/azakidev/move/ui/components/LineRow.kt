@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -123,20 +125,22 @@ fun StopEntries(
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding( horizontal = 12.dp, vertical = 6.dp)
-                            .fillMaxWidth(),
+                            .padding( horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             modifier = Modifier
-                                .padding(vertical = 6.dp)
-                                .fillMaxWidth(.6f),
+                                .weight(1f)
+                                .padding(vertical = 6.dp),
                             text = stopItem.name.fmt(),
                             fontSize = 16.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(
+                            modifier = Modifier.width(16.dp)
                         )
                         StopEmblemRow(
                             stopItem = stopItem,

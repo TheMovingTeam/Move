@@ -5,6 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -203,43 +208,53 @@ fun ShapePreview() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StopEmblemRow(
     modifier: Modifier = Modifier,
     stopItem: StopItem,
     lines: List<LineItem>
 ) {
-    Row(
+    val lineItems =
+        lines.filter { stopItem.lines.contains(it.id) && it.provider == stopItem.provider }
+    val distinctLines = lineItems.fastDistinctBy { line -> line.emblem }.sortedBy { it.emblem }
+    FlowRow (
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
             space = 4.dp,
             alignment = Alignment.End
-        )
+        ),
+        maxLines = 1,
     ) {
-        val lineItems =
-            lines.filter { stopItem.lines.contains(it.id) && it.provider == stopItem.provider }
-        val distinctLines = lineItems.fastDistinctBy { line -> line.emblem }.sortedBy { it.emblem }
-        if (distinctLines.count() <= 3) {
-            distinctLines.forEach { line ->
-                EmblemShape(
-                    modifier = Modifier.size(36.dp),
-                    line = line,
-                    textStyle = MaterialTheme.typography.titleSmall
-                )
-            }
-        } else {
-            distinctLines.take(2).forEach { line ->
-                EmblemShape(
-                    modifier = Modifier.size(36.dp),
-                    line = line,
-                    textStyle = MaterialTheme.typography.titleSmall
-                )
-            }
-            Icon(
+        distinctLines.forEach { line ->
+            EmblemShape(
                 modifier = Modifier.size(36.dp),
-                imageVector = Icons.Rounded.MoreHoriz,
-                contentDescription = null
+                line = line,
+                textStyle = MaterialTheme.typography.titleSmall
             )
         }
     }
+}
+
+@Composable @Preview
+fun StopEmblemRowPreview() {
+    val stopItem = StopItem(
+        id = 1,
+        name = "A Stop item with a very long name lmao",
+        lines = (1..5).toList()
+    )
+
+    val lines = mutableListOf<LineItem>()
+
+    stopItem.lines.forEach {
+        lines += LineItem(
+            id = it,
+            emblem = "L$it"
+        )
+    }
+
+    StopEmblemRow(
+        stopItem = stopItem,
+        lines = lines
+    )
 }

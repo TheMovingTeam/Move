@@ -50,14 +50,14 @@ fun LargeScreenHome(
         ) {
             HomePage(
                 modifier = Modifier
-                    .fillMaxWidth(.5f)
+                    .weight(1f)
                     .padding(start = 8.dp, bottom = 0.dp),
                 fabShouldAppear = false,
                 model = model, sheetModel = sheetModel, backStack = backStack
             )
             LinesPage(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .weight(1f)
                     .padding(bottom = 0.dp),
                 appBarCanScroll = false,
                 model = model, sheetModel = sheetModel

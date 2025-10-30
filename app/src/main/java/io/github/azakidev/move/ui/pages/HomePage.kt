@@ -7,15 +7,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Settings
@@ -30,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -219,16 +225,24 @@ fun HomePageView(
                                             ) {
                                                 Text(
                                                     modifier = Modifier
-                                                        .fillMaxWidth(0.62f)
-                                                        .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
+                                                        .padding(
+                                                            start = 12.dp,
+                                                            top = 12.dp,
+                                                            bottom = 12.dp
+                                                        ),
                                                     text = stopItem.name.fmt(),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                     fontSize = 16.sp,
-                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Spacer(
+                                                    modifier = Modifier.width(16.dp)
                                                 )
                                                 StopEmblemRow(
-                                                    modifier = Modifier.padding(end = 12.dp),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .padding(end = 12.dp),
                                                     stopItem = stopItem,
                                                     lines = lines.filter { it.provider == stopItem.provider }
                                                 )
