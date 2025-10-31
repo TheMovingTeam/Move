@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -72,15 +73,13 @@ fun StopEntries(
     isExpanded: Boolean,
     onClick: (StopItem) -> Unit
 ) {
-    val spacialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
-    val effectSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     // Opening Animation
     val expandTransition = remember {
         expandVertically(
             expandFrom = Alignment.Top,
-            animationSpec = spacialSpec
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         ) + fadeIn(
-            animationSpec = effectSpec
+            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
         )
     }
 
@@ -88,19 +87,17 @@ fun StopEntries(
     val collapseTransition = remember {
         shrinkVertically(
             shrinkTowards = Alignment.Top,
-            animationSpec = spacialSpec
+            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         ) + fadeOut(
-            animationSpec = effectSpec
+            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
         )
     }
 
-    val fetchedStops = stops.filter { lineItem.stops.contains(it.id) && it.provider == lineItem.provider }
-
-    val map = fetchedStops.associateBy { stopItem -> stopItem.id }
+    val map = stops.associateBy { stopItem -> stopItem.id }
     val sortedStops = lineItem.stops.mapNotNull { id ->
         map[id]
     }
-    
+
     AnimatedVisibility(
         visible = isExpanded,
         enter = expandTransition,
@@ -125,13 +122,12 @@ fun StopEntries(
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding( horizontal = 12.dp, vertical = 6.dp),
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             modifier = Modifier
-                                .weight(1f)
                                 .padding(vertical = 6.dp),
                             text = stopItem.name.fmt(),
                             fontSize = 16.sp,
@@ -143,6 +139,7 @@ fun StopEntries(
                             modifier = Modifier.width(16.dp)
                         )
                         StopEmblemRow(
+                            modifier = Modifier.weight(1f),
                             stopItem = stopItem,
                             lines = lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) }
                         )
@@ -181,7 +178,7 @@ fun LineRow(
         Column {
             LineEntry(line = lineItem)
             StopEntries(
-                stops = stops,
+                stops = stops.filter { lineItem.stops.contains(it.id) && it.provider == lineItem.provider },
                 lines = lines,
                 lineItem = lineItem,
                 isExpanded = expanded.value,
@@ -195,70 +192,48 @@ fun LineRow(
 @Composable
 fun LineRowPreview() {
     val stops = listOf(
-            StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
-            StopItem(id = 2, name = "Stop 2"),
-            StopItem(id = 3, name = "Stop 3")
-        )
-    val lines = listOf(
-        LineItem(id = 1, name = "Line 1", emblem = "L1"),
-        LineItem(id = 2, name = "Line 2", emblem = "L2"),
-        LineItem(id = 3, name = "Line 3", emblem = "L3")
-    )
-    val expanded = remember { mutableStateOf(false) }
-    LineRow(
-        stops = stops,
-        lines = lines,
-        lineItem = LineItem(stops = listOf(1, 2, 3)),
-        expanded = expanded,
-        onClick = {}
-    )
-}
-
-@Preview
-@Composable
-fun LineRowLongPreview() {
-    val stops = listOf(
         StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
         StopItem(id = 2, name = "Stop 2"),
         StopItem(id = 3, name = "Stop 3")
     )
     val lines = listOf(
-        LineItem(id = 1, name = "Line 1", emblem = "L1"),
-        LineItem(id = 2, name = "Line 2", emblem = "L2"),
-        LineItem(id = 3, name = "Line 3", emblem = "L3")
-    )
-    val expanded = remember { mutableStateOf(false) }
-    LineRow(
-        stops = stops,
-        lines = lines,
-        lineItem = LineItem(
+        LineItem(id = 1, name = "Line 1", emblem = "L1", stops = (1..3).toList()),
+        LineItem(
+            id = 2,
             name = "A line with an obscenely long name to which I would rather not read but I might need regardless",
+            emblem = "ELNL",
             stops = listOf(1, 2, 3)
-        ),
-        expanded = expanded,
-        onClick = {}
+        )
     )
-}
-
-@Preview
-@Composable
-fun LineRowExpandedPreview() {
-    val stops = listOf(
-        StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2, 3)),
-        StopItem(id = 2, name = "Stop 2"),
-        StopItem(id = 3, name = "Stop 3")
-    )
-    val lines = listOf(
-        LineItem(id = 1, name = "Line 1", emblem = "L1"),
-        LineItem(id = 2, name = "Line 2", emblem = "L2"),
-        LineItem(id = 3, name = "Line 3", emblem = "L3")
-    )
+    val notExpanded = remember { mutableStateOf(false) }
     val expanded = remember { mutableStateOf(true) }
-    LineRow(
-        stops = stops,
-        lines = lines,
-        lineItem = LineItem(stops = listOf(1, 3, 2)),
-        expanded = expanded,
-        onClick = {}
-    )
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LineRow(
+            stops = stops,
+            lines = lines,
+            lineItem = lines[0],
+            expanded = notExpanded,
+            onClick = {}
+        )
+
+        LineRow(
+            stops = stops,
+            lines = lines,
+            lineItem = lines[1],
+            expanded = notExpanded,
+            onClick = {}
+        )
+
+        LineRow(
+            stops = stops,
+            lines = lines,
+            lineItem = lines[0],
+            expanded = expanded,
+            onClick = {}
+        )
+    }
+
 }

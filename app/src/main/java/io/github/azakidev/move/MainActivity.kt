@@ -100,101 +100,107 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    if (model.onboardingStatus.collectAsState().value) {
-                        val backStack = rememberNavBackStack(MainView)
-                        val context = LocalContext.current
+                    AnimatedContent(model.onboardingStatus.collectAsState().value) { state ->
+                        when (state) {
+                            true -> {
+                                val backStack = rememberNavBackStack(MainView)
+                                val context = LocalContext.current
 
-                        NavDisplay(
-                            modifier = Modifier
-                                .blur(blur.dp),
-                            backStack = backStack,
-                            onBack = { backStack.removeLastOrNull() },
-                            transitionSpec = {
-                                // Slide in from right when navigating forward
-                                slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
-                                    targetScale = 0.9f,
-                                    transformOrigin = TransformOrigin(0f, 0.5f),
-                                    animationSpec = MotionScheme.standard().defaultSpatialSpec()
-                                )
-                            },
-                            popTransitionSpec = {
-                                // Slide in from left when navigating back
-                                scaleIn(
-                                    initialScale = 0.9f,
-                                    transformOrigin = TransformOrigin(0f, 0.5f),
-                                    animationSpec = tween(500)
-                                ) togetherWith slideOutHorizontally(
-                                    animationSpec = tween(500)
-                                ) { it }
-                            },
-                            predictivePopTransitionSpec = {
-                                // Slide in from left when navigating back
-                                scaleIn(
-                                    initialScale = 0.9f,
-                                    transformOrigin = TransformOrigin(0f, 0.5f),
-                                    animationSpec = tween(200)
-                                ) + fadeIn(
-                                    initialAlpha = 0.2f,
-                                    animationSpec = tween(200)
-                                ) togetherWith scaleOut(
-                                    targetScale = 0.9f,
-                                    transformOrigin = TransformOrigin(0f, 0.5f),
-                                    animationSpec = tween(200)
-                                ) + slideOutHorizontally(
-                                    animationSpec = tween(200, easing = EaseInCirc),
-                                    targetOffsetX = { it }
-                                )
+                                NavDisplay(
+                                    modifier = Modifier
+                                        .blur(blur.dp),
+                                    backStack = backStack,
+                                    onBack = { backStack.removeLastOrNull() },
+                                    transitionSpec = {
+                                        // Slide in from right when navigating forward
+                                        slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
+                                            targetScale = 0.9f,
+                                            transformOrigin = TransformOrigin(0f, 0.5f),
+                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                        )
+                                    },
+                                    popTransitionSpec = {
+                                        // Slide in from left when navigating back
+                                        scaleIn(
+                                            initialScale = 0.9f,
+                                            transformOrigin = TransformOrigin(0f, 0.5f),
+                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                        ) togetherWith slideOutHorizontally(
+                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                        ) { it }
+                                    },
+                                    predictivePopTransitionSpec = {
+                                        // Slide in from left when navigating back
+                                        scaleIn(
+                                            initialScale = 0.9f,
+                                            transformOrigin = TransformOrigin(0f, 0.5f),
+                                            animationSpec = tween(200, easing = EaseInCirc)
+                                        ) + fadeIn(
+                                            initialAlpha = 0.2f,
+                                            animationSpec = tween(200, easing = EaseInCirc)
+                                        ) togetherWith scaleOut(
+                                            targetScale = 0.9f,
+                                            transformOrigin = TransformOrigin(0f, 0.5f),
+                                            animationSpec = tween(200, easing = EaseInCirc)
+                                        ) + slideOutHorizontally(
+                                            animationSpec = tween(200, easing = EaseInCirc),
+                                            targetOffsetX = { it }
+                                        )
 
-                            },
-                            entryProvider = entryProvider {
-                                entry<MainView> {
-                                    AppNavigator(
-                                        model,
-                                        sheetState,
-                                        sheetModel,
-                                        backStack
-                                    )
-                                }
-                                entry<Providers> {
-                                    ProvidersPage(model, backStack)
-                                }
-                                entry<Settings> {
-                                    val invalidText = stringResource(R.string.providerInvalid)
-                                    SettingsPage(
-                                        model.providerRepo,
-                                        backStack,
-                                        onProviderReset = { url ->
-                                            if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
-                                                model.saveRepo(url)
-                                                model.flushInfo()
-                                            } else {
-                                                Toast
-                                                    .makeText(
-                                                        context,
-                                                        invalidText,
-                                                        Toast.LENGTH_SHORT
-                                                    )
-                                                    .show()
-                                            }
-                                        },
-                                        onboardingIsComplete = model.onboardingStatus.collectAsState().value,
-                                        onAppReset = {
-                                            model.flushInfo()
-                                            model.saveOnboarding(false)
-                                        },
-                                        onOnboardingReset = {
-                                            model.saveOnboarding(false)
+                                    },
+                                    entryProvider = entryProvider {
+                                        entry<MainView> {
+                                            AppNavigator(
+                                                model,
+                                                sheetState,
+                                                sheetModel,
+                                                backStack
+                                            )
                                         }
-                                    )
-                                }
-                                entry<QrScanner> {
-                                    QrPage(model, sheetModel, backStack)
-                                }
-                            },
-                        )
-                    } else {
-                        OnboardingPage(model)
+                                        entry<Providers> {
+                                            ProvidersPage(model, backStack)
+                                        }
+                                        entry<Settings> {
+                                            val invalidText = stringResource(R.string.providerInvalid)
+                                            SettingsPage(
+                                                model.providerRepo,
+                                                backStack,
+                                                onProviderReset = { url ->
+                                                    if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
+                                                        model.saveRepo(url)
+                                                        model.flushInfo()
+                                                    } else {
+                                                        Toast
+                                                            .makeText(
+                                                                context,
+                                                                invalidText,
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                            .show()
+                                                    }
+                                                },
+                                                onboardingIsComplete = model.onboardingStatus.collectAsState().value,
+                                                onAppReset = {
+                                                    model.flushInfo()
+                                                    model.saveOnboarding(false)
+                                                },
+                                                onOnboardingReset = {
+                                                    model.saveOnboarding(false)
+                                                }
+                                            )
+                                        }
+                                        entry<QrScanner> {
+                                            QrPage(model, sheetModel, backStack)
+                                        }
+                                    },
+                                )
+                            }
+                            false -> {
+                                OnboardingPage(model)
+                            }
+                        }
                     }
+
                 }
             }
         }
@@ -268,7 +274,6 @@ fun AppNavigator(
                 }
             }
         }
-
     }
 
     if (sheetModel.showBottomSheet) {

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -83,15 +86,6 @@ fun ProvidersPage(
         timer.cancel()
     }
 
-    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> ->
-        if (!model.savedProviders.value.contains(i)) {
-            icon.value = Icons.Default.Favorite
-            model.addSavedProvider(i)
-        } else {
-            icon.value = Icons.Default.FavoriteBorder
-            model.removeSavedProvider(i)
-        }
-    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
@@ -124,13 +118,24 @@ fun ProvidersPage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = 0.dp
+                ),
         ) {
             ProvidersList(
                 providerRepo = model.providerRepo.value,
                 providers = model.providers.collectAsState().value,
                 savedProviders = model.savedProviders.collectAsState().value,
-                onFavoriteClick = onFavoriteClick,
+                onFavoriteClick = {
+                    if (it !in model.savedProviders.value) {
+                        model.addSavedProvider(it)
+                    } else {
+                        model.removeSavedProvider(it)
+                    }
+                },
                 scrollBehavior = scrollBehavior
             )
         }
@@ -154,7 +159,6 @@ fun ProvidersPagePreview() {
         )
     )
     val savedProviders = emptyList<Int>()
-    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         topBar = {
@@ -191,7 +195,7 @@ fun ProvidersPagePreview() {
                 providerRepo = "",
                 providers = providers,
                 savedProviders = savedProviders,
-                onFavoriteClick = onFavoriteClick,
+                onFavoriteClick = {},
                 scrollBehavior = scrollBehavior
             )
         }

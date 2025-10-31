@@ -77,6 +77,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
@@ -121,17 +122,17 @@ fun OnboardingPage(model: MoveViewModel) {
         transitionSpec = {
             // Slide in from right when navigating forward
             slideInHorizontally(
-                animationSpec = tween(500)
+                animationSpec = MotionScheme.standard().defaultSpatialSpec()
             ) { it } togetherWith slideOutHorizontally(
-                animationSpec = tween(500)
+                animationSpec = MotionScheme.standard().defaultSpatialSpec()
             ) { -it }
         },
         popTransitionSpec = {
             // Slide in from left when navigating back
             slideInHorizontally(
-                animationSpec = tween(500)
+                animationSpec = MotionScheme.standard().defaultSpatialSpec()
             ) { -it } togetherWith slideOutHorizontally(
-                animationSpec = tween(500)
+                animationSpec = MotionScheme.standard().defaultSpatialSpec()
             ) { it }
         },
         predictivePopTransitionSpec = {
@@ -294,7 +295,7 @@ fun WelcomePage(
             } else {
                 1f
             }
-        Box(
+        Box( // Backdrop
             modifier = Modifier
                 .fillMaxSize()
                 .blur(25.dp)
@@ -302,7 +303,10 @@ fun WelcomePage(
         ) {
             val size = 200f * scale
             val padding = 40
-            val color = colorResource(R.color.purple_shadow)
+
+            val colorLight = colorResource(R.color.purple_brand)
+            val colorShadow = colorResource(R.color.purple_shadow)
+
             Box(
                 modifier = Modifier
                     .padding(padding.dp)
@@ -312,7 +316,7 @@ fun WelcomePage(
                     .aspectRatio(1f)
                     .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 2).toInt()))
                     .background(
-                        Color(color.red, color.green, color.blue, .8f)
+                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .8f)
                     )
                     .align(Alignment.TopStart)
             ) {}
@@ -325,9 +329,37 @@ fun WelcomePage(
                     .aspectRatio(1f)
                     .clip(MaterialShapes.Cookie12Sided.toShape((-shapeAngle.value / 3).toInt()))
                     .background(
-                        Color(color.red, color.green, color.blue, .4f)
+                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .4f)
                     )
                     .align(Alignment.BottomEnd)
+            ) {}
+            Box(
+                modifier = Modifier
+                    .padding(padding.dp)
+                    .offset((-(size + padding) / 2).dp, ((size + padding) / 2).dp)
+                    .size(size.dp)
+                    .scale(scale * 1.5f)
+                    .aspectRatio(1f)
+                    .blur(40.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .2f)
+                    )
+                    .align(Alignment.BottomStart)
+            ) {}
+            Box(
+                modifier = Modifier
+                    .padding(padding.dp)
+                    .offset(((size + padding) / 2).dp, (-(size + padding) / 1.8).dp)
+                    .size(size.dp)
+                    .scale(scale * 2.5f)
+                    .aspectRatio(1f)
+                    .blur(40.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .3f)
+                    )
+                    .align(Alignment.TopEnd)
             ) {}
         }
         Box(
@@ -362,6 +394,7 @@ fun WelcomePage(
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.ExtraLight,
                             fontStyle = FontStyle.Italic,
+                            fontFamily = FontFamily.Serif,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
@@ -369,6 +402,7 @@ fun WelcomePage(
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Light,
                             fontStyle = FontStyle.Italic,
+                            fontFamily = FontFamily.SansSerif,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -646,15 +680,6 @@ fun ProviderPage(
         timer.cancel()
     }
 
-    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> ->
-        if (i !in model.savedProviders.value) {
-            icon.value = Icons.Default.Favorite
-            model.addSavedProvider(i)
-        } else {
-            icon.value = Icons.Default.FavoriteBorder
-            model.removeSavedProvider(i)
-        }
-    }
     ProviderContent(
         onBack = onBack,
         onEnd = onEnd,
@@ -665,7 +690,13 @@ fun ProviderPage(
                 providerRepo = model.providerRepo.value,
                 providers = model.providers.collectAsState().value,
                 savedProviders = model.savedProviders.collectAsState().value,
-                onFavoriteClick = onFavoriteClick,
+                onFavoriteClick = {
+                    if (it !in model.savedProviders.value) {
+                        model.addSavedProvider(it)
+                    } else {
+                        model.removeSavedProvider(it)
+                    }
+                },
             )
         }
     )

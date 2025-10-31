@@ -1,6 +1,11 @@
 package io.github.azakidev.move.ui.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -23,6 +30,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -48,7 +56,6 @@ import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.listShape
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -57,7 +64,7 @@ fun ProvidersList(
     providerRepo: String,
     providers: List<ProviderItem>,
     savedProviders: List<Int>,
-    onFavoriteClick: (Int, MutableStateFlow<ImageVector>) -> Unit,
+    onFavoriteClick: (Int) -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Box(
@@ -94,12 +101,7 @@ fun ProvidersList(
                         items(visibleProviders.count()) { i ->
                             val provider = visibleProviders.sortedBy { it.name }[i]
                             val shape = listShape(i, providers.count())
-                            val iconMut =
-                                remember { MutableStateFlow(Icons.Default.FavoriteBorder) }
-                            var icon = iconMut.collectAsState().value
-                            if (provider.id in savedProviders) {
-                                icon = Icons.Default.Favorite
-                            }
+
                             ProviderEntry(
                                 modifier = Modifier
                                     .animateItem(
@@ -107,11 +109,11 @@ fun ProvidersList(
                                         placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
                                         fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
                                     ),
-                                provider = provider,
                                 shape = shape,
+                                provider = provider,
+                                savedProviders = savedProviders,
                                 providerRepo = providerRepo,
-                                icon = icon,
-                                onClick = { onFavoriteClick(provider.id, iconMut) }
+                                onClick = { onFavoriteClick(provider.id) }
                             )
                         }
                     }
@@ -138,13 +140,12 @@ fun ProvidersListPreview() {
         )
     )
     val savedProviders = emptyList<Int>()
-    val onFavoriteClick = { i: Int, icon: MutableStateFlow<ImageVector> -> }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     ProvidersList(
         providerRepo = "",
         providers = providers,
         savedProviders = savedProviders,
-        onFavoriteClick = onFavoriteClick,
+        onFavoriteClick = {},
         scrollBehavior = scrollBehavior,
     )
 }
@@ -156,8 +157,8 @@ fun ProviderEntry(
     provider: ProviderItem,
     shape: Shape,
     providerRepo: String,
-    icon: ImageVector,
     onClick: () -> Unit,
+    savedProviders: List<Int>,
 ) {
     Column(
         modifier = modifier
@@ -202,15 +203,41 @@ fun ProviderEntry(
             IconButton(
                 shape = CircleShape,
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryFixedDim,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryFixed
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
                 onClick = onClick
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null
-                )
+                AnimatedContent(
+                    targetState = provider.id in savedProviders,
+                    transitionSpec = {
+                        fadeIn(
+                            animationSpec = MotionScheme.expressive().fastEffectsSpec()
+                        ) + scaleIn(
+                            animationSpec = MotionScheme.expressive().fastSpatialSpec()
+                        ) togetherWith fadeOut(
+                            animationSpec = MotionScheme.expressive().fastEffectsSpec()
+                        ) + scaleOut(
+                            animationSpec = MotionScheme.expressive().fastSpatialSpec()
+                        )
+                    }
+                ) { state ->
+                    when (state) {
+                        true -> {
+                            Icon(
+                                imageVector = Icons.Rounded.Favorite,
+                                contentDescription = "Save provider"
+                            )
+                        }
+
+                        false -> {
+                            Icon(
+                                imageVector = Icons.Rounded.FavoriteBorder,
+                                contentDescription = "Save provider"
+                            )
+                        }
+                    }
+                }
             }
         }
         if (provider.description.isNotEmpty()) {

@@ -48,7 +48,7 @@ fun MoveTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        motionScheme = MotionScheme.expressive(),
+        motionScheme = MotionScheme.standard(),
         content = content
     )
 }

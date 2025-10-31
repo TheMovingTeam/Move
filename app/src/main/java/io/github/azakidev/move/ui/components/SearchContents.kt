@@ -17,16 +17,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.DirectionsBus
@@ -46,6 +50,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarState
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -160,20 +165,31 @@ fun SearchContents(
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                filterTags.forEach {
-                    FilterChip(selected = it.state.value, leadingIcon = {
-                        Icon(
-                            imageVector = it.icon, contentDescription = null
-                        )
-                    }, label = { Text(stringResource(it.label)) }, onClick = {
-                        it.state.value = !it.state.value
-                    })
+                val sortedTags = filterTags.sortedBy { filter -> !filter.state.value }
+                items(sortedTags.count()) {
+                    val tag = sortedTags[it]
+                    FilterChip(
+                        modifier = Modifier
+                            .animateItem(
+                                fadeInSpec = MotionScheme.expressive().defaultEffectsSpec(),
+                                placementSpec = MotionScheme.expressive().defaultSpatialSpec(),
+                                fadeOutSpec = MotionScheme.expressive().defaultEffectsSpec()
+                            ),
+                        selected = tag.state.value,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = tag.icon, contentDescription = null
+                            )
+                        },
+                        label = { Text(stringResource(tag.label)) },
+                        onClick = {
+                            tag.state.value = !tag.state.value
+                        }
+                    )
                 }
             }
         }
@@ -271,6 +287,9 @@ fun SearchContents(
                         }
                     )
                 }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
 
             if (stopResults.count() + lineResults.count() == 0) {
@@ -311,16 +330,19 @@ fun SearchResultStop(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                modifier = Modifier.weight(1f),
                 text = stopItem.name.fmt(),
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(
                 modifier = Modifier.width(16.dp)
             )
             StopEmblemRow(
-                stopItem = stopItem, lines = lines
+                modifier = Modifier
+                    .weight(1f)
+                    .defaultMinSize(minWidth = 36.dp),
+                stopItem = stopItem,
+                lines = lines
             )
         }
     }
@@ -408,7 +430,7 @@ fun SearchInputField(
                                 scope.launch { searchBarState.animateToCollapsed() }
                             }) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
