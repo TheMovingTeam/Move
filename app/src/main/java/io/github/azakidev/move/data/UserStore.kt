@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -22,6 +23,7 @@ class UserStore(private val context: Context) {
         val LAST_STOPS_IDS = stringSetPreferencesKey("last_stops_ids")
         val SAVED_PROVIDERS_IDS = stringSetPreferencesKey("saved_providers_ids")
         val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
+        val LAST_OPENED_VERSION_CODE = intPreferencesKey("last_opened_version_code")
     }
 
     // Default URL if nothing is saved yet
@@ -97,6 +99,18 @@ class UserStore(private val context: Context) {
     suspend fun saveOnboardingStatus(status: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.HAS_COMPLETED_ONBOARDING] = status
+        }
+    }
+
+    // Last opened version code
+    val lastOpenedVersionCodeFlow: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LAST_OPENED_VERSION_CODE] ?: 0
+        }
+
+    suspend fun saveLastOpenedVersionCode(versionCode: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_OPENED_VERSION_CODE] = versionCode
         }
     }
 }

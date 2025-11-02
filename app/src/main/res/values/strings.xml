@@ -35,11 +35,17 @@
     <string name="alerts">Alerts</string>
     <string name="noAlerts">There are no alerts for this stop</string>
     <string name="privacyPolicy">Privacy Policy</string>
+    <string name="searchPlaceholder">Where to go…</string>
 
     <string name="stopNameFilter">Stop name</string>
     <string name="stopComIdFilter">Stop ID</string>
     <string name="lineNameFilter">Line name</string>
     <string name="lineEmblemFilter">Line emblem</string>
+
+    <string name="showChangeLog">Show Changelog</string>
+    <string name="changelogVersion">{app} has been updated to version {ver}!</string>
+    <string name="changelogFlavor">Check out what\'s new</string>
+    <string name="changelogHistory">Previous changelogs</string>
 
     <string-array name="greetings">
         <item>Going somewhere?</item>
@@ -67,5 +73,13 @@
         <item>Once everything has been set up, you can search, save and check the estimations for every provider you have added in one place.</item>
         <item>If you like the app, please consider supporting the development with a donation after using it for a while. That way more features can be added to Move in the future.</item>
     </string-array>
-    <string name="searchPlaceholder">Where to go…</string>
+    <string-array name="changelogItems">
+        <item>Add search filters</item>
+        <item>Add in-app changelog</item>
+        <item>Fix parsing for Tranvía de Murcia</item>
+        <item>Fix issues where EMT Madrid would interfere with other providers</item>
+        <item>Fix favourite and recent stops not being purged when removing a provider</item>
+        <item>Allow line emblems to properly utilize the free space</item>
+        <item>UI fixes and improvements</item>
+    </string-array>
 </resources>

@@ -85,10 +85,19 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = true
         )
 
+    val shouldShowChangelog = mutableStateOf(false)
+
+    private val _lastOpenedVersionCode: StateFlow<Int> = _userStore.lastOpenedVersionCodeFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = -1
+        )
+
     private val _stopsToLoad: MutableList<Int> = mutableListOf()
 
     init {
-        // Collect provider repo value DO NOT DELETE
+        // Collect provider repo value
         viewModelScope.launch {
             _providerRepo.collect { savedUrl ->
                 providerRepo.value = savedUrl
@@ -129,6 +138,28 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         loadProvidersFromDb()
         // Initiate stop fetching
         startFetchLoop()
+
+        viewModelScope.launch {
+            Timer().schedule(delay = 500, period = 500, action = {
+                viewModelScope.launch {
+                    _lastOpenedVersionCode.collect { ver ->
+                        val currentVersion = BuildConfig.VERSION_CODE
+                        // ver should be:
+                        // -1 before it's properly collected
+                        // 0 if the app hasn't been opened before
+                        // The previous version number if the app has been updated
+                        if (ver != -1) {
+                            _userStore.saveLastOpenedVersionCode(currentVersion)
+                            if (currentVersion > ver) {
+                                shouldShowChangelog.value = true
+                            }
+                            this@schedule.cancel()
+                            return@collect
+                        }
+                    }
+                }
+            }).run()
+        }
     }
 
     fun fetchProviders() {

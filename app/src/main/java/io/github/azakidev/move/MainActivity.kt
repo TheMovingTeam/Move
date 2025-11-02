@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -63,10 +62,10 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.ui.pages.ChangelogPage
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LargeScreenHome
 import io.github.azakidev.move.ui.pages.LinesPage
-import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.QrPage
@@ -89,7 +88,7 @@ class MainActivity : ComponentActivity() {
             val sheetModel = viewModel<SheetStopViewModel>()
 
             val blur by animateFloatAsState(
-                targetValue = if (sheetModel.showBottomSheet) 20f else 0f,
+                targetValue = if (sheetModel.showBottomSheet || model.shouldShowChangelog.value) 20f else 0f,
                 label = "Blur",
                 animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
             )
@@ -186,7 +185,11 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onOnboardingReset = {
                                                     model.saveOnboarding(false)
-                                                }
+                                                },
+                                                onChangeLogShow = {
+                                                    backStack.removeLastOrNull()
+                                                    model.shouldShowChangelog.value = true
+                                                },
                                             )
                                         }
                                         entry<QrScanner> {
@@ -196,11 +199,11 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             false -> {
+                                model.shouldShowChangelog.value = false
                                 OnboardingPage(model)
                             }
                         }
                     }
-
                 }
             }
         }
@@ -291,6 +294,23 @@ fun AppNavigator(
             dragHandle = { },
         ) {
             StopPage(model = model, sheetModel = sheetModel)
+        }
+    }
+
+    if (model.shouldShowChangelog.value) {
+        val nestedScroll = rememberNestedScrollInteropConnection()
+        ModalBottomSheet(
+            modifier = Modifier
+                .fillMaxHeight()
+                .nestedScroll(nestedScroll),
+            onDismissRequest = {
+                model.shouldShowChangelog.value = !model.shouldShowChangelog.value
+            },
+            containerColor = MaterialTheme.colorScheme.background,
+            sheetState = sheetState,
+            dragHandle = { },
+        ) {
+            ChangelogPage()
         }
     }
 }

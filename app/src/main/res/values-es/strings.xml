@@ -40,6 +40,12 @@
     <string name="stopComIdFilter">ID de parada</string>
     <string name="lineNameFilter">Nombre de línea</string>
     <string name="lineEmblemFilter">Emblema de línea</string>
+    <string name="searchPlaceholder">A donde ir…</string>
+
+    <string name="showChangeLog">Mostrar cambios</string>
+    <string name="changelogVersion">{app} a sido actualizada a la versión {ver}!</string>
+    <string name="changelogFlavor">Míra todo lo nuevo</string>
+    <string name="changelogHistory">Cambios anteriores</string>
 
     <string-array name="greetings">
         <item>¿Vas a algún sitio?</item>
@@ -67,5 +73,13 @@
         <item>Una vez está todo listo, podrás buscar, guardar, y comprobar las estimaciones para cada proveedor que hayas añadido en el mismo sitio.</item>
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
-    <string name="searchPlaceholder">A donde ir…</string>
+    <string-array name="changelogItems">
+        <item>Añade filtros de búsqueda</item>
+        <item>Añade un listado de cambios en la app</item>
+        <item>Arregla la interpretación de tiempos para Tranvía de Murcia</item>
+        <item>Arregla problemas donde EMT Madrid podía interferir con otros proveedores</item>
+        <item>Arregla la purga de paradas recientes y favoritas al eliminar un proveedor</item>
+        <item>Permite que los emblemas de líneas hagan mejor uso del espacio disponible</item>
+        <item>Mejoras y arreglos de interfaz</item>
+    </string-array>
 </resources>
