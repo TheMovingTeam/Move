@@ -3,7 +3,6 @@
 package io.github.azakidev.move.data.providers
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
