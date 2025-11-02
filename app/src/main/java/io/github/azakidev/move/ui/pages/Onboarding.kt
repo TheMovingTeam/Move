@@ -37,8 +37,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -69,7 +67,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -97,7 +94,6 @@ import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.ProvidersList
 import io.github.azakidev.move.ui.components.ProvidersListPreview
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -193,7 +189,8 @@ fun OnboardingPage(model: MoveViewModel) {
                     },
                     onboardingIsComplete = model.onboardingStatus.collectAsState().value,
                     onAppReset = {},
-                    onOnboardingReset = {}
+                    onOnboardingReset = {},
+                    onChangeLogShow = {}
                 )
             }
         },
@@ -343,7 +340,7 @@ fun WelcomePage(
                     .blur(40.dp)
                     .clip(CircleShape)
                     .background(
-                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .2f)
+                        Color(colorLight.red, colorLight.green, colorLight.blue, .2f)
                     )
                     .align(Alignment.BottomStart)
             ) {}
@@ -357,7 +354,7 @@ fun WelcomePage(
                     .blur(40.dp)
                     .clip(CircleShape)
                     .background(
-                        Color(colorShadow.red, colorShadow.green, colorShadow.blue, .3f)
+                        Color(colorLight.red, colorLight.green, colorLight.blue, .3f)
                     )
                     .align(Alignment.TopEnd)
             ) {}

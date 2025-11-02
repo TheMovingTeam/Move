@@ -27,18 +27,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
@@ -47,6 +42,7 @@ import androidx.compose.material.icons.rounded.AlternateEmail
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.NewReleases
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -68,8 +64,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
@@ -100,6 +94,7 @@ fun SettingsPage(
     onboardingIsComplete: Boolean,
     onAppReset: () -> Unit,
     onOnboardingReset: () -> Unit,
+    onChangeLogShow: () -> Unit,
 ) {
     val state = rememberTextFieldState(
         initialText = providerRepo.value,
@@ -173,7 +168,9 @@ fun SettingsPage(
                 LogoSection()
             }
             item {
-                AboutSection()
+                AboutSection(
+                    onChangeLogShow = onChangeLogShow
+                )
             }
             item {
                 ProviderSection(
@@ -214,7 +211,8 @@ fun SettingsPagePreview() {
         onProviderReset = {},
         onboardingIsComplete = true,
         onAppReset = {},
-        onOnboardingReset = {}
+        onOnboardingReset = {},
+        onChangeLogShow = {}
     )
 }
 
@@ -260,7 +258,8 @@ data class AboutElement(
 
 @Composable
 fun AboutSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChangeLogShow: () -> Unit
 ) {
     val elements = listOf(
         AboutElement(
@@ -292,7 +291,7 @@ fun AboutSection(
         )
         elements.forEach {
             RowButton(
-                shape = listShape(elements.indexOf(it), elements.count(), 24.dp, 4.dp),
+                shape = listShape(elements.indexOf(it), elements.count() + 1, 24.dp, 4.dp),
                 icon = it.icon,
                 description = stringResource(it.description),
                 onClick = {
@@ -300,6 +299,12 @@ fun AboutSection(
                 }
             )
         }
+        RowButton(
+            shape = listShape(elements.count(), elements.count() + 1, 24.dp, 4.dp),
+            icon = Icons.Rounded.NewReleases,
+            description = stringResource(R.string.showChangeLog),
+            onClick = onChangeLogShow
+        )
     }
 }
 
@@ -316,7 +321,8 @@ fun ResetSection(
             text = stringResource(R.string.reset),
             style = MaterialTheme.typography.titleMedium
         )
-        val shape = if (BuildConfig.DEBUG) listShape(0, 2, 24.dp, 4.dp)
+        val totalEntries = 2
+        val shape = if (BuildConfig.DEBUG) listShape(0, totalEntries, 24.dp, 4.dp)
         else listShape(1, 1, 24.dp, 4.dp)
         RowButton(
             shape = shape,
@@ -328,7 +334,7 @@ fun ResetSection(
         )
         if (BuildConfig.DEBUG) {
             RowButton(
-                shape = listShape(1, 2, 24.dp, 4.dp),
+                shape = listShape(1, totalEntries, 24.dp, 4.dp),
                 icon = Icons.Rounded.BugReport,
                 color = MaterialTheme.colorScheme.errorContainer,
                 iconColor = MaterialTheme.colorScheme.onErrorContainer,

@@ -11,7 +11,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,11 +24,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.filled.Search
@@ -50,7 +47,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarState
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -175,9 +171,9 @@ fun SearchContents(
                     FilterChip(
                         modifier = Modifier
                             .animateItem(
-                                fadeInSpec = MotionScheme.expressive().defaultEffectsSpec(),
-                                placementSpec = MotionScheme.expressive().defaultSpatialSpec(),
-                                fadeOutSpec = MotionScheme.expressive().defaultEffectsSpec()
+                                fadeInSpec = MotionScheme.expressive().fastEffectsSpec(),
+                                placementSpec = MotionScheme.expressive().fastSpatialSpec(),
+                                fadeOutSpec = MotionScheme.expressive().fastEffectsSpec()
                             ),
                         selected = tag.state.value,
                         leadingIcon = {

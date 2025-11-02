@@ -17,9 +17,9 @@ import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
@@ -156,9 +156,9 @@ fun LineList(
             LineRow(
                 modifier = Modifier
                     .animateItem(
-                        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-                        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-                        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+                        fadeInSpec = MotionScheme.expressive().defaultEffectsSpec(),
+                        placementSpec = MotionScheme.expressive().defaultSpatialSpec(),
+                        fadeOutSpec = MotionScheme.expressive().defaultEffectsSpec()
                     ),
                 stops = stopItems,
                 lines = lineItems,
