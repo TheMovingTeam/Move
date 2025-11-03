@@ -23,14 +23,14 @@ data class FGVTimeEstimate(
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable @JsonIgnoreUnknownKeys
 data class FGVTrain(
-    val destino: String,
+    @SerialName("destino") val destination: String,
     val seconds: Int,
     @SerialName("line_id") val id: Int
 )
 
 fun parseFGVResponse(response: String): List<LineTime> {
     val responseJson = Json.decodeFromString<FGVResponse>(response)
-    val estimatesByDestination = responseJson.previsiones.map { it.trains }.flatten().groupBy { it.destino }
+    val estimatesByDestination = responseJson.previsiones.map { it.trains }.flatten().groupBy { it.destination }
 
     val response = mutableListOf<LineTime>()
 
@@ -40,16 +40,15 @@ fun parseFGVResponse(response: String): List<LineTime> {
             if (value.count() >= 2) {
                 LineTime(
                     lineId = key,
-                    destination = value[0].destino,
+                    destination = value[0].destination,
                     nextTimeFirst = value[0].seconds / 60,
                     nextTimeSecond = value[1].seconds / 60
                 )
             } else {
                 LineTime(
                     lineId = key,
-                    destination = value[0].destino,
-                    nextTimeFirst = value[0].seconds / 60,
-                    nextTimeSecond = null
+                    destination = value[0].destination,
+                    nextTimeFirst = value[0].seconds / 60
                 )
             }
         }

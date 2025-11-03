@@ -117,8 +117,7 @@ fun parseEMTMadrid(response: String, lines: List<LineItem>): List<LineTime> {
                     LineTime(
                         lineId = line.id,
                         destination = value[0].destination,
-                        nextTimeFirst = value[0].estimateArrive / 60,
-                        nextTimeSecond = null
+                        nextTimeFirst = value[0].estimateArrive / 60
                     )
                 }
             } else {

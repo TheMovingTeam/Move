@@ -1,109 +1,63 @@
 package io.github.azakidev.move.data.providers
 
-import android.util.Log
-import android.util.Xml
-import io.github.azakidev.move.LogTags
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import java.io.IOException
-import java.io.StringReader
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlElement
 
+@Serializable
+@SerialName("result")
 data class VectaliaResponse(
-    val lineEmblem: String,
-    val destination: String,
-    val imageUrl: String,
-    val firstEstimateSeconds: Int?,
-    val secondEstimateSeconds: Int?
+    @XmlElement val estimates: List<VectaliaEstimate>
 )
 
-@Throws(XmlPullParserException::class, IOException::class)
-fun parseVectaliaResponse(xmlString: String): List<VectaliaResponse> {
-    val estimations = mutableListOf<VectaliaResponse>()
-    val parser: XmlPullParser = Xml.newPullParser()
-    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-    parser.setInput(StringReader(xmlString))
-
-    var eventType = parser.eventType
-    var currentEstimation: MutableMap<String, String?> = mutableMapOf()
-    var currentTag: String? = null
-    val secondsList = mutableListOf<Int>()
-
-    while (eventType != XmlPullParser.END_DOCUMENT) {
-        when (eventType) {
-            XmlPullParser.START_TAG -> {
-                currentTag = parser.name
-                if (currentTag == "estimation") {
-                    currentEstimation = mutableMapOf()
-                    secondsList.clear()
-                }
-            }
-            XmlPullParser.TEXT -> {
-                val text = parser.text.trim()
-                if (text.isNotEmpty()) {
-                    when (currentTag) {
-                        "line" -> currentEstimation["lineEmblem"] = text
-                        "destino" -> currentEstimation["destination"] = text
-                        "imageIcon" -> currentEstimation["imageUrl"] = text
-                        "seconds" -> {
-                            try {
-                                secondsList.add(text.toInt())
-                            } catch (e: NumberFormatException) {
-                                // Handle cases where 'seconds' is not a valid integer
-                                Log.w(
-                                    LogTags.Parser.name,
-                                    "Invalid number format for seconds: $text",
-                                    e
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            XmlPullParser.END_TAG -> {
-                if (parser.name == "estimation") {
-                    val firstEstimate = if (secondsList.isNotEmpty()) secondsList[0] else null
-                    val secondEstimate = if (secondsList.size > 1) secondsList[1] else null
-
-                    val estimation = VectaliaResponse(
-                        lineEmblem = currentEstimation["lineEmblem"] ?: "",
-                        destination = currentEstimation["destination"] ?: "",
-                        imageUrl = currentEstimation["imageUrl"] ?: "",
-                        firstEstimateSeconds = firstEstimate,
-                        secondEstimateSeconds = secondEstimate
-                    )
-                    estimations.add(estimation)
-                }
-                currentTag = null // Reset current tag
-            }
-        }
-        eventType = parser.next()
-    }
-    return estimations
-}
+@Serializable
+@SerialName("estimation")
+data class VectaliaEstimate(
+    @XmlElement @SerialName("line") val lineEmblem: String,
+    @XmlElement @SerialName("destino") val destination: String,
+    @XmlElement @SerialName("seconds") val seconds: List<Int>,
+)
 
 fun parseVectaliaTimes(
-    response:String,
-    lines: List<LineItem>
+    xmlResponse: String, lines: List<LineItem>
 ): List<LineTime> {
-    val estimations = parseVectaliaResponse(response)
-    val timeList: List<LineTime> = estimations.mapNotNull { estimation ->
-        val matchingLine = lines.find { line ->
-            line.name.equals(estimation.destination, ignoreCase = true) ||
-                    line.emblem == estimation.lineEmblem // Fallback or additional check using emblem
+    val format = XML {
+        defaultPolicy {
+            pedantic = false
+            ignoreUnknownChildren()
         }
-        val time =
-            if ((matchingLine != null) && (estimation.firstEstimateSeconds != null)) {
+    }
+    val responseParsed = format.decodeFromString<VectaliaResponse>(xmlResponse)
+    val response = mutableListOf<LineTime>()
+
+    response += responseParsed.estimates.mapNotNull { estimate ->
+        val matchingLine = lines.find { line ->
+            line.name.equals(
+                estimate.destination, ignoreCase = true
+            ) || line.emblem == estimate.lineEmblem // Fallback or additional check using emblem
+        }
+
+        if (matchingLine != null) {
+            if (estimate.seconds.count() >= 2) {
                 LineTime(
                     lineId = matchingLine.id,
-                    nextTimeFirst = estimation.firstEstimateSeconds.div(60),
-                    nextTimeSecond = estimation.secondEstimateSeconds?.div(60)
+                    nextTimeFirst = estimate.seconds[0].div(60),
+                    nextTimeSecond = estimate.seconds[1].div(60)
                 )
             } else {
-                null
+                LineTime(
+                    lineId = matchingLine.id,
+                    nextTimeFirst = estimate.seconds.first().div(60)
+                )
             }
-        time
+        } else {
+            null
+        }
     }
-    return timeList
+
+    return response
 }
