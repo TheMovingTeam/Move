@@ -20,12 +20,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -84,6 +82,8 @@ import io.github.azakidev.move.R
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -100,17 +100,19 @@ fun SettingsPage(
         initialText = providerRepo.value,
     )
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val gridCells = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
-        StaggeredGridCells.Fixed(2)
-    } else {
-        StaggeredGridCells.Adaptive((WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND/2).dp)
-    }
+    val gridCells =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+            StaggeredGridCells.Fixed(2)
+        } else {
+            StaggeredGridCells.Adaptive((WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND / 2).dp)
+        }
 
-    val scrollBehavior = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
-        null
-    } else {
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    }
+    val scrollBehavior =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+            null
+        } else {
+            TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        }
 
     val modifier = if (scrollBehavior != null) {
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -188,9 +190,6 @@ fun SettingsPage(
                     ResetSection(
                         onAppReset = onAppReset,
                         onOnboardingReset = onOnboardingReset
-                    )
-                    Spacer(
-                        modifier = Modifier.height(18.dp)
                     )
                 }
             }
@@ -314,6 +313,7 @@ fun ResetSection(
     onOnboardingReset: () -> Unit
 ) {
     Column(
+        modifier = Modifier.padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
@@ -376,6 +376,40 @@ fun ProviderSection(
             animationSpec = MotionScheme.expressive().defaultSpatialSpec()
         )
     }
+
+    val iconState = state.text.toString() != providerRepo.value
+
+    val shouldShowIcon = remember { mutableStateOf(false) }
+
+    when (iconState) {
+        true -> shouldShowIcon.value = true
+        false -> Timer().schedule(delay = 200, action = { shouldShowIcon.value = false })
+    }
+
+    val trailingIcon = if (shouldShowIcon.value) {
+        @Composable {
+            val shouldBeVisible = remember { mutableStateOf(false) }
+            Timer().schedule(delay = 25, action = { shouldBeVisible.value = true })
+
+            AnimatedVisibility(
+                visible = shouldBeVisible.value && iconState,
+                enter = enterTransition,
+                exit = exitTransition
+            ) {
+                IconButton(
+                    onClick = {
+                        onClick(state.text.toString())
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+    } else null
+
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         text = stringResource(R.string.providerTitle),
@@ -391,13 +425,12 @@ fun ProviderSection(
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                    modifier = Modifier.padding(start = 14.dp, top = 2.dp),
                     text = stringResource(R.string.providerSource),
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -430,24 +463,7 @@ fun ProviderSection(
                         text = stringResource(R.string.providerSource)
                     )
                 },
-                trailingIcon = {
-                    AnimatedVisibility(
-                        visible = state.text.toString() != providerRepo.value,
-                        enter = enterTransition,
-                        exit = exitTransition
-                    ) {
-                        IconButton(
-                            onClick = {
-                                onClick(state.text.toString())
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Save,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                }
+                trailingIcon = trailingIcon
             )
         }
         if (onboardingIsComplete) {
