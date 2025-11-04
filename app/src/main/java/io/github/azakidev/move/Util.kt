@@ -16,6 +16,7 @@ import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
 import io.github.azakidev.move.data.providers.parseEMTValencia
 import io.github.azakidev.move.data.providers.parseFGVResponse
+import io.github.azakidev.move.data.providers.parseTMPMurcia
 import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
@@ -256,6 +257,20 @@ fun parseTimes(
                 Log.e(
                     LogTags.Networking.name,
                     "Couldn't parse Tranvía de Murcia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "TMP Murcia" -> {
+            val estimations: List<LineTime> = try {
+                parseTMPMurcia(response, lines.filter { it.provider == 12 })
+            } catch (e: Exception) {
+                Log.e(
+                    LogTags.Networking.name,
+                    "Couldn't parse TMP Murcia times in ${e.message}",
                     e
                 )
                 return null
