@@ -3,14 +3,9 @@ package io.github.azakidev.move.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
@@ -26,12 +21,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toColorLong
-import androidx.compose.ui.layout.WindowInsetsRulers.Companion.SafeContent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastDistinctBy
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
@@ -81,7 +76,10 @@ fun EmblemShape(
             style = textStyle,
             fontWeight = FontWeight.Medium,
             color = textColor,
-            autoSize = TextAutoSize.StepBased(maxFontSize = textStyle.fontSize)
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 0.sp,
+                maxFontSize = textStyle.fontSize
+            )
         )
     }
 }
@@ -195,12 +193,18 @@ fun StopEmblemRowPreview() {
 
     val lines = mutableListOf<LineItem>()
 
-    stopItem.lines.forEach {
+    lines += LineItem(
+        id = 5,
+        emblem = "555b"
+    )
+
+    stopItem.lines.take(4).forEach {
         lines += LineItem(
             id = it,
             emblem = "L$it"
         )
     }
+
 
     StopEmblemRow(
         stopItem = stopItem,

@@ -7,8 +7,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @Serializable
 data class TMPMurciaResponse(
