@@ -61,16 +61,16 @@ fun EmblemShape(
 
     Box(
         modifier = modifier
-            .clip(shape = shapeFromId(line.emblem.hashCode() + line.provider.hashCode()))
+            .clip(shapeFromId(line.emblem.hashCode() + line.provider.hashCode()))
             .background(color),
         contentAlignment = Alignment.Center
     ) {
         val emblem = emblemOverride ?: line.emblem
-        val text = if (emblem.length <= 4) emblem else emblem.substring(0..3)
+        val padding = if (textStyle.fontSize > 12.sp) 6 else 3
 
         Text(
-            modifier = Modifier.padding(6.dp),
-            text = text,
+            modifier = Modifier.padding(padding.dp),
+            text = emblem.take(4),
             maxLines = 1,
             textAlign = TextAlign.Center,
             style = textStyle,
@@ -205,9 +205,19 @@ fun StopEmblemRowPreview() {
         )
     }
 
-
     StopEmblemRow(
         stopItem = stopItem,
         lines = lines
+    )
+}
+
+@Composable @Preview
+fun FavStopEmblem() {
+    EmblemShape(
+        modifier = Modifier.size(26.dp),
+        line = LineItem(
+            emblem = "555b"
+        ),
+        textStyle = MaterialTheme.typography.labelSmall
     )
 }

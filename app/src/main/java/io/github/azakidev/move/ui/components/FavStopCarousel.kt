@@ -211,7 +211,7 @@ fun HeroCarrouselItem(
                             modifier = Modifier.size(26.dp),
                             line = line,
                             emblemOverride = lineTime.emblemOverride,
-                            textStyle = MaterialTheme.typography.titleSmall
+                            textStyle = MaterialTheme.typography.labelSmall
                         )
                         Text(
                             text = (lineTime.destination ?: line.name)

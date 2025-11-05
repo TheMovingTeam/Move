@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
@@ -246,12 +247,6 @@ fun StopBanner(
                     )
                 ),
         ) {
-            val style = when {
-                sheetModel.sheetStop.name.length > 20 -> MaterialTheme.typography.headlineMedium
-                sheetModel.sheetStop.name.length > 15 -> MaterialTheme.typography.headlineLarge
-                sheetModel.sheetStop.name.length > 10 -> MaterialTheme.typography.displaySmall
-                else -> MaterialTheme.typography.displayMedium
-            }
             val width =
                 if (sheetModel.sheetStop.name.length > 10) .8f
                 else 1f
@@ -261,7 +256,10 @@ fun StopBanner(
                     .fillMaxWidth(width)
                     .align(Alignment.BottomStart),
                 text = sheetModel.sheetStop.name.fmt(),
-                style = style,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    maxFontSize = MaterialTheme.typography.displaySmall.fontSize
+                ),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -317,6 +315,9 @@ fun StopBanner(
 @Preview
 fun StopBannerPreview() {
     val sheetModel = viewModel<SheetStopViewModel>()
+    sheetModel.sheetStop = StopItem(
+        name = "A stop with a really long name for testing purposes in case that a line decides to be obnoxious"
+    )
     StopBanner(
         imgUrl = "",
         favStops = listOf(),
@@ -430,7 +431,6 @@ fun StopTimes(
                                     }
                                 }
                             }
-
                         }
                 }
             }
@@ -534,24 +534,4 @@ fun StopNotifications(
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun StopNotificationsPreview() {
-    val notifications = listOf(
-        "All your bases are mine"
-    )
-    StopNotifications(
-        notifications = notifications
-    )
-}
-
-@Composable
-@Preview
-fun StopNotificationsEmptyPreview() {
-    val notifications = emptyList<String>()
-    StopNotifications(
-        notifications = notifications
-    )
 }
