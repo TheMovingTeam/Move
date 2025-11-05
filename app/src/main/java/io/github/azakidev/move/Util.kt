@@ -16,6 +16,7 @@ import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
 import io.github.azakidev.move.data.providers.parseEMTValencia
 import io.github.azakidev.move.data.providers.parseFGVResponse
+import io.github.azakidev.move.data.providers.parseMetrobusValencia
 import io.github.azakidev.move.data.providers.parseTMPMurcia
 import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
@@ -271,6 +272,20 @@ fun parseTimes(
                 Log.e(
                     LogTags.Networking.name,
                     "Couldn't parse TMP Murcia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Metrobus Valencia" -> {
+            val estimations: List<LineTime> = try {
+                parseMetrobusValencia(response, lines.filter { it.provider == 13 })
+            } catch (e: Exception) {
+                Log.e(
+                    LogTags.Networking.name,
+                    "Couldn't parse Metrobus Valencia times in ${e.message}",
                     e
                 )
                 return null

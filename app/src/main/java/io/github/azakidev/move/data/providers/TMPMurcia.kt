@@ -24,19 +24,11 @@ data class TMPMurciaEstimates(
 )
 
 fun parseTMPMurcia(response: String, lines: List<LineItem>): List<LineTime> {
-    val string = """
-        { 
-          "estimates":  $response
-        }
-        """
+    val string = """{ "estimates":  $response }"""
 
-    println(response)
+    val estimates = Json.decodeFromString<TMPMurciaResponse>(string).estimates
 
-    val responseParsed = Json.decodeFromString<TMPMurciaResponse>(string).estimates
-
-    val response = mutableListOf<LineTime>()
-
-    response += responseParsed.mapNotNull { it ->
+    val response = estimates.mapNotNull { it ->
         val line = lines.find { lineItem -> lineItem.id == it.lineId }
         val min = it.timeString.split(" ").mapNotNull { it.toIntOrNull() }.toMutableList()
         min.ifEmpty { min += 0 }
