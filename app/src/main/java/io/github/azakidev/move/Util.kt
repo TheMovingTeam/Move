@@ -56,7 +56,7 @@ enum class LogTags {
     Parser,
 }
 
-fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): Request.Builder {
+fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem, stopItem: StopItem): Request.Builder {
 
     if (provider.name.contains("Vectalia")) { // Vectalia headers
         return this.header("Accept", "*/*").header("responseType", "ResponseType.json")
@@ -84,9 +84,11 @@ fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): R
     }
 
     if (provider.name.contains("Transporte de Murcia")) {
-        val content = """<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body><GetStopMonitoring xmlns='http://tempuri.org/'><request><ServiceRequestInfo xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><AccountId xmlns='http://www.siri.org.uk/siri'>wshuesca</AccountId><AccountKey xmlns='http://www.siri.org.uk/siri'>WS.huesca</AccountKey></ServiceRequestInfo><Request xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><MonitoringRef xmlns='http://www.siri.org.uk/siri'>9000</MonitoringRef></Request></request></GetStopMonitoring></soap:Body></soap:Envelope>"""
+        val content = """<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body><GetStopMonitoring xmlns='http://tempuri.org/'><request><ServiceRequestInfo xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><AccountId xmlns='http://www.siri.org.uk/siri'>wshuesca</AccountId><AccountKey xmlns='http://www.siri.org.uk/siri'>WS.huesca</AccountKey></ServiceRequestInfo><Request xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><MonitoringRef xmlns='http://www.siri.org.uk/siri'>@comId</MonitoringRef></Request></request></GetStopMonitoring></soap:Body></soap:Envelope>"""
         return this.post(
-            content.toRequestBody(
+            content
+                .replace("@comId", stopItem.id.toString())
+                .toRequestBody(
                 "text/xml".toMediaTypeOrNull()
             )
         )
@@ -97,13 +99,12 @@ fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): R
 
 fun OkHttpClient.Builder.trustSelfSignedCertsIfNeeded(provider: ProviderItem): OkHttpClient.Builder {
 
-    val trustManager = createInsecureTrustManager()
-    val sslSocketFactory = createInsecureSslSocketFactory(trustManager)
-
-    val insecureClient = this.sslSocketFactory(sslSocketFactory, trustManager)
-        .hostnameVerifier(createInsecureHostnameVerifier())
-
     if (provider.name.contains("Tranvía de Murcia")) {
+        val trustManager = createInsecureTrustManager()
+        val sslSocketFactory = createInsecureSslSocketFactory(trustManager)
+
+        val insecureClient = this.sslSocketFactory(sslSocketFactory, trustManager)
+            .hostnameVerifier(createInsecureHostnameVerifier())
         return insecureClient
     }
 

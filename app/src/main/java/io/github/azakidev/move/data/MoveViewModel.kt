@@ -517,7 +517,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             val request = Request.Builder()
 
             try {
-                val requestBuilt = request.formRequest(client, provider).url(url).build()
+                val requestBuilt = request.formRequest(client, provider, stopItem).url(url).build()
 
                 val response = client
                     .newCall(requestBuilt)
