@@ -18,6 +18,7 @@ import io.github.azakidev.move.data.providers.parseEMTValencia
 import io.github.azakidev.move.data.providers.parseFGVResponse
 import io.github.azakidev.move.data.providers.parseMetrobusValencia
 import io.github.azakidev.move.data.providers.parseTMPMurcia
+import io.github.azakidev.move.data.providers.parseTMurcia
 import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
 import kotlinx.serialization.Serializable
@@ -50,7 +51,9 @@ internal data object QrScanner : NavKey
 
 // Log tags
 enum class LogTags {
-    MoveModel, Networking, Parser,
+    MoveModel,
+    Networking,
+    Parser,
 }
 
 fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): Request.Builder {
@@ -76,6 +79,15 @@ fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem): R
         ).post(
             content.toRequestBody(
                 "application/json".toMediaTypeOrNull()
+            )
+        )
+    }
+
+    if (provider.name.contains("Transporte de Murcia")) {
+        val content = """<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body><GetStopMonitoring xmlns='http://tempuri.org/'><request><ServiceRequestInfo xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><AccountId xmlns='http://www.siri.org.uk/siri'>wshuesca</AccountId><AccountKey xmlns='http://www.siri.org.uk/siri'>WS.huesca</AccountKey></ServiceRequestInfo><Request xmlns=''><RequestTimestamp xmlns='http://www.siri.org.uk/siri'>0001-01-01T00:00:00</RequestTimestamp><MonitoringRef xmlns='http://www.siri.org.uk/siri'>9000</MonitoringRef></Request></request></GetStopMonitoring></soap:Body></soap:Envelope>"""
+        return this.post(
+            content.toRequestBody(
+                "text/xml".toMediaTypeOrNull()
             )
         )
     }
@@ -148,7 +160,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -160,7 +172,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -172,7 +184,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -184,7 +196,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -196,7 +208,7 @@ fun parseTimes(
                 parseVectaliaTimes(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Vectalia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Vectalia times in ${e.message}", e
                 )
                 return null
             }
@@ -208,7 +220,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Tram Alacant times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Tram Alacant times in ${e.message}", e
                 )
                 return null
             }
@@ -220,7 +232,7 @@ fun parseTimes(
                 parseFGVResponse(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse Metrovalencia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse Metrovalencia times in ${e.message}", e
                 )
                 return null
             }
@@ -232,7 +244,7 @@ fun parseTimes(
                 parseEMTValencia(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse EMT Valencia times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse EMT Valencia times in ${e.message}", e
                 )
                 return null
             }
@@ -244,7 +256,7 @@ fun parseTimes(
                 parseEMTMadrid(response, lines.filter { it.provider == provider.id })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name, "Couldn't parse EMT Madrid times in ${e.message}", e
+                    LogTags.Parser.name, "Couldn't parse EMT Madrid times in ${e.message}", e
                 )
                 return null
             }
@@ -256,7 +268,7 @@ fun parseTimes(
                 parseTranviaMurcia(response)
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
+                    LogTags.Parser.name,
                     "Couldn't parse Tranvía de Murcia times in ${e.message}",
                     e
                 )
@@ -270,7 +282,7 @@ fun parseTimes(
                 parseTMPMurcia(response, lines.filter { it.provider == 12 })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
+                    LogTags.Parser.name,
                     "Couldn't parse TMP Murcia times in ${e.message}",
                     e
                 )
@@ -284,8 +296,22 @@ fun parseTimes(
                 parseMetrobusValencia(response, lines.filter { it.provider == 13 })
             } catch (e: Exception) {
                 Log.e(
-                    LogTags.Networking.name,
+                    LogTags.Parser.name,
                     "Couldn't parse Metrobus Valencia times in ${e.message}",
+                    e
+                )
+                return null
+            }
+            return estimations
+        }
+
+        "Transporte de Murcia" -> {
+            val estimations: List<LineTime> = try {
+                parseTMurcia(response)
+            } catch (e: Exception) {
+                Log.e(
+                    LogTags.Parser.name,
+                    "Couldn't parse TMurcia times in ${e.message}",
                     e
                 )
                 return null

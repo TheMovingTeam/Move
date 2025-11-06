@@ -502,9 +502,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         val provider =
             providers.value.find { providerItem -> providerItem.id == stopItem.provider }
                 ?: ProviderItem()
-        if (!(provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
-                Capabilities.DoubleTime
-            ))
+        if (!(provider.capabilities.contains(Capabilities.Time))
         ) {
             return
         }

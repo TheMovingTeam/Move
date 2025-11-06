@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
@@ -147,13 +148,10 @@ fun StopPage(
             Column(
                 modifier = Modifier.padding(16.dp),
             ) {
-                if (
-                    provider.capabilities.contains(Capabilities.Time) ||
-                    provider.capabilities.contains(Capabilities.DoubleTime)
-                ) {
+                if (provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
+                        Capabilities.DoubleTime)) {
                     StopTimes(
                         lineItems = lines,
-                        provider = provider,
                         sheetModel = sheetModel
                     )
                 }
@@ -260,6 +258,7 @@ fun StopBanner(
                     minFontSize = MaterialTheme.typography.titleLarge.fontSize,
                     maxFontSize = MaterialTheme.typography.displaySmall.fontSize
                 ),
+                lineHeight = 28.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -332,7 +331,6 @@ fun StopBannerPreview() {
 fun StopTimes(
     modifier: Modifier = Modifier,
     lineItems: List<LineItem>,
-    provider: ProviderItem,
     sheetModel: SheetStopViewModel
 ) {
     Text(
@@ -420,7 +418,7 @@ fun StopTimes(
                                         Text(
                                             text = text
                                         )
-                                        if (provider.capabilities.contains(Capabilities.DoubleTime) and (it.nextTimeSecond != null)) {
+                                        if (it.nextTimeSecond != null) {
                                             Text(
                                                 text = "/"
                                             )
@@ -476,7 +474,6 @@ fun StopTimesPreview(
     StopTimes(
         modifier = modifier,
         lineItems = lineItems,
-        provider = ProviderItem(),
         sheetModel = sheetModel
     )
 }
