@@ -74,6 +74,7 @@
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
     <string-array name="changelogItems">
+        <item>Añade soporte para Transporte de Murcia</item>
         <item>Añade soporte para Metrobus Valencia</item>
         <item>Añade soporte para TMP Murcia</item>
         <item>Mejora de estabilidad en los interpretes de texto</item>

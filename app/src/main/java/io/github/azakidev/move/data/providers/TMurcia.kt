@@ -138,7 +138,7 @@ fun parseTMurcia(response: String): List<LineTime> {
                         date1.toInstant(TimeZone.of("Europe/Madrid")),
                         DateTimeUnit.MINUTE
                     ).toInt()
-                    val date2 = LocalDateTime.parse(value[0].lineInfo.mc.eta.take(19))
+                    val date2 = LocalDateTime.parse(value[1].lineInfo.mc.eta.take(19))
                     var min2: Int? = now.until(
                         date2.toInstant(TimeZone.of("Europe/Madrid")),
                         DateTimeUnit.MINUTE
