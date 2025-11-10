@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.camera.compose)
+    implementation(libs.kotlinx.datetime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

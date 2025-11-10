@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 xmlutil = "0.91.3"
 kotlin = "2.2.21"
 junit = "4.13.2"
@@ -37,6 +37,7 @@ ksp = "2.2.10-2.0.2"
 roomRuntime = "2.8.3"
 roomCompiler = "2.8.3"
 cameraCompose = "1.5.1"
+kotlinxDatetime = "0.7.0-0.6.x-compat"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.17.0" }
@@ -87,6 +88,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "cameraCompose" }
 io-github-pdvrieze-xmlutil-core-android = { group = "io.github.pdvrieze.xmlutil", module = "io.github.pdvrieze.xmlutil:core-android", version.ref = "xmlutil" }
 io-github-pdvrieze-xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
