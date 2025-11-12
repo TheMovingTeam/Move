@@ -274,7 +274,7 @@ fun AboutSection(
         AboutElement(
             icon = Icons.Rounded.Info,
             description = R.string.privacyPolicy,
-            link = "https://themovingteam.github.io/privacy/"
+            link = "https://movetransit.app/privacy/"
         ),
     )
 

@@ -249,7 +249,7 @@ fun WelcomePage(
                     modifier = modifier
                         .height(48.dp),
                     onClick = {
-                        uriHandler.openUri("https://themovingteam.github.io/privacy/")
+                        uriHandler.openUri("https://movetransit.app/privacy/")
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent,

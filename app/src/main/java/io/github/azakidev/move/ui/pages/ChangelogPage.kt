@@ -137,7 +137,7 @@ fun ChangelogPage() {
             icon = Icons.Rounded.Link,
             description = stringResource(R.string.changelogHistory),
             onClick = {
-                uriHandler.openUri("https://themovingteam.github.io/changelog/")
+                uriHandler.openUri("https://movetransit.app/changelog/")
             }
         )
     }
