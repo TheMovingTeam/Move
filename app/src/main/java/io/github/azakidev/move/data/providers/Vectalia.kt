@@ -36,15 +36,14 @@ fun parseVectaliaTimes(
 
     response += responseParsed.estimates.mapNotNull { estimate ->
         val matchingLine = lines.find { line ->
-            line.name.equals(
-                estimate.destination, ignoreCase = true
-            ) || line.emblem == estimate.lineEmblem // Fallback or additional check using emblem
+            (line.emblem == estimate.lineEmblem && line.name.contains(estimate.destination)) || line.emblem == estimate.lineEmblem
         }
 
         if (matchingLine != null) {
             if (estimate.seconds.count() >= 2) {
                 LineTime(
                     lineId = matchingLine.id,
+                    destination = estimate.destination,
                     nextTimeFirst = estimate.seconds[0].div(60),
                     nextTimeSecond = estimate.seconds[1].div(60)
                 )
