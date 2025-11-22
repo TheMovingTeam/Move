@@ -100,7 +100,7 @@ fun HomePageView(
     lastStops: List<StopItem>,
     lines: List<LineItem>,
     onRecentOpen: (StopItem) -> Unit,
-    favStopCarrousel: @Composable() () -> Unit,
+    favStopCarrousel: @Composable () -> Unit,
     fabShouldAppear: Boolean = true
 ) {
     val greetings = stringArrayResource(R.array.greetings)

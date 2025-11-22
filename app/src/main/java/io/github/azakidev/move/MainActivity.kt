@@ -229,6 +229,7 @@ fun AppNavigator(
     backStack: NavBackStack<NavKey>
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
     if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
         LargeScreenHome(model, sheetModel, backStack)
     } else {

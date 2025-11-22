@@ -13,7 +13,7 @@
     <string name="recentStops">Paradas recientes</string>
     <string name="noFavStops">No se ha añadido ninguna parada a favoritos</string>
     <string name="noRecentStops">No se ha visto ninguna parada recientemente</string>
-    <string name="noResults">No se ha encontrado ningun resultado</string>
+    <string name="noResults">No se ha encontrado ningún resultado</string>
     <string name="noLines">No se ha añadido ninguna línea</string>
     <string name="settings">Ajustes</string>
     <string name="about">Sobre la app</string>
@@ -30,10 +30,13 @@
     <string name="qrNotFound">URL no reconocída</string>
     <string name="noQrProviders">No se han encontrado proveedores que soporten códigos QR</string>
     <string name="noCameraPermission">No se ha otorgado permísos de cámara</string>
+
     <string name="times">Estimaciones</string>
+    <string name="noTimes">No se han encontrado estimaciones</string>
     <string name="soon">Pronto</string>
     <string name="alerts">Alertas</string>
     <string name="noAlerts">No hay ninguna alerta en esta parada</string>
+
     <string name="privacyPolicy">Política de Privacidad</string>
 
     <string name="stopNameFilter">Nombre de parada</string>

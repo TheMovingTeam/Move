@@ -69,8 +69,6 @@ import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -89,16 +87,6 @@ fun StopPage(
         targetValue = roundness,
         animationSpec = MotionScheme.expressive().fastSpatialSpec()
     )
-
-    Timer().schedule(delay = 1000, period = 1000, action = {
-        if (!sheetModel.showBottomSheet) {
-            this.cancel()
-        }
-        if (!sheetModel.sheetStop.lineTimes.value.isEmpty()) {
-            this.cancel()
-        }
-        model.fetchTimes(sheetModel.sheetStop)
-    }).run()
 
     model.addToFetchLoop(sheetModel.sheetStop.id)
 
@@ -342,10 +330,10 @@ fun StopTimes(
     )
     val lineTimes = sheetModel.sheetStop.lineTimes.collectAsState().value
     AnimatedContent(
-        targetState = lineTimes.count(),
-    ) { count ->
-        when (count) {
-            0 -> {
+        targetState = lineTimes,
+    ) { times ->
+        when (times) {
+            null -> {
                 Box(
                     modifier = Modifier
                         .height(150.dp)
@@ -358,20 +346,33 @@ fun StopTimes(
                 }
             }
 
+            emptyList<LineTime>() -> {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.noTimes))
+                }
+            }
+
             else -> {
                 Column(
                     modifier = modifier,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     var count = 0
-                    lineTimes
+                    times
                         .sortedBy { it.nextTimeFirst }
                         .forEach {
 
                             val line = lineItems
                                 .find { lineItem -> lineItem.id == it.lineId } ?: LineItem()
 
-                            val shape = listShape(count, lineTimes.count())
+                            val shape = listShape(count, times.count())
                             count++
 
                             Box(

@@ -103,7 +103,7 @@ fun ChangelogPage() {
             color = MaterialTheme.colorScheme.outline
         )
         var count = 0
-        changelogEntry.forEach { it ->
+        changelogEntry.forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

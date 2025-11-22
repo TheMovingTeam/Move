@@ -20,9 +20,9 @@ data class StopItem(
 
     val notifications: List<String> = emptyList()
 ) {
-    @Transient private var _lineTimes: MutableStateFlow<List<LineTime>> = MutableStateFlow(listOf())
+    @Transient private var _lineTimes: MutableStateFlow<List<LineTime>?> = MutableStateFlow(null)
     @Transient val lineTimes = _lineTimes.asStateFlow()
-    fun setTimeTable(times: List<LineTime>) {
+    fun setTimeTable(times: List<LineTime>?) {
         _lineTimes.value = times
     }
 }

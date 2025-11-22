@@ -384,7 +384,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             lastStops.value.filterNot { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
         
         viewModelScope.launch {
-            _stopsToLoad -= stopsToStopLoading
+            _stopsToLoad -= stopsToStopLoading.toSet()
             _userStore.saveFavouriteStops(favStopsToKeep)
             _userStore.saveLastStops(lastStopsToKeep)
         }
@@ -499,13 +499,19 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun fetchTimes(stopItem: StopItem) {
-        val provider =
-            providers.value.find { providerItem -> providerItem.id == stopItem.provider }
-                ?: ProviderItem()
-        if (!(provider.capabilities.contains(Capabilities.Time))
-        ) {
+        val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider }
+
+        if (provider == null) {
+            Log.w(LogTags.Networking.name , "Provider cannot be null")
             return
         }
+
+        if (!(provider.capabilities.contains(Capabilities.Time))) {
+            return
+        }
+
+
+
         viewModelScope.launch(Dispatchers.IO) {
             val url = provider.timeSource
                 .replace("@stop", stopItem.id.toString())
@@ -513,29 +519,31 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
             val client = OkHttpClient.Builder()
                 .trustSelfSignedCertsIfNeeded(provider)
+                .retryOnConnectionFailure(true)
                 .build()
-            val request = Request.Builder()
 
             try {
-                val requestBuilt = request.formRequest(client, provider, stopItem).url(url).build()
+                val requestBuilt = Request.Builder().formRequest(client, provider, stopItem).url(url).build()
 
                 val response = client
                     .newCall(requestBuilt)
                     .execute()
 
                 val responseText = response.body!!.string()
+
                 try {
-                    val times =
-                        parseTimes(responseText, provider, stopItem, lines.value) ?: emptyList()
-                    if (times.isNotEmpty()) {
-                        stopItem.setTimeTable(times)
-                    }
+                    val times = parseTimes(responseText, provider, stopItem, lines.value)
+                        ?: emptyList()
+
+                    stopItem.setTimeTable(times)
+
                 } catch (e: Exception) {
                     Log.e(
                         LogTags.MoveModel.name,
                         "Could not parse times for ${stopItem.name}: $e",
                         e
                     )
+                    stopItem.setTimeTable(emptyList())
                     return@launch
                 }
             } catch (e: Exception) {
@@ -573,6 +581,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addToFetchLoop(stopId: Int) {
         if (!_stopsToLoad.contains(stopId)) { // Avoid duplicates
+
+            val stopItem = stops.value.find { it.id == stopId }
+            if (stopItem != null) {
+                fetchTimes(stopItem) // Force first fetch
+            }
+
             _stopsToLoad.add(stopId)
         }
     }

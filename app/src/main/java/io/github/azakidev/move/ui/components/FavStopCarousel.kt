@@ -49,9 +49,6 @@ import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.LineTime
 import io.github.azakidev.move.data.ProviderItem
 import io.github.azakidev.move.fmt
-import java.util.Timer
-import java.util.TimerTask
-import kotlin.concurrent.schedule
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,9 +68,6 @@ fun FavStopCarousel(
 
     sortedFavStops.parallelStream().forEach { stopItem ->
         model.addToFetchLoop(stopItem.id)
-        if (stopItem.lineTimes.value.isEmpty()) {
-            fastTimer(model, stopItem).run()
-        }
     }
 
     AnimatedContent(sortedFavStops.count()) { count ->
@@ -91,7 +85,7 @@ fun FavStopCarousel(
                 ) { i ->
                     val stopItem = sortedFavStops[i]
                     val provider =
-                        model.providers.collectAsState().value.find { it -> it.id == stopItem.id }
+                        model.providers.collectAsState().value.find { it.id == stopItem.id }
                             ?: ProviderItem()
                     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
                     HeroCarrouselItem(
@@ -118,22 +112,6 @@ fun FavStopCarousel(
     }
 }
 
-fun fastTimer(
-    model: MoveViewModel,
-    stopItem: StopItem,
-): TimerTask {
-    return Timer().schedule(
-        delay = 1000,
-        period = 5000,
-        action = {
-            model.fetchTimes(stopItem)
-            if (!stopItem.lineTimes.value.isEmpty()) {
-                this.cancel()
-            }
-        }
-    )
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HeroCarrouselItem(
@@ -143,13 +121,15 @@ fun HeroCarrouselItem(
     imgUrl: String,
     sheetModel: SheetStopViewModel
 ) {
-    val sortedLineTimes = stopItem.lineTimes.collectAsState().value
-        .sortedBy { it.nextTimeFirst }
-        .take(3)
-        .reversed()
     Box(
         modifier = modifier
     ) {
+
+        val sortedLineTimes = stopItem.lineTimes.collectAsState().value
+            ?.sortedBy { it.nextTimeFirst }
+            ?.take(3)
+            ?.reversed() ?: emptyList()
+
         AsyncImage(
             modifier = Modifier.matchParentSize(),
             model = ImageRequest.Builder(LocalContext.current)
@@ -187,6 +167,7 @@ fun HeroCarrouselItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+
             items(sortedLineTimes.count()) { lineTimeId ->
                 val lineTime = sortedLineTimes[lineTimeId]
                 val line = lineItems.find { lineItem -> lineItem.id == lineTime.lineId } ?: LineItem()

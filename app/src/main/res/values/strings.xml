@@ -30,13 +30,16 @@
     <string name="qrNotFound">URL not recognized</string>
     <string name="noQrProviders">No providers found with support for QR codes</string>
     <string name="noCameraPermission">The camera permission has not been granted</string>
+
     <string name="times">Estimations</string>
+    <string name="noTimes">No estimations found</string>
     <string name="soon">Soon</string>
     <string name="alerts">Alerts</string>
+
     <string name="noAlerts">There are no alerts for this stop</string>
     <string name="privacyPolicy">Privacy Policy</string>
-    <string name="searchPlaceholder">Where to go…</string>
 
+    <string name="searchPlaceholder">Where to go…</string>
     <string name="stopNameFilter">Stop name</string>
     <string name="stopComIdFilter">Stop ID</string>
     <string name="lineNameFilter">Line name</string>
