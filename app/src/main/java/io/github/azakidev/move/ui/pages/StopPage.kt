@@ -86,7 +86,7 @@ import org.maplibre.spatialk.geojson.Position
 fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    currentLocation: StateFlow<org.maplibre.compose.location.Location?>
+    currentLocation: StateFlow<Location?>
 ) {
     val roundness: Int =
         if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {

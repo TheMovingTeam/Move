@@ -1,8 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -35,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +50,7 @@ import io.github.azakidev.move.ui.components.LocationIndicator
 import io.github.azakidev.move.ui.components.MapSurface
 import io.github.azakidev.move.ui.components.SearchContents
 import io.github.azakidev.move.ui.components.SearchInputField
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
@@ -80,16 +78,14 @@ fun MapPage(
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = Position(
-                        latitude = 0.0,
-                        longitude = 0.0
-                    ),
+                    target = currentLocation.collectAsState().value?.position ?: Position(0.0, 0.0),
                     zoom = ZOOM
                 )
         )
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
+            delay(200)
             camera.animateTo(
                 finalPosition =
                     camera.position.copy(
