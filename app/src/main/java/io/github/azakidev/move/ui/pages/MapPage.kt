@@ -3,10 +3,15 @@ package io.github.azakidev.move.ui.pages
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.location.Location
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GpsFixed
@@ -20,117 +25,133 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
+import androidx.compose.ui.zIndex
+import androidx.window.core.layout.WindowSizeClass
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.utsman.osmandcompose.DefaultMapProperties
-import com.utsman.osmandcompose.OpenStreetMap
-import com.utsman.osmandcompose.ZoomButtonVisibility
-import com.utsman.osmandcompose.rememberCameraState
 import io.github.azakidev.move.R
+import io.github.azakidev.move.data.Capabilities
+import io.github.azakidev.move.data.MoveViewModel
+import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.fmtSearch
+import io.github.azakidev.move.ui.components.AllStops
+import io.github.azakidev.move.ui.components.LocationIndicator
+import io.github.azakidev.move.ui.components.MapSurface
+import io.github.azakidev.move.ui.components.SearchContents
+import io.github.azakidev.move.ui.components.SearchInputField
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
+import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.Location
+import org.maplibre.spatialk.geojson.Position
+import kotlin.time.Duration.Companion.milliseconds
+
+const val ZOOM: Double = 16.5
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+@OptIn(
+    ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
 fun MapPage(
-    fusedLocationProviderClient: FusedLocationProviderClient
+    model: MoveViewModel,
+    sheetModel: SheetStopViewModel,
+    currentLocation: StateFlow<Location?>,
 ) {
-    val context = LocalContext.current.applicationContext
+    val coroutineScope = rememberCoroutineScope()
 
-    val locationFinePermissionState = rememberPermissionState(
-        Manifest.permission.ACCESS_FINE_LOCATION
-    )
-
-    var lat = 0.0
-    var lon = 0.0
-
-    LaunchedEffect(key1 = null) {
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            locationFinePermissionState.launchPermissionRequest()
-        }
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                lat = location.latitude
-                lon = location.longitude
-            }
-        }
-    }
-
-    val cameraState = rememberCameraState {
-        geoPoint = GeoPoint(lat, lon)
-        zoom = 20.0
-    }
-
-    LaunchedEffect(key1 = null) {
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                lat = location.latitude
-                lon = location.longitude
-                cameraState.animateTo(
-                    point = GeoPoint(lat, lon),
-                    pZoom = 20.0
+    val camera =
+        rememberCameraState(
+            firstPosition =
+                CameraPosition(
+                    target = Position(
+                        latitude = 0.0,
+                        longitude = 0.0
+                    ),
+                    zoom = ZOOM
                 )
-            }
+        )
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            camera.animateTo(
+                finalPosition =
+                    camera.position.copy(
+                        target = currentLocation.value?.position ?: Position(0.0, 0.0),
+                    ),
+                duration = 100.milliseconds,
+            )
         }
     }
-
-    var mapProperties by remember { mutableStateOf(DefaultMapProperties) }
 
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
-    val scope = rememberCoroutineScope()
 
     val inputField = @Composable {
-        SearchBarDefaults.InputField(
-            searchBarState = searchBarState,
-            textFieldState = textFieldState,
-            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.searchPlaceholder)
-                )
-            },
+        SearchInputField(
+            searchBarState,
+            textFieldState
         )
     }
 
-    SideEffect {
-        mapProperties = mapProperties
-            .copy(tileSources = TileSourceFactory.MAPNIK)
-            .copy(isEnableRotationGesture = true)
-            .copy(zoomButtonVisibility = ZoomButtonVisibility.NEVER)
-            .copy(isFlingEnable = true)
-            .copy(isAnimating = false)
-            .copy(minZoomLevel = 5.0)
-    }
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val topSafe = WindowInsets.statusBars.getTop(LocalDensity.current).times(0.4f).dp
+
+    val fill =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            Brush.verticalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.background,
+                    MaterialTheme.colorScheme.background
+                )
+            )
+        } else {
+            Brush.verticalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+                    Color.Transparent
+                )
+            )
+        }
+
+    val mapModifier =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            if (windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)) {
+                Modifier
+                    .zIndex(1f)
+                    .padding(top = topSafe)
+                    .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 0.dp))
+            } else {
+                Modifier
+                    .zIndex(1f)
+                    .padding(top = topSafe)
+                    .clip(RoundedCornerShape(12.dp, 12.dp, 0.dp, 0.dp))
+            }
+        } else {
+            Modifier.zIndex(1f)
+        }
+
+    val geoProviders = model.providers.collectAsState().value
+        .filter { it.capabilities.contains(Capabilities.Geo) }
+        .map { it.id }
+
     Scaffold(
         topBar = {
             AppBarWithSearch(
@@ -138,11 +159,19 @@ fun MapPage(
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
-                    appBarContainerColor = Color.Transparent
+                    appBarContainerColor = Color.Transparent,
+                    scrolledAppBarContainerColor = Color.Transparent,
                 ),
-                scrollBehavior = null
             )
-            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {}
+            ExpandedFullScreenSearchBar(state = searchBarState, inputField = inputField) {
+                SearchContents(
+                    model,
+                    sheetModel,
+                    textFieldState,
+                    searchBarState,
+                    textFieldState.text.toString().fmtSearch()
+                )
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -151,15 +180,14 @@ fun MapPage(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
-                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
-                        location?.let {
-                            lat = location.latitude
-                            lon = location.longitude
-                            cameraState.animateTo(
-                                point = GeoPoint(lat, lon),
-                                pZoom = 20.0
-                            )
-                        }
+                    coroutineScope.launch {
+                        camera.animateTo(
+                            finalPosition =
+                                camera.position.copy(
+                                    target = currentLocation.value?.position ?: Position(0.0, 0.0),
+                                ),
+                            duration = 250.milliseconds,
+                        )
                     }
                 }
             ) {
@@ -171,16 +199,102 @@ fun MapPage(
             }
         },
     ) { paddingValues ->
-        Surface(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            OpenStreetMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraState = cameraState,
-                properties = mapProperties,
-
-            )
-        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(topSafe)
+                .zIndex(2f)
+                .background(
+                    brush = fill
+                )
+        ) {}
+        MapSurface(
+            modifier = mapModifier,
+            paddingValues = paddingValues,
+            cameraState = camera,
+            hasCompass = true,
+            content = {
+                LocationIndicator(
+                    currentLocation = currentLocation
+                )
+                AllStops(
+                    model.stops.collectAsState().value
+                        .filter { it.provider in geoProviders }
+                        .filter { it.geoX != null && it.geoY != null }
+                )
+            }
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@Composable
+@Preview(showSystemUi = true)
+fun MapPagePreview() {
+    Scaffold(
+        topBar = {
+            AppBarWithSearch(
+                modifier = Modifier.padding(bottom = 8.dp),
+                state = rememberSearchBarState(),
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        textFieldState = rememberTextFieldState(),
+                        searchBarState = rememberSearchBarState(),
+                        onSearch = {},
+                    )
+                },
+                colors = SearchBarDefaults.appBarWithSearchColors(
+                    appBarContainerColor = Color.Transparent,
+                    scrolledAppBarContainerColor = Color.Transparent,
+                ),
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier.padding(8.dp),
+                shape = FloatingActionButtonDefaults.largeShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = { }
+            ) {
+                Icon(
+                    modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
+                    imageVector = Icons.Filled.GpsFixed,
+                    contentDescription = stringResource(id = R.string.search)
+                )
+            }
+        },
+    ) { paddingValues ->
+        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
+        val fill =
+            if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            } else {
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0f, 0f, 0f, 0.8f),
+                        Color(0f, 0f, 0f, 0.5f),
+                        Color.Transparent
+                    )
+                )
+            }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(WindowInsets.statusBars.getTop(LocalDensity.current).times(0.5f).dp)
+                .zIndex(2f)
+                .background(
+                    brush = fill
+                )
+        ) {}
+        MapSurface(
+            paddingValues = paddingValues
+        )
+    }
+}

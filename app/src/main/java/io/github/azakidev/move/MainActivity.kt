@@ -23,8 +23,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -66,12 +67,18 @@ import io.github.azakidev.move.ui.pages.ChangelogPage
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LargeScreenHome
 import io.github.azakidev.move.ui.pages.LinesPage
+import io.github.azakidev.move.ui.pages.MapPage
 import io.github.azakidev.move.ui.pages.OnboardingPage
 import io.github.azakidev.move.ui.pages.ProvidersPage
 import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
+import kotlinx.coroutines.flow.StateFlow
+import org.maplibre.compose.location.DesiredAccuracy
+import org.maplibre.compose.location.Location
+import org.maplibre.compose.location.rememberAndroidLocationProvider
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
@@ -92,6 +99,14 @@ class MainActivity : ComponentActivity() {
                 label = "Blur",
                 animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
             )
+
+            val location = rememberAndroidLocationProvider(
+                3.seconds,
+                DesiredAccuracy.Balanced,
+                minDistanceMeters = 50f,
+            )
+
+            val currentLocation = location.location
 
             MoveTheme {
                 Surface(
@@ -153,7 +168,8 @@ class MainActivity : ComponentActivity() {
                                                 model,
                                                 sheetState,
                                                 sheetModel,
-                                                backStack
+                                                backStack,
+                                                currentLocation
                                             )
                                         }
                                         entry<Providers> {
@@ -215,9 +231,9 @@ enum class AppDestinations(
     val icon: ImageVector,
     @param:StringRes val contentDescription: Int
 ) {
-    HOME(R.string.home, Icons.Default.Home, R.string.home),
-    LINES(R.string.lines, Icons.AutoMirrored.Filled.ArrowForward, R.string.lines),
-//    MAP(R.string.map, Icons.Default.LocationOn, R.string.map)
+    HOME(R.string.home, Icons.Rounded.Home, R.string.home),
+    LINES(R.string.lines, Icons.AutoMirrored.Rounded.ArrowForward, R.string.lines),
+    MAP(R.string.map, Icons.Rounded.LocationOn, R.string.map)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -226,56 +242,69 @@ fun AppNavigator(
     model: MoveViewModel,
     sheetState: SheetState,
     sheetModel: SheetStopViewModel,
-    backStack: NavBackStack<NavKey>
+    backStack: NavBackStack<NavKey>,
+    currentLocation: StateFlow<Location?>
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
-    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-        LargeScreenHome(model, sheetModel, backStack)
+    val visibleDestinations = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+        AppDestinations.entries.filterNot { it == AppDestinations.LINES }
     } else {
-        var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                AppDestinations.entries.forEach {
-                    item(
-                        icon = {
-                            Icon(
-                                imageVector = it.icon,
-                                contentDescription = stringResource(it.contentDescription)
-                            )
-                        },
-                        label = { Text(stringResource(it.label)) },
-                        selected = it == currentDestination,
-                        onClick = { currentDestination = it }
-                    )
-                }
+        AppDestinations.entries
+    }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            visibleDestinations.forEach {
+                item(
+                    icon = {
+                        Icon(
+                            imageVector = it.icon,
+                            contentDescription = stringResource(it.contentDescription)
+                        )
+                    },
+                    label = { Text(stringResource(it.label)) },
+                    selected = it == currentDestination,
+                    onClick = { currentDestination = it }
+                )
             }
-        ) {
-            AnimatedContent(
-                targetState = currentDestination,
-                transitionSpec = {
-                    fadeIn(
-                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                    ) togetherWith fadeOut(
-                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                    )
+        }
+    ) {
+        AnimatedContent(
+            targetState = currentDestination,
+            transitionSpec = {
+                fadeIn(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                ) togetherWith fadeOut(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                )
+            }
+        ) { currentDestination ->
+            when (currentDestination) {
+                AppDestinations.HOME -> {
+                    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                        LargeScreenHome(model, sheetModel, backStack)
+                    } else {
+                        HomePage(
+                            modifier = Modifier.padding(bottom = 0.dp),
+                            model = model,
+                            sheetModel = sheetModel,
+                            backStack = backStack
+                        )
+                    }
                 }
-            ) { currentDestination ->
-                when (currentDestination) {
-                    AppDestinations.HOME -> HomePage(
-                        modifier = Modifier.padding(bottom = 0.dp),
-                        model = model,
-                        sheetModel = sheetModel,
-                        backStack = backStack
-                    )
 
-                    AppDestinations.LINES -> LinesPage(
-                        modifier = Modifier.padding(bottom = 0.dp),
-                        model = model,
-                        sheetModel = sheetModel
-                    )
-//                AppDestinations.MAP -> MapPage(fusedLocationProviderClient)
-                }
+                AppDestinations.LINES -> LinesPage(
+                    modifier = Modifier.padding(bottom = 0.dp),
+                    model = model,
+                    sheetModel = sheetModel
+                )
+
+                AppDestinations.MAP -> MapPage(
+                    model = model,
+                    sheetModel = sheetModel,
+                    currentLocation = currentLocation
+                )
             }
         }
     }
@@ -294,7 +323,11 @@ fun AppNavigator(
             sheetState = sheetState,
             dragHandle = { },
         ) {
-            StopPage(model = model, sheetModel = sheetModel)
+            StopPage(
+                model = model,
+                sheetModel = sheetModel,
+                currentLocation = currentLocation
+            )
         }
     }
 

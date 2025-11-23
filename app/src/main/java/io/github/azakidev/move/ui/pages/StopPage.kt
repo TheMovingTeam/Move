@@ -58,6 +58,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.Capabilities
 import io.github.azakidev.move.data.LineItem
@@ -69,12 +70,23 @@ import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
 import io.github.azakidev.move.ui.components.EmblemShape
+import io.github.azakidev.move.ui.components.LocationIndicator
+import io.github.azakidev.move.ui.components.MapSurface
+import io.github.azakidev.move.ui.components.StopIndicator
+import kotlinx.coroutines.flow.StateFlow
+import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.Location
+import org.maplibre.spatialk.geojson.Position
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalPermissionsApi::class
+)
 @Composable
 fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
+    currentLocation: StateFlow<org.maplibre.compose.location.Location?>
 ) {
     val roundness: Int =
         if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {
@@ -137,7 +149,9 @@ fun StopPage(
                 modifier = Modifier.padding(16.dp),
             ) {
                 if (provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
-                        Capabilities.DoubleTime)) {
+                        Capabilities.DoubleTime
+                    )
+                ) {
                     StopTimes(
                         lineItems = lines,
                         sheetModel = sheetModel
@@ -146,6 +160,12 @@ fun StopPage(
                 if (provider.capabilities.contains(Capabilities.Notifications)) {
                     StopNotifications(
                         notifications = sheetModel.sheetStop.notifications
+                    )
+                }
+                if (provider.capabilities.contains(Capabilities.Geo)) {
+                    StopMap(
+                        sheetModel = sheetModel,
+                        currentLocation = currentLocation
                     )
                 }
             }
@@ -529,6 +549,57 @@ fun StopNotifications(
                         count++
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun StopMap(
+    sheetModel: SheetStopViewModel,
+    currentLocation: StateFlow<Location?>,
+) {
+    val stopItem = sheetModel.sheetStop
+
+    if (stopItem.geoX != null && stopItem.geoY != null) {
+        val camera =
+            rememberCameraState(
+                firstPosition =
+                    CameraPosition(
+                        target = Position(
+                            latitude = stopItem.geoX.toDouble(),
+                            longitude = stopItem.geoY.toDouble()
+                        ),
+                        zoom = 15.0
+                    )
+            )
+        Text(
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            text = stringResource(id = R.string.map),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Box(
+            modifier = Modifier
+                .height(208.dp)
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center
+        ) {
+            MapSurface(
+                cameraState = camera,
+                interactable = false
+            ) {
+                StopIndicator(
+                    stopItem.geoX.toDouble(),
+                    stopItem.geoY.toDouble()
+                )
+                LocationIndicator(
+                    currentLocation = currentLocation
+                )
             }
         }
     }

@@ -66,8 +66,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
-    implementation(libs.osmdroid.android)
-    implementation(libs.osm.androd.compose)
     implementation(libs.play.services.location)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.navigation3.runtime)
@@ -94,6 +92,7 @@ dependencies {
     implementation(libs.com.google.devtools.ksp.gradle.plugin)
     implementation(libs.io.github.pdvrieze.xmlutil.core.android)
     implementation(libs.io.github.pdvrieze.xmlutil.serialization)
+    implementation(libs.maplibre.compose)
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)
