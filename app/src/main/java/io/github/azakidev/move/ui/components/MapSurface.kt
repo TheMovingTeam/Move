@@ -71,9 +71,9 @@ fun MapSurface(
 @Composable
 @MaplibreComposable
 fun LocationIndicator(
-    currentLocation: StateFlow<Location?>
+    currentLocation: StateFlow<Location?>?
 ) {
-    val position = currentLocation.collectAsState().value ?: return
+    val position = currentLocation?.collectAsState()?.value ?: return
     val locationData = rememberGeoJsonSource(
         GeoJsonData.JsonString(
             """

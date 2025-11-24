@@ -1,5 +1,6 @@
 package io.github.azakidev.move
 
+import android.Manifest
 import android.os.Bundle
 import android.webkit.URLUtil
 import android.widget.Toast
@@ -61,6 +62,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.pages.ChangelogPage
@@ -82,6 +86,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -100,13 +105,21 @@ class MainActivity : ComponentActivity() {
                 animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
             )
 
-            val location = rememberAndroidLocationProvider(
-                3.seconds,
-                DesiredAccuracy.Balanced,
-                minDistanceMeters = 50f,
+            val locationFinePermissionState = rememberPermissionState(
+                Manifest.permission.ACCESS_FINE_LOCATION
             )
 
-            val currentLocation = location.location
+            var currentLocation: StateFlow<Location?>? = null
+
+            if (locationFinePermissionState.status.isGranted) {
+                val location = rememberAndroidLocationProvider(
+                    3.seconds,
+                    DesiredAccuracy.Balanced,
+                    minDistanceMeters = 50f,
+                )
+                currentLocation = location.location
+            }
+
 
             MoveTheme {
                 Surface(
@@ -130,7 +143,8 @@ class MainActivity : ComponentActivity() {
                                         slideInHorizontally(initialOffsetX = { it }) togetherWith scaleOut(
                                             targetScale = 0.9f,
                                             transformOrigin = TransformOrigin(0f, 0.5f),
-                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                            animationSpec = MotionScheme.standard()
+                                                .defaultSpatialSpec()
                                         )
                                     },
                                     popTransitionSpec = {
@@ -138,9 +152,11 @@ class MainActivity : ComponentActivity() {
                                         scaleIn(
                                             initialScale = 0.9f,
                                             transformOrigin = TransformOrigin(0f, 0.5f),
-                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                            animationSpec = MotionScheme.standard()
+                                                .defaultSpatialSpec()
                                         ) togetherWith slideOutHorizontally(
-                                            animationSpec = MotionScheme.standard().defaultSpatialSpec()
+                                            animationSpec = MotionScheme.standard()
+                                                .defaultSpatialSpec()
                                         ) { it }
                                     },
                                     predictivePopTransitionSpec = {
@@ -176,7 +192,8 @@ class MainActivity : ComponentActivity() {
                                             ProvidersPage(model, backStack)
                                         }
                                         entry<Settings> {
-                                            val invalidText = stringResource(R.string.providerInvalid)
+                                            val invalidText =
+                                                stringResource(R.string.providerInvalid)
                                             SettingsPage(
                                                 model.providerRepo,
                                                 backStack,
@@ -214,6 +231,7 @@ class MainActivity : ComponentActivity() {
                                     },
                                 )
                             }
+
                             false -> {
                                 model.shouldShowChangelog.value = false
                                 OnboardingPage(model)
@@ -243,15 +261,16 @@ fun AppNavigator(
     sheetState: SheetState,
     sheetModel: SheetStopViewModel,
     backStack: NavBackStack<NavKey>,
-    currentLocation: StateFlow<Location?>
+    currentLocation: StateFlow<Location?>?
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
-    val visibleDestinations = if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-        AppDestinations.entries.filterNot { it == AppDestinations.LINES }
-    } else {
-        AppDestinations.entries
-    }
+    val visibleDestinations =
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            AppDestinations.entries.filterNot { it == AppDestinations.LINES }
+        } else {
+            AppDestinations.entries
+        }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     NavigationSuiteScaffold(
         navigationSuiteItems = {

@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.pages
 
+import android.Manifest
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.window.core.layout.WindowSizeClass
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
@@ -70,26 +72,33 @@ const val ZOOM: Double = 16.5
 fun MapPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    currentLocation: StateFlow<Location?>,
+    currentLocation: StateFlow<Location?>?,
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    val locationFinePermissionState = rememberPermissionState(
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     val camera =
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = currentLocation.collectAsState().value?.position ?: Position(0.0, 0.0),
+                    target = currentLocation?.collectAsState()?.value?.position ?: Position(0.0, 0.0),
                     zoom = ZOOM
                 )
         )
 
     LaunchedEffect(Unit) {
+        if (currentLocation == null) {
+            locationFinePermissionState.launchPermissionRequest()
+        }
         coroutineScope.launch {
             delay(200)
             camera.animateTo(
                 finalPosition =
                     camera.position.copy(
-                        target = currentLocation.value?.position ?: Position(0.0, 0.0),
+                        target = currentLocation?.value?.position ?: Position(0.0, 0.0),
                     ),
                 duration = 100.milliseconds,
             )
@@ -180,7 +189,7 @@ fun MapPage(
                         camera.animateTo(
                             finalPosition =
                                 camera.position.copy(
-                                    target = currentLocation.value?.position ?: Position(0.0, 0.0),
+                                    target = currentLocation?.value?.position ?: Position(0.0, 0.0),
                                 ),
                             duration = 250.milliseconds,
                         )
