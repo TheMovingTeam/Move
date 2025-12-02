@@ -78,9 +78,8 @@ import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
-import kotlinx.coroutines.flow.StateFlow
+import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.compose.location.DesiredAccuracy
-import org.maplibre.compose.location.Location
 import org.maplibre.compose.location.rememberAndroidLocationProvider
 import kotlin.time.Duration.Companion.seconds
 
@@ -109,17 +108,16 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
 
-            var currentLocation: StateFlow<Location?>? = null
+            var currentLocation: AndroidLocationProvider? = null
 
             if (locationFinePermissionState.status.isGranted) {
                 val location = rememberAndroidLocationProvider(
-                    3.seconds,
+                    1.seconds,
                     DesiredAccuracy.Balanced,
                     minDistanceMeters = 50f,
                 )
-                currentLocation = location.location
+                currentLocation = location
             }
-
 
             MoveTheme {
                 Surface(
@@ -261,7 +259,7 @@ fun AppNavigator(
     sheetState: SheetState,
     sheetModel: SheetStopViewModel,
     backStack: NavBackStack<NavKey>,
-    currentLocation: StateFlow<Location?>?
+    currentLocation: AndroidLocationProvider?
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 

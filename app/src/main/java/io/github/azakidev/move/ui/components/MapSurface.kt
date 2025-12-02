@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.R
+import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.compose.camera.CameraState
@@ -23,8 +25,12 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.value.SymbolPlacement
 import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
+import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.compose.location.Location
+import org.maplibre.compose.location.LocationPuck
+import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
@@ -71,9 +77,11 @@ fun MapSurface(
 @Composable
 @MaplibreComposable
 fun LocationIndicator(
-    currentLocation: StateFlow<Location?>?
+    currentLocation: AndroidLocationProvider?
 ) {
-    val position = currentLocation?.collectAsState()?.value ?: return
+    val location = currentLocation ?: return
+    val position = location.location.collectAsState().value ?: return
+
     val locationData = rememberGeoJsonSource(
         GeoJsonData.JsonString(
             """
@@ -179,4 +187,53 @@ fun AllStops(
         iconColor = const(MaterialTheme.colorScheme.onErrorContainer),
         iconImage = image(rememberVectorPainter(Icons.Rounded.LocationOn))
     )
+}
+
+@Composable
+@MaplibreComposable
+fun AllLines(
+    lines: List<LineItem>,
+    stops: List<StopItem>
+) {
+    lines.forEach { line ->
+        val stopLines = line.stops.mapNotNull { stop -> stops.find { it.id == stop && it.provider == line.provider } }
+
+        var posArray = ""
+
+        stopLines.forEach{
+            posArray += "[${it.geoY}, ${it.geoX}]"
+
+            if (it != stopLines.last()) {
+                posArray += ",\n"
+            }
+        }
+
+        val geoJson = """
+         { 
+            "type": "Feature",
+            "geometry": {
+               "type": "LineString",
+               "coordinates": [
+                   ${posArray.removeSuffix(",")}
+               ]
+            }
+        }""".trimIndent()
+
+        val locationData = rememberGeoJsonSource(
+            GeoJsonData.JsonString(geoJson)
+        )
+
+        val color = when (line.color) {
+            null -> MaterialTheme.colorScheme.primary
+            else -> {
+                Color(line.color.toColorInt())
+            }
+        }
+
+        LineLayer(
+            id = "line-${line.provider}-${line.id}",
+            source = locationData,
+            color = const(color)
+        )
+    }
 }

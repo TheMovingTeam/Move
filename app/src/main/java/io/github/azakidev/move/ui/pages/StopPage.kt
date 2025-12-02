@@ -76,6 +76,7 @@ import io.github.azakidev.move.ui.components.StopIndicator
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.compose.location.Location
 import org.maplibre.spatialk.geojson.Position
 
@@ -86,7 +87,7 @@ import org.maplibre.spatialk.geojson.Position
 fun StopPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    currentLocation: StateFlow<Location?>?
+    currentLocation: AndroidLocationProvider?
 ) {
     val roundness: Int =
         if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {
@@ -558,7 +559,7 @@ fun StopNotifications(
 @Composable
 fun StopMap(
     sheetModel: SheetStopViewModel,
-    currentLocation: StateFlow<Location?>?,
+    currentLocation: AndroidLocationProvider?,
 ) {
     val stopItem = sheetModel.sheetStop
 

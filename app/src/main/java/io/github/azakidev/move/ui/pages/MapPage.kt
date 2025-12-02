@@ -47,6 +47,7 @@ import io.github.azakidev.move.data.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.fmtSearch
+import io.github.azakidev.move.ui.components.AllLines
 import io.github.azakidev.move.ui.components.AllStops
 import io.github.azakidev.move.ui.components.LocationIndicator
 import io.github.azakidev.move.ui.components.MapSurface
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.compose.location.Location
 import org.maplibre.spatialk.geojson.Position
 import kotlin.time.Duration.Companion.milliseconds
@@ -72,7 +74,7 @@ const val ZOOM: Double = 16.5
 fun MapPage(
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    currentLocation: StateFlow<Location?>?,
+    currentLocation: AndroidLocationProvider?,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -84,7 +86,7 @@ fun MapPage(
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = currentLocation?.collectAsState()?.value?.position ?: Position(0.0, 0.0),
+                    target = currentLocation?.location?.collectAsState()?.value?.position ?: Position(0.0, 0.0),
                     zoom = ZOOM
                 )
         )
@@ -98,7 +100,7 @@ fun MapPage(
             camera.animateTo(
                 finalPosition =
                     camera.position.copy(
-                        target = currentLocation?.value?.position ?: Position(0.0, 0.0),
+                        target = currentLocation?.location?.value?.position ?: Position(0.0, 0.0),
                     ),
                 duration = 100.milliseconds,
             )
@@ -189,7 +191,7 @@ fun MapPage(
                         camera.animateTo(
                             finalPosition =
                                 camera.position.copy(
-                                    target = currentLocation?.value?.position ?: Position(0.0, 0.0),
+                                    target = currentLocation?.location?.value?.position ?: Position(0.0, 0.0),
                                 ),
                             duration = 250.milliseconds,
                         )
@@ -213,6 +215,7 @@ fun MapPage(
                     brush = fill
                 )
         ) {}
+
         MapSurface(
             modifier = mapModifier,
             paddingValues = paddingValues,
@@ -226,6 +229,10 @@ fun MapPage(
                     model.stops.collectAsState().value
                         .filter { it.provider in geoProviders }
                         .filter { it.geoX != null && it.geoY != null }
+                )
+                AllLines(
+                    model.lines.collectAsState().value,
+                    model.stops.collectAsState().value
                 )
             }
         )
@@ -294,9 +301,7 @@ fun MapPagePreview() {
                 .fillMaxWidth()
                 .height(WindowInsets.statusBars.getTop(LocalDensity.current).times(0.5f).dp)
                 .zIndex(2f)
-                .background(
-                    brush = fill
-                )
+                .background(brush = fill)
         ) {}
         MapSurface(
             paddingValues = paddingValues
