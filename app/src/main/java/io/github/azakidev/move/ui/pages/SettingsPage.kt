@@ -66,6 +66,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
@@ -241,9 +244,17 @@ fun LogoSection(
         val appName =
             if (BuildConfig.DEBUG) stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME + "_BETA"
             else stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME
+
+        val fredokaFontFamily = FontFamily(
+            Font(R.font.fredoka_medium, FontWeight.Medium),
+            Font(R.font.fredoka_bold, FontWeight.Bold)
+        )
+
         Text(
             modifier = Modifier.padding(top = 8.dp),
             text = appName,
+            fontFamily = fredokaFontFamily,
+            fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.titleMedium
         )
     }

@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastDistinctBy
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
+import io.github.azakidev.move.R
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
 
@@ -68,16 +71,22 @@ fun EmblemShape(
         val emblem = emblemOverride ?: line.emblem
         val padding = if (textStyle.fontSize > 12.sp) 6 else 3
 
+        val fredokaFontFamily = FontFamily(
+            Font(R.font.fredoka_medium, FontWeight.Medium),
+            Font(R.font.fredoka_bold, FontWeight.Bold)
+        )
+
         Text(
             modifier = Modifier.padding(padding.dp),
             text = emblem.take(4),
             maxLines = 1,
             textAlign = TextAlign.Center,
-            style = textStyle,
-            fontWeight = FontWeight.Medium,
             color = textColor,
+            style = textStyle,
+            fontFamily = fredokaFontFamily,
+            fontWeight = FontWeight.Medium,
             autoSize = TextAutoSize.StepBased(
-                minFontSize = 0.sp,
+                minFontSize = 4.sp,
                 maxFontSize = textStyle.fontSize
             )
         )

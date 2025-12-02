@@ -74,6 +74,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -232,6 +233,10 @@ fun WelcomePage(
             Modifier.fillMaxWidth()
         }
 
+    val fredokaFontFamily = FontFamily(
+        Font(R.font.fredoka_bold, FontWeight.Bold)
+    )
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -365,7 +370,7 @@ fun WelcomePage(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            Column( horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 LogoHero(
                     size = (208 * scale).toInt(),
                     shapeAngle = shapeAngle.value.toInt()
@@ -396,10 +401,9 @@ fun WelcomePage(
                         )
                         Text(
                             text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.displayMedium,
-                            fontWeight = FontWeight.Light,
-                            fontStyle = FontStyle.Italic,
-                            fontFamily = FontFamily.SansSerif,
+                            style = MaterialTheme.typography.displayLarge,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = fredokaFontFamily,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }

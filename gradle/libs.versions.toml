@@ -37,6 +37,7 @@ roomCompiler = "2.8.4"
 cameraCompose = "1.5.1"
 kotlinxDatetime = "0.7.1"
 maplibre = "0.12.1"
+uiText = "1.9.5"
 
 [libraries]
 # Core
@@ -100,6 +101,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 # Maps
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre" }
+androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
