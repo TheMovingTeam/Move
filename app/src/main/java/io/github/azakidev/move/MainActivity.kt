@@ -263,65 +263,80 @@ fun AppNavigator(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
+    //TODO: Remove check when Map page is finished
+    val presentDestinations =
+        if (BuildConfig.DEBUG) AppDestinations.entries
+        else AppDestinations.entries.filterNot { it == AppDestinations.MAP }
+
     val visibleDestinations =
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            AppDestinations.entries.filterNot { it == AppDestinations.LINES }
+            presentDestinations.filterNot { it == AppDestinations.LINES }
         } else {
-            AppDestinations.entries
+            presentDestinations
         }
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            visibleDestinations.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            imageVector = it.icon,
-                            contentDescription = stringResource(it.contentDescription)
-                        )
-                    },
-                    label = { Text(stringResource(it.label)) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
-            }
-        }
-    ) {
-        AnimatedContent(
-            targetState = currentDestination,
-            transitionSpec = {
-                fadeIn(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                ) togetherWith fadeOut(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                )
-            }
-        ) { currentDestination ->
-            when (currentDestination) {
-                AppDestinations.HOME -> {
-                    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-                        LargeScreenHome(model, sheetModel, backStack)
-                    } else {
-                        HomePage(
-                            modifier = Modifier.padding(bottom = 0.dp),
-                            model = model,
-                            sheetModel = sheetModel,
-                            backStack = backStack
-                        )
-                    }
+
+    //TODO: Remove check when Map page is finished
+    if (
+        visibleDestinations.count() == 1 &&
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+        ) {
+        LargeScreenHome(model, sheetModel, backStack)
+    } else {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                visibleDestinations.forEach {
+                    item(
+                        icon = {
+                            Icon(
+                                imageVector = it.icon,
+                                contentDescription = stringResource(it.contentDescription)
+                            )
+                        },
+                        label = { Text(stringResource(it.label)) },
+                        selected = it == currentDestination,
+                        onClick = { currentDestination = it }
+                    )
                 }
+            }
+        ) {
+            AnimatedContent(
+                targetState = currentDestination,
+                transitionSpec = {
+                    fadeIn(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    ) togetherWith fadeOut(
+                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                    )
+                }
+            ) { currentDestination ->
+                when (currentDestination) {
+                    AppDestinations.HOME -> {
+                        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                            LargeScreenHome(model, sheetModel, backStack)
+                        } else {
+                            HomePage(
+                                modifier = Modifier.padding(bottom = 0.dp),
+                                model = model,
+                                sheetModel = sheetModel,
+                                backStack = backStack
+                            )
+                        }
+                    }
 
-                AppDestinations.LINES -> LinesPage(
-                    modifier = Modifier.padding(bottom = 0.dp),
-                    model = model,
-                    sheetModel = sheetModel
-                )
+                    AppDestinations.LINES -> LinesPage(
+                        modifier = Modifier.padding(bottom = 0.dp),
+                        model = model,
+                        sheetModel = sheetModel
+                    )
 
-                AppDestinations.MAP -> MapPage(
-                    model = model,
-                    sheetModel = sheetModel,
-                    currentLocation = currentLocation
-                )
+                    AppDestinations.MAP -> MapPage(
+                        model = model,
+                        sheetModel = sheetModel,
+                        currentLocation = currentLocation
+                    )
+                }
             }
         }
     }

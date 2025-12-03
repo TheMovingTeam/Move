@@ -13,22 +13,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.LineItem
 import io.github.azakidev.move.data.StopItem
-import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
-import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.interpolate
 import org.maplibre.compose.expressions.dsl.zoom
-import org.maplibre.compose.expressions.value.FloatValue
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.expressions.value.SymbolAnchor
@@ -37,9 +34,6 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.location.AndroidLocationProvider
-import org.maplibre.compose.location.Location
-import org.maplibre.compose.location.LocationPuck
-import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
@@ -211,6 +205,8 @@ fun AllLines(
     lines: List<LineItem>,
     stops: List<StopItem>
 ) {
+    //TODO: Remove check when fully implemented
+    if (!BuildConfig.DEBUG) return
     lines.forEach { line ->
         val stopLines =
             line.stops.mapNotNull { stop -> stops.find { it.id == stop && it.provider == line.provider } }
