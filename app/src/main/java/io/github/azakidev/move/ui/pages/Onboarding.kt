@@ -450,7 +450,7 @@ fun FeaturePage(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .padding(top = 64.dp)
-                    .width((windowSizeClass.minWidthDp / 2).dp)
+                    .width((windowSizeClass.minWidthDp * 0.55).dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(MaterialTheme.colorScheme.background)
                     .shadow(4.dp),

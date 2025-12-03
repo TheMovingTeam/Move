@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
@@ -69,6 +70,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.StopItem
 import io.github.azakidev.move.fmt
 import io.github.azakidev.move.listShape
+import io.github.azakidev.move.ui.components.AllLines
 import io.github.azakidev.move.ui.components.EmblemShape
 import io.github.azakidev.move.ui.components.LocationIndicator
 import io.github.azakidev.move.ui.components.MapSurface
@@ -166,6 +168,8 @@ fun StopPage(
                 if (provider.capabilities.contains(Capabilities.Geo)) {
                     StopMap(
                         sheetModel = sheetModel,
+                        lines = lines.fastFilter { it.stops.contains(sheetModel.sheetStop.id) },
+                        stops = model.stops.collectAsState().value,
                         currentLocation = currentLocation
                     )
                 }
@@ -559,6 +563,8 @@ fun StopNotifications(
 @Composable
 fun StopMap(
     sheetModel: SheetStopViewModel,
+    lines: List<LineItem>,
+    stops: List<StopItem>,
     currentLocation: AndroidLocationProvider?,
 ) {
     val stopItem = sheetModel.sheetStop
@@ -594,6 +600,10 @@ fun StopMap(
                 cameraState = camera,
                 interactable = false
             ) {
+                AllLines(
+                    lines = lines,
+                    stops = stops
+                )
                 StopIndicator(
                     stopItem.geoX.toDouble(),
                     stopItem.geoY.toDouble()

@@ -54,12 +54,10 @@ import io.github.azakidev.move.ui.components.MapSurface
 import io.github.azakidev.move.ui.components.SearchContents
 import io.github.azakidev.move.ui.components.SearchInputField
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.location.AndroidLocationProvider
-import org.maplibre.compose.location.Location
 import org.maplibre.spatialk.geojson.Position
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -86,7 +84,7 @@ fun MapPage(
         rememberCameraState(
             firstPosition =
                 CameraPosition(
-                    target = currentLocation?.location?.collectAsState()?.value?.position ?: Position(0.0, 0.0),
+                    target = currentLocation?.location?.collectAsState()?.value?.position ?: Position(-0.490, 38.346),
                     zoom = ZOOM
                 )
         )
@@ -100,7 +98,7 @@ fun MapPage(
             camera.animateTo(
                 finalPosition =
                     camera.position.copy(
-                        target = currentLocation?.location?.value?.position ?: Position(0.0, 0.0),
+                        target = currentLocation?.location?.value?.position ?: Position(-0.490, 38.346),
                     ),
                 duration = 100.milliseconds,
             )
@@ -118,7 +116,7 @@ fun MapPage(
     }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val topSafe = WindowInsets.statusBars.getTop(LocalDensity.current).times(0.4f).dp
+    val topSafe = WindowInsets.statusBars.getTop(LocalDensity.current).times(0.8f).dp
 
     val fill =
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
@@ -191,7 +189,7 @@ fun MapPage(
                         camera.animateTo(
                             finalPosition =
                                 camera.position.copy(
-                                    target = currentLocation?.location?.value?.position ?: Position(0.0, 0.0),
+                                    target = currentLocation?.location?.value?.position ?: Position(-0.490, 38.346),
                                 ),
                             duration = 250.milliseconds,
                         )
@@ -225,14 +223,14 @@ fun MapPage(
                 LocationIndicator(
                     currentLocation = currentLocation
                 )
+                AllLines(
+                    model.lines.collectAsState().value,
+                    model.stops.collectAsState().value
+                )
                 AllStops(
                     model.stops.collectAsState().value
                         .filter { it.provider in geoProviders }
                         .filter { it.geoX != null && it.geoY != null }
-                )
-                AllLines(
-                    model.lines.collectAsState().value,
-                    model.stops.collectAsState().value
                 )
             }
         )

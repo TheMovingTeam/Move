@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.R
@@ -21,8 +22,16 @@ import io.github.azakidev.move.data.StopItem
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.image
+import org.maplibre.compose.expressions.dsl.interpolate
+import org.maplibre.compose.expressions.dsl.zoom
+import org.maplibre.compose.expressions.value.FloatValue
+import org.maplibre.compose.expressions.value.LineCap
+import org.maplibre.compose.expressions.value.LineJoin
+import org.maplibre.compose.expressions.value.SymbolAnchor
 import org.maplibre.compose.expressions.value.SymbolPlacement
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
@@ -135,8 +144,7 @@ fun StopIndicator(
                     "geometry": {
                         "type": "Point",
                         "coordinates": [${lon}, ${lat}]
-                    },
-                    "properties": {}
+                    }
                 }
             """.trimIndent()
         )
@@ -146,8 +154,12 @@ fun StopIndicator(
         id = name,
         source = locationData,
         placement = const(SymbolPlacement.Point),
-        iconColor = const(MaterialTheme.colorScheme.onErrorContainer),
-        iconImage = image(rememberVectorPainter(Icons.Rounded.LocationOn))
+        iconImage = image(
+            value = rememberVectorPainter(Icons.Rounded.LocationOn),
+            drawAsSdf = true
+        ),
+        iconAnchor = const(SymbolAnchor.Bottom),
+        iconColor = const(colorResource(R.color.purple_brand))
     )
 }
 
@@ -158,7 +170,7 @@ fun AllStops(
 ) {
     var geoJson = """{ "type": "FeatureCollection", "features": [ """
 
-    stops.forEach{
+    stops.forEach {
         geoJson += """
                 {
                     "type": "Feature",
@@ -184,8 +196,12 @@ fun AllStops(
         id = "All stops",
         source = locationData,
         placement = const(SymbolPlacement.Point),
-        iconColor = const(MaterialTheme.colorScheme.onErrorContainer),
-        iconImage = image(rememberVectorPainter(Icons.Rounded.LocationOn))
+        iconImage = image(
+            value = rememberVectorPainter(Icons.Rounded.LocationOn),
+            drawAsSdf = true,
+        ),
+        iconAnchor = const(SymbolAnchor.Bottom),
+        iconColor = const(colorResource(R.color.purple_brand))
     )
 }
 
@@ -196,11 +212,12 @@ fun AllLines(
     stops: List<StopItem>
 ) {
     lines.forEach { line ->
-        val stopLines = line.stops.mapNotNull { stop -> stops.find { it.id == stop && it.provider == line.provider } }
+        val stopLines =
+            line.stops.mapNotNull { stop -> stops.find { it.id == stop && it.provider == line.provider } }
 
         var posArray = ""
 
-        stopLines.forEach{
+        stopLines.forEach {
             posArray += "[${it.geoY}, ${it.geoX}]"
 
             if (it != stopLines.last()) {
@@ -233,7 +250,19 @@ fun AllLines(
         LineLayer(
             id = "line-${line.provider}-${line.id}",
             source = locationData,
-            color = const(color)
+            color = const(color),
+            cap = const(LineCap.Round),
+            join = const(LineJoin.Round),
+            width =
+                interpolate(
+                    type = exponential(1.2f),
+                    input = zoom(),
+                    4 to const(0.dp),
+                    5 to const(0.4.dp),
+                    6 to const(0.7.dp),
+                    7 to const(1.75.dp),
+                    20 to const(8.dp),
+                ),
         )
     }
 }
