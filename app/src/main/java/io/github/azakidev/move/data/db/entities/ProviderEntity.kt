@@ -1,9 +1,9 @@
-package io.github.azakidev.move.data.db
+package io.github.azakidev.move.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import io.github.azakidev.move.data.Capabilities // Assuming these are simple enums
-import io.github.azakidev.move.data.ProviderItem
+import io.github.azakidev.move.data.items.Capabilities // Assuming these are simple enums
+import io.github.azakidev.move.data.items.ProviderItem
 
 @Entity(tableName = "providers")
 data class ProviderEntity(

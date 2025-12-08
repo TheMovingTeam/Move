@@ -1,6 +1,7 @@
 package io.github.azakidev.move
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.webkit.URLUtil
 import android.widget.Toast
@@ -55,6 +56,8 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -67,6 +70,11 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.widget.FavStopWidgetReceiver
+import io.github.azakidev.move.ui.MainView
+import io.github.azakidev.move.ui.Providers
+import io.github.azakidev.move.ui.QrScanner
+import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.ui.pages.ChangelogPage
 import io.github.azakidev.move.ui.pages.HomePage
 import io.github.azakidev.move.ui.pages.LargeScreenHome
@@ -78,6 +86,8 @@ import io.github.azakidev.move.ui.pages.QrPage
 import io.github.azakidev.move.ui.pages.SettingsPage
 import io.github.azakidev.move.ui.pages.StopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.compose.location.DesiredAccuracy
 import org.maplibre.compose.location.rememberAndroidLocationProvider
@@ -90,6 +100,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
+
+        // Widget preview setup
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            lifecycleScope.launch(Dispatchers.Default) {
+                GlanceAppWidgetManager(this@MainActivity)
+                    .setWidgetPreviews(FavStopWidgetReceiver::class)
+            }
+        }
+
         setContent {
             val model = viewModel<MoveViewModel>()
             model.fetchProviders()

@@ -1,4 +1,4 @@
-package io.github.azakidev.move.data
+package io.github.azakidev.move.data.items
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

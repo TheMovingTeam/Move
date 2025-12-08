@@ -35,10 +35,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.fmt
-import io.github.azakidev.move.listShape
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.fmt
+import io.github.azakidev.move.ui.listShape
 
 @Composable
 fun LineEntry(line: LineItem) {

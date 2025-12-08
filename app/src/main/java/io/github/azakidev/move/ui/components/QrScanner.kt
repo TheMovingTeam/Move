@@ -30,8 +30,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.Capabilities
-import io.github.azakidev.move.data.ProviderItem
+import io.github.azakidev.move.data.items.Capabilities
+import io.github.azakidev.move.data.items.ProviderItem
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

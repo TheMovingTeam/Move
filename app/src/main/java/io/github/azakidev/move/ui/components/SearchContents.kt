@@ -20,8 +20,12 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.input.TextFieldState
@@ -65,13 +69,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.LineItem
+import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.data.StopItem
-import io.github.azakidev.move.fmt
-import io.github.azakidev.move.fmtSearch
-import io.github.azakidev.move.listShape
+import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.fmt
+import io.github.azakidev.move.ui.fmtSearch
+import io.github.azakidev.move.ui.listShape
 import kotlinx.coroutines.launch
 
 data class FilterTag(
@@ -232,7 +236,8 @@ fun SearchContents(
                                 )
                             }
                             scope.launch { searchBarState.animateToCollapsed() }
-                        })
+                        }
+                    )
                 }
             }
             if (lineResults.count() != 0) {
@@ -326,6 +331,7 @@ fun SearchResultStop(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = modifier,
                 text = stopItem.name.fmt(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -336,7 +342,7 @@ fun SearchResultStop(
             StopEmblemRow(
                 modifier = Modifier
                     .weight(1f)
-                    .defaultMinSize(minWidth = 36.dp),
+                    .widthIn(min = 36.dp, max = Int.MAX_VALUE.dp),
                 stopItem = stopItem,
                 lines = lines
             )
@@ -385,12 +391,31 @@ fun SearchNoResults(
 @Composable
 @Preview
 fun SearchResultPreview() {
-    SearchResultStop(
-        stopItem = StopItem(
-            lines = listOf(1)
-        ), lines = listOf(
-            LineItem(id = 1)
-        ), shape = MaterialTheme.shapes.medium, onClick = {})
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        SearchResultStop(
+            stopItem = StopItem(
+                lines = listOf(1)
+            ),
+            lines = listOf(
+                LineItem(id = 1)
+            ),
+            shape = MaterialTheme.shapes.medium, onClick = {}
+        )
+        SearchResultStop(
+            stopItem = StopItem(
+                name = "A stop with a really long long long long nameeeeeee",
+                lines = listOf(1, 2, 3)
+            ),
+            lines = listOf(
+                LineItem(id = 1, emblem = "L1"),
+                LineItem(id = 2, emblem = "L2"),
+                LineItem(id = 3, emblem = "L3"),
+            ),
+            shape = MaterialTheme.shapes.medium, onClick = {}
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

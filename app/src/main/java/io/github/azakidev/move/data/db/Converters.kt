@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import io.github.azakidev.move.data.Capabilities
+import io.github.azakidev.move.data.items.Capabilities
 
 class Converters {
     private val gson = Gson()

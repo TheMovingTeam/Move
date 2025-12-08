@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -79,10 +81,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.BuildConfig
-import io.github.azakidev.move.MainView
-import io.github.azakidev.move.Providers
+import io.github.azakidev.move.ui.MainView
+import io.github.azakidev.move.ui.Providers
 import io.github.azakidev.move.R
-import io.github.azakidev.move.listShape
+import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
 import java.util.Timer
@@ -195,6 +197,11 @@ fun SettingsPage(
                         onOnboardingReset = onOnboardingReset
                     )
                 }
+            }
+            item {
+                Spacer(
+                    Modifier.height(8.dp)
+                )
             }
         }
     }

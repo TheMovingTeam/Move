@@ -50,6 +50,17 @@
     <string name="changelogFlavor">Míra todo lo nuevo</string>
     <string name="changelogHistory">Cambios anteriores</string>
 
+    <string name="favStopWidgetAbout">Muestra información sobre una de tus paradas favoritas</string>
+
+    <string name="favStopWidgetSelectorTitle">Selecciona una parada</string>
+    <string name="allStops">Todas las paradas</string>
+    <string name="favStopPreviewStop">Estación de Move</string>
+    <string name="favStopWidgetLoading">Cargando datos de parada…</string>
+    <string name="favStopWidgetError">Parada no encontrada.\n Por favor reconfigura el widget.</string>
+
+    <string name="nextUp">Siguiente</string>
+    <string name="comingUp">Próximamente</string>
+
     <string-array name="greetings">
         <item>¿Vas a algún sitio?</item>
         <item>¡Adelante!</item>

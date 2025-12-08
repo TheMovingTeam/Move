@@ -1,10 +1,10 @@
-package io.github.azakidev.move.data.db
+package io.github.azakidev.move.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.StopItem
 
 @Entity(
     tableName = "stops",

@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
@@ -33,8 +36,8 @@ import androidx.compose.ui.util.fastDistinctBy
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.StopItem
 
 @Composable
 fun EmblemShape(
@@ -77,10 +80,10 @@ fun EmblemShape(
         )
 
         Text(
-            modifier = Modifier.padding(padding.dp),
+            modifier = Modifier.padding(vertical = padding.dp),
             text = emblem.take(4),
             maxLines = 1,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             color = textColor,
             style = textStyle,
             fontFamily = fredokaFontFamily,

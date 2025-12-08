@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.StopItem
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const

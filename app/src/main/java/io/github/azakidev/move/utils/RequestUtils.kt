@@ -1,17 +1,11 @@
-package io.github.azakidev.move
+package io.github.azakidev.move.utils
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastJoinToString
-import androidx.navigation3.runtime.NavKey
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.LineTime
-import io.github.azakidev.move.data.ProviderItem
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.LineTime
+import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
 import io.github.azakidev.move.data.providers.parseEMTValencia
@@ -21,39 +15,59 @@ import io.github.azakidev.move.data.providers.parseTMPMurcia
 import io.github.azakidev.move.data.providers.parseTMurcia
 import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
-import kotlinx.serialization.Serializable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.platform.Platform
 import java.security.cert.X509Certificate
-import java.util.Locale
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import kotlin.streams.toList
 
+fun fetchStopTime(provider: ProviderItem, stopItem: StopItem, lines: List<LineItem>) {
+    val url = provider.timeSource
+        .replace("@stop", stopItem.id.toString())
+        .replace("@comId", stopItem.comId.toString())
 
-// App locations
-@Serializable
-internal data object MainView : NavKey
+    val client = OkHttpClient.Builder()
+        .trustSelfSignedCertsIfNeeded(provider)
+        .retryOnConnectionFailure(true)
+        .build()
 
-@Serializable
-internal data object Settings : NavKey
+    try {
+        val requestBuilt = Request.Builder().formRequest(client, provider, stopItem).url(url).build()
 
-@Serializable
-internal data object Providers : NavKey
+        val response = client
+            .newCall(requestBuilt)
+            .execute()
 
-@Serializable
-internal data object QrScanner : NavKey
+        val responseText = response.body!!.string()
 
-// Log tags
-enum class LogTags {
-    MoveModel,
-    Networking,
-    Parser,
+        try {
+            val times = parseTimes(responseText, provider, stopItem, lines)
+                ?: emptyList()
+
+            stopItem.setTimeTable(times)
+
+        } catch (e: Exception) {
+            Log.e(
+                LogTags.MoveModel.name,
+                "Could not parse times for ${stopItem.name}: $e",
+                e
+            )
+            stopItem.setTimeTable(emptyList())
+            return
+        }
+    } catch (e: Exception) {
+        Log.e(
+            LogTags.Networking.name,
+            "Could not get times for ${stopItem.name}: $e",
+            e
+        )
+        return
+    }
 }
 
 fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem, stopItem: StopItem): Request.Builder {
@@ -89,8 +103,8 @@ fun Request.Builder.formRequest(client: OkHttpClient, provider: ProviderItem, st
             content
                 .replace("@comId", stopItem.id.toString())
                 .toRequestBody(
-                "text/xml".toMediaTypeOrNull()
-            )
+                    "text/xml".toMediaTypeOrNull()
+                )
         )
     }
 
@@ -324,83 +338,4 @@ fun parseTimes(
             return null
         }
     }
-}
-
-fun listShape(
-    count: Int, total: Int, roundingLarge: Dp = 12.dp, roundingSmall: Dp = 4.dp
-): Shape {
-    if (total == 1) {
-        return RoundedCornerShape(
-            roundingLarge
-        )
-    }
-    return when (count) {
-        0 -> {
-            RoundedCornerShape(
-                topStart = roundingLarge,
-                topEnd = roundingLarge,
-                bottomStart = roundingSmall,
-                bottomEnd = roundingSmall,
-            )
-        }
-
-        total - 1 -> {
-            RoundedCornerShape(
-                topStart = roundingSmall,
-                topEnd = roundingSmall,
-                bottomStart = roundingLarge,
-                bottomEnd = roundingLarge
-            )
-        }
-
-        else -> {
-            RoundedCornerShape(
-                roundingSmall
-            )
-        }
-    }
-}
-
-fun String.fmt(): String {
-    return this
-        .lowercase()
-        .replace("-", " - ")
-        .replace("–", " - ")
-        .replace("—", " - ")
-        .replace(">", " > ")
-        .replace("(", " ( ")
-        .replace("/", " / ")
-        .replace(".", ". ")
-        .replace("'", "' ")
-        .replace("\"", "")
-        .replace("_", " ")
-        .replace("avda", "av.")
-        .replace("- obres", "( obres )")
-        .replace("..", ".")
-        .replace("  ", " ")
-        .replace("- >", ">")
-        .split(' ')
-        .map { word ->
-            if (word.uppercase().chars().allMatch { "MDCLXVI".chars().toList().contains(it) }
-            ) { // Check if it's a roman numeral
-                word.uppercase()
-            } else {
-                word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            }
-        }
-        .fastJoinToString(" ")
-        .replace("c/", "C/")
-        .replace("C/", "C/ ")
-        .replace("' ", "'")
-        .replace("( ", "(")
-        .replace(" )", ")")
-        .replace(" / ", "/")
-}
-
-fun String.fmtSearch(): String {
-    return this
-        .lowercase()
-        .toList()
-        .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
-        .joinToString("")
 }

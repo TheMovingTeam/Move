@@ -1,6 +1,6 @@
 package io.github.azakidev.move.data.providers
 
-import io.github.azakidev.move.data.LineTime
+import io.github.azakidev.move.data.items.LineTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

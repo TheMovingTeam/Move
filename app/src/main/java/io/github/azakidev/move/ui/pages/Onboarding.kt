@@ -89,9 +89,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.R
-import io.github.azakidev.move.Settings
+import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.data.MoveViewModel
-import io.github.azakidev.move.listShape
+import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.ProvidersList
 import io.github.azakidev.move.ui.components.ProvidersListPreview

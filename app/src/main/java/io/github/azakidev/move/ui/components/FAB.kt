@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import io.github.azakidev.move.QrScanner
+import io.github.azakidev.move.ui.QrScanner
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

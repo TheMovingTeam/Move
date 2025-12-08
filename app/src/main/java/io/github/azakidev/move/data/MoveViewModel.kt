@@ -7,17 +7,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.azakidev.move.BuildConfig
-import io.github.azakidev.move.LogTags
+import io.github.azakidev.move.utils.LogTags
 import io.github.azakidev.move.data.db.MoveDatabase
-import io.github.azakidev.move.data.db.toLineEntity
-import io.github.azakidev.move.data.db.toLineItem
-import io.github.azakidev.move.data.db.toProviderEntity
-import io.github.azakidev.move.data.db.toProviderItem
-import io.github.azakidev.move.data.db.toStopEntity
-import io.github.azakidev.move.data.db.toStopItem
-import io.github.azakidev.move.formRequest
-import io.github.azakidev.move.parseTimes
-import io.github.azakidev.move.trustSelfSignedCertsIfNeeded
+import io.github.azakidev.move.data.db.entities.toLineEntity
+import io.github.azakidev.move.data.db.entities.toLineItem
+import io.github.azakidev.move.data.db.entities.toProviderEntity
+import io.github.azakidev.move.data.db.entities.toProviderItem
+import io.github.azakidev.move.data.db.entities.toStopEntity
+import io.github.azakidev.move.data.db.entities.toStopItem
+import io.github.azakidev.move.data.items.Capabilities
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.LineResponse
+import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.data.items.ProviderListResponse
+import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.StopResponse
+import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,8 +32,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.net.URL
 import java.util.Timer
 import java.util.concurrent.LinkedBlockingDeque
@@ -215,16 +218,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
 
-                // 4. Insert/Update fresh providers in DB
                 if (freshProvidersFromRemote.isNotEmpty()) {
                     _providerDao.insertProviders(freshProvidersFromRemote.map { it.toProviderEntity() })
                 }
 
-                // 5. Update the _providers StateFlow by loading all (including just updated) from DB
-                loadProvidersFromDb() // This will now include the fresh data
+                loadProvidersFromDb()
 
-                // 6. Fetch info for saved providers (lines and stops)
-                // This should also respect the lastUpdated timestamp for lines/stops if available
                 fetchInfoForProviders(
                     savedProviders.value
                 )
@@ -287,7 +286,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 // 1. No cached lines/stops for this provider (check DAO).
                 // 2. The provider's metadata was updated more recently than the last time we fetched lines/stops for it.
                 val needsRemoteFetch =
-                    (cachedProviderEntity != null && provider.lastUpdated > (cachedProviderEntity.lastUpdated)) // Simplified: if provider metadata is newer
+                    (cachedProviderEntity != null && provider.lastUpdated > (cachedProviderEntity.lastUpdated))
 
                 if (needsRemoteFetch && currentRepoUrl.isNotEmpty()) {
                     Log.d(
@@ -510,50 +509,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-
-
         viewModelScope.launch(Dispatchers.IO) {
-            val url = provider.timeSource
-                .replace("@stop", stopItem.id.toString())
-                .replace("@comId", stopItem.comId.toString())
-
-            val client = OkHttpClient.Builder()
-                .trustSelfSignedCertsIfNeeded(provider)
-                .retryOnConnectionFailure(true)
-                .build()
-
-            try {
-                val requestBuilt = Request.Builder().formRequest(client, provider, stopItem).url(url).build()
-
-                val response = client
-                    .newCall(requestBuilt)
-                    .execute()
-
-                val responseText = response.body!!.string()
-
-                try {
-                    val times = parseTimes(responseText, provider, stopItem, lines.value)
-                        ?: emptyList()
-
-                    stopItem.setTimeTable(times)
-
-                } catch (e: Exception) {
-                    Log.e(
-                        LogTags.MoveModel.name,
-                        "Could not parse times for ${stopItem.name}: $e",
-                        e
-                    )
-                    stopItem.setTimeTable(emptyList())
-                    return@launch
-                }
-            } catch (e: Exception) {
-                Log.e(
-                    LogTags.Networking.name,
-                    "Could not get times for ${stopItem.name}: $e",
-                    e
-                )
-                return@launch
-            }
+            fetchStopTime(
+                provider,
+                stopItem,
+                lines.value
+            )
         }
     }
 

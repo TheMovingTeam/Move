@@ -41,12 +41,12 @@ import androidx.navigation3.runtime.NavKey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import io.github.azakidev.move.MainView
+import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.Capabilities
+import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.ui.components.QrScannerViewFinder
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)

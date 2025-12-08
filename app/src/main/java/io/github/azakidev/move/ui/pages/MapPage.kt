@@ -43,10 +43,10 @@ import androidx.window.core.layout.WindowSizeClass
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import io.github.azakidev.move.R
-import io.github.azakidev.move.data.Capabilities
+import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.fmtSearch
+import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.components.AllLines
 import io.github.azakidev.move.ui.components.AllStops
 import io.github.azakidev.move.ui.components.LocationIndicator

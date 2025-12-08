@@ -5,6 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import io.github.azakidev.move.data.db.dao.LineDao
+import io.github.azakidev.move.data.db.dao.ProviderDao
+import io.github.azakidev.move.data.db.dao.StopDao
+import io.github.azakidev.move.data.db.entities.LineEntity
+import io.github.azakidev.move.data.db.entities.ProviderEntity
+import io.github.azakidev.move.data.db.entities.StopEntity
 
 @Database(
     entities = [ProviderEntity::class, LineEntity::class, StopEntity::class],

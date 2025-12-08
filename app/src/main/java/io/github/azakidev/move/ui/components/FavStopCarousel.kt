@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
-import io.github.azakidev.move.data.StopItem
+import io.github.azakidev.move.data.items.StopItem
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -45,10 +45,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.LineTime
-import io.github.azakidev.move.data.ProviderItem
-import io.github.azakidev.move.fmt
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.LineTime
+import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.ui.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

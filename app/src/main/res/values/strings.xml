@@ -50,6 +50,17 @@
     <string name="changelogFlavor">Check out what\'s new</string>
     <string name="changelogHistory">Previous changelogs</string>
 
+    <string name="favStopWidgetAbout">Display information for one of your favourite stops</string>
+
+    <string name="favStopWidgetSelectorTitle">Select a stop</string>
+    <string name="allStops">All stops</string>
+    <string name="favStopPreviewStop">Move station</string>
+    <string name="favStopWidgetLoading">Loading stop data…</string>
+    <string name="favStopWidgetError">Stop not found.\n Please reconfigure widget.</string>
+
+    <string name="nextUp">Next up</string>
+    <string name="comingUp">Coming up</string>
+
     <string-array name="greetings">
         <item>Going somewhere?</item>
         <item>Let\'s go!</item>

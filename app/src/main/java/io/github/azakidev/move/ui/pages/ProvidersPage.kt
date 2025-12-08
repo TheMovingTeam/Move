@@ -1,9 +1,12 @@
 package io.github.azakidev.move.ui.pages
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,7 +31,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
-import io.github.azakidev.move.data.ProviderItem
+import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.ui.components.ProvidersList
 import java.util.Timer
 import kotlin.concurrent.schedule

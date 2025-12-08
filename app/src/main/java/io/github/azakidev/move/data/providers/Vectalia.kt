@@ -1,7 +1,7 @@
 package io.github.azakidev.move.data.providers
 
-import io.github.azakidev.move.data.LineItem
-import io.github.azakidev.move.data.LineTime
+import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.LineTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString

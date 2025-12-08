@@ -11,8 +11,14 @@ plugins {
 android {
     namespace = "io.github.azakidev.move"
     compileSdk = 36
+
     buildFeatures {
         buildConfig = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     defaultConfig {
@@ -41,14 +47,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_18
+        targetCompatibility = JavaVersion.VERSION_18
     }
     kotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
-    }
-    buildFeatures {
-        compose = true
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_18)
     }
 }
 
@@ -100,6 +103,11 @@ dependencies {
     implementation(libs.androidx.camera.compose)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.glance.appwidget.preview)
+    implementation(libs.androidx.glance.preview)
+    implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

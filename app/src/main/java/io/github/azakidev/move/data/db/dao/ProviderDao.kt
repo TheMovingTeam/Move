@@ -1,9 +1,10 @@
-package io.github.azakidev.move.data.db
+package io.github.azakidev.move.data.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import io.github.azakidev.move.data.db.entities.ProviderEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

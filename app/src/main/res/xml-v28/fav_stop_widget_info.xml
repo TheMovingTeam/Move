@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:minHeight="120.dp"
+    android:minResizeWidth="120.dp"
+    android:updatePeriodMillis="60000"
+    android:resizeMode="horizontal | vertical"
+    android:description="@string/favStopWidgetAbout"
+    android:widgetFeatures="reconfigurable"
+    android:configure="io.github.azakidev.move.FavStopWidgetConfigureActivity"
+    >
+</appwidget-provider>
