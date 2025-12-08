@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.azakidev.move"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 36
         versionCode = 12
         versionName = "0.12"
