@@ -205,30 +205,41 @@ fun HomePageView(
                                         )
                                     }
                                 }
+
                                 else -> {
-                                    Column {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
                                         lastStops.forEach { stopItem ->
-                                            val shape = listShape(lastStops.indexOf(stopItem), lastStops.count())
+                                            val shape = listShape(
+                                                lastStops.indexOf(stopItem),
+                                                lastStops.count()
+                                            )
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(bottom = 4.dp)
                                                     .clip(shape = shape)
                                                     .clickable(
                                                         onClick = { onRecentOpen(stopItem) }
                                                     )
-                                                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+                                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                                    .padding(12.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
+                                                val stopName = stopItem.name.fmt()
+                                                val emblems =
+                                                    lines.filter { it.provider == stopItem.provider }
+
+                                                val textMod =
+                                                    if (stopName.length >= 35 && emblems.count() > 2) Modifier.weight(
+                                                        4f
+                                                    )
+                                                    else Modifier
+
                                                 Text(
-                                                    modifier = Modifier
-                                                        .padding(
-                                                            start = 12.dp,
-                                                            top = 12.dp,
-                                                            bottom = 12.dp
-                                                        ),
-                                                    text = stopItem.name.fmt(),
+                                                    modifier = textMod.padding(vertical = 4.dp),
+                                                    text = stopName,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                     fontSize = 16.sp,
@@ -239,8 +250,7 @@ fun HomePageView(
                                                 )
                                                 StopEmblemRow(
                                                     modifier = Modifier
-                                                        .weight(1f)
-                                                        .padding(end = 12.dp),
+                                                        .weight(1f),
                                                     stopItem = stopItem,
                                                     lines = lines.filter { it.provider == stopItem.provider }
                                                 )

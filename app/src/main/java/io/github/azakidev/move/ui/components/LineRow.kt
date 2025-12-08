@@ -118,17 +118,23 @@ fun StopEntries(
                             onClick = { onClick(stopItem) }
                         )
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        val stopName = stopItem.name.fmt()
+                        val emblems =
+                            lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) }
+
+                        val textMod =
+                            if (stopName.length >= 35 && emblems.count() > 2) Modifier.weight(4f)
+                            else Modifier
+
                         Text(
-                            modifier = Modifier
-                                .padding(vertical = 6.dp),
-                            text = stopItem.name.fmt(),
+                            modifier = textMod.padding(vertical = 6.dp),
+                            text = stopName,
                             fontSize = 16.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -140,7 +146,7 @@ fun StopEntries(
                         StopEmblemRow(
                             modifier = Modifier.weight(1f),
                             stopItem = stopItem,
-                            lines = lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) }
+                            lines = emblems
                         )
                     }
                 }

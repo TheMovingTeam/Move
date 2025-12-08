@@ -16,14 +16,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.MoveViewModel
@@ -330,19 +330,24 @@ fun SearchResultStop(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val stopName = stopItem.name.fmt()
+
+            val textMod =
+                if (stopName.length >= 35 && lines.count() > 2) Modifier.weight(4f)
+                else Modifier
+
             Text(
-                modifier = modifier,
-                text = stopItem.name.fmt(),
+                modifier = textMod.padding(vertical = 4.dp),
+                text = stopName,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 16.sp,
             )
             Spacer(
                 modifier = Modifier.width(16.dp)
             )
             StopEmblemRow(
-                modifier = Modifier
-                    .weight(1f)
-                    .widthIn(min = 36.dp, max = Int.MAX_VALUE.dp),
+                modifier = Modifier.weight(1f),
                 stopItem = stopItem,
                 lines = lines
             )
@@ -400,6 +405,18 @@ fun SearchResultPreview() {
             ),
             lines = listOf(
                 LineItem(id = 1)
+            ),
+            shape = MaterialTheme.shapes.medium, onClick = {}
+        )
+        SearchResultStop(
+            stopItem = StopItem(
+                name = "A stop with a many lines",
+                lines = listOf(1, 2, 3)
+            ),
+            lines = listOf(
+                LineItem(id = 1, emblem = "L1"),
+                LineItem(id = 2, emblem = "L2"),
+                LineItem(id = 3, emblem = "L3"),
             ),
             shape = MaterialTheme.shapes.medium, onClick = {}
         )
