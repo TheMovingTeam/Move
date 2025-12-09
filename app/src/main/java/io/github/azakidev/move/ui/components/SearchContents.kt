@@ -16,15 +16,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.input.TextFieldState
@@ -422,7 +418,7 @@ fun SearchResultPreview() {
         )
         SearchResultStop(
             stopItem = StopItem(
-                name = "A stop with a really long long long long nameeeeeee",
+                name = "A stop with a really really really long name",
                 lines = listOf(1, 2, 3)
             ),
             lines = listOf(
