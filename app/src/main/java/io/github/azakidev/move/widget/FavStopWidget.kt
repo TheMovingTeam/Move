@@ -20,16 +20,14 @@ import androidx.core.graphics.toColorInt
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
+import androidx.glance.action.action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -54,7 +52,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import io.github.azakidev.move.MainActivity
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.data.db.entities.toLineItem
@@ -71,8 +68,10 @@ import io.github.azakidev.move.utils.fetchStopTime
 import io.github.azakidev.move.worker.FavStopUpdaterWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Timer
 import java.util.concurrent.TimeUnit
 import kotlin.collections.map
+import kotlin.concurrent.schedule
 
 const val CORNER_RADIUS = 24
 const val PADDING = 8
@@ -116,7 +115,6 @@ class FavStopWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val frameworkAppWidgetId =
             GlanceAppWidgetManager(context).getAppWidgetId(id)
-
 
         provideContent {
             val stopId = currentState(stopIdKey)
@@ -171,8 +169,10 @@ class FavStopWidget : GlanceAppWidget() {
             val lines = linesState
             val provider = providerItemState
 
+            val isLoading = remember { mutableStateOf(false) }
+
             GlanceTheme {
-                if (stopItem != null && stopItem != StopItem()) {
+                if (stopItem != null && stopItem != StopItem() && !isLoading.value) {
                     val sortedLineTimes = stopItem.lineTimes.collectAsState().value
                         ?.sortedBy { it.nextTimeFirst }
                         ?.take(6) ?: emptyList()
@@ -184,11 +184,15 @@ class FavStopWidget : GlanceAppWidget() {
                         onRefresh = {
                             coroutineScope.launch(Dispatchers.IO) {
                                 if (provider != null) {
+                                    isLoading.value = true
                                     fetchStopTime(
                                         provider,
                                         stopItem,
                                         lines
                                     )
+                                    Timer().schedule(delay = 100, action = {
+                                        isLoading.value = false
+                                    })
                                 }
                             }
                         })
@@ -204,7 +208,7 @@ class FavStopWidget : GlanceAppWidget() {
                             .padding(PADDING.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (stopItem == null) {
+                        if (stopItem == null || isLoading.value) {
                             Text(
                                 text = context.resources.getString(R.string.favStopWidgetLoading),
                                 style = TextStyle(color = GlanceTheme.colors.onBackground)
@@ -315,7 +319,9 @@ fun FavStopWidgetContent(
             .cornerRadius(CORNER_RADIUS.dp)
             .padding(PADDING.dp)
             .clickable(
-                onClick = actionStartActivity<MainActivity>()
+                onClick = action {
+                    onRefresh()
+                }
             ),
         contentAlignment = Alignment.TopEnd
     ) {
@@ -324,10 +330,7 @@ fun FavStopWidgetContent(
             verticalAlignment = Alignment.Top,
         ) {
             Text(
-                modifier = GlanceModifier.padding(
-                    start = (PADDING / 2).dp,
-                    end = (22 + (PADDING / 2)).dp
-                ),
+                modifier = GlanceModifier.padding(horizontal = (PADDING / 2).dp),
                 text = stopItem.name.fmt(),
                 maxLines = 1,
                 style = TextStyle(color = GlanceTheme.colors.onBackground)
@@ -379,14 +382,6 @@ fun FavStopWidgetContent(
                 }
             }
         }
-        CircleIconButton(
-            modifier = GlanceModifier.size(24.dp),
-            imageProvider = ImageProvider(
-                R.drawable.refresh
-            ),
-            contentDescription = "Refresh",
-            onClick = onRefresh,
-        )
     }
 }
 
