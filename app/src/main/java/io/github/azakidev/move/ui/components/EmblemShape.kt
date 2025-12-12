@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
@@ -77,16 +78,18 @@ fun EmblemShape(
         )
 
         Text(
-            modifier = Modifier.padding(vertical = padding.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = padding.dp),
             text = emblem.take(4),
             maxLines = 1,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             color = textColor,
             style = textStyle,
             fontFamily = fredokaFontFamily,
             fontWeight = FontWeight.Medium,
             autoSize = TextAutoSize.StepBased(
-                minFontSize = 4.sp,
+                minFontSize = textStyle.fontSize.times(0.6),
                 maxFontSize = textStyle.fontSize
             )
         )
