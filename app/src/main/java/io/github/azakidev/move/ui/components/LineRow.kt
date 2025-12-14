@@ -37,8 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
+import kotlin.math.round
 
 @Composable
 fun LineEntry(line: LineItem) {
@@ -48,12 +50,12 @@ fun LineEntry(line: LineItem) {
     ) {
         EmblemShape(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(PADDING.div(2).dp)
                 .size(48.dp),
             line = line
         )
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = PADDING.div(2).dp),
             text = line.name
                 .fmt()
                 .replace(" - ", " > "),
@@ -92,6 +94,7 @@ fun StopEntries(
         )
     }
 
+    // Sort stop as they appear in the line
     val map = stops.associateBy { stopItem -> stopItem.id }
     val sortedStops = lineItem.stops.mapNotNull { id ->
         map[id]
@@ -103,53 +106,33 @@ fun StopEntries(
         exit = collapseTransition
     ) {
         Column(
-            Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 12.dp),
+            Modifier
+                .padding(horizontal = PADDING.times(0.75).dp)
+                .padding(
+                    top = PADDING.times(0.75).div(2).dp,
+                    bottom = PADDING.times(0.75).dp
+                ),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             var count = 0
             sortedStops.forEach { stopItem ->
-                val shape = listShape(count, sortedStops.count())
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = shape)
-                        .clickable(
-                            enabled = isExpanded,
-                            onClick = { onClick(stopItem) }
-                        )
-                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        val stopName = stopItem.name.fmt()
-                        val emblems =
-                            lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) }
-
-                        val textMod =
-                            if (stopName.length >= 35 && emblems.count() > 2) Modifier.weight(4f)
-                            else Modifier
-
-                        Text(
-                            modifier = textMod.padding(vertical = 6.dp),
-                            text = stopName,
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(
-                            modifier = Modifier.width(16.dp)
-                        )
-                        StopEmblemRow(
-                            modifier = Modifier.weight(1f),
-                            stopItem = stopItem,
-                            lines = emblems
-                        )
-                    }
-                }
+                val shape = listShape(
+                    count,
+                    sortedStops.count(),
+                    roundingLarge = (24 - PADDING.times(0.75)).dp
+                )
+                StopRow(
+                    modifier = Modifier.animateEnterExit(
+                        enter = expandTransition,
+                        exit = collapseTransition,
+                    ),
+                    shape = shape,
+                    background = MaterialTheme.colorScheme.surfaceContainerLow,
+                    stopItem = stopItem,
+                    lines = lines.filter { (it.emblem != lineItem.emblem) && (it.provider == lineItem.provider) },
+                    onClick = { onClick(stopItem) },
+                    clickable = isExpanded
+                )
                 count++
             }
         }

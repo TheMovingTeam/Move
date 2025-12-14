@@ -1,19 +1,12 @@
 package io.github.azakidev.move.ui.pages
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +43,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -84,11 +76,11 @@ import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.ui.Providers
 import io.github.azakidev.move.R
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
-import java.util.Timer
-import kotlin.concurrent.schedule
+import io.github.azakidev.move.ui.components.trailingButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -169,7 +161,7 @@ fun SettingsPage(
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer),
             columns = gridCells,
-            verticalItemSpacing = 8.dp
+            verticalItemSpacing = PADDING.div(2).dp
         ) {
             item {
                 LogoSection()
@@ -200,7 +192,7 @@ fun SettingsPage(
             }
             item {
                 Spacer(
-                    Modifier.height(8.dp)
+                    Modifier.height(PADDING.div(2).dp)
                 )
             }
         }
@@ -239,10 +231,10 @@ fun LogoSection(
     )
     Column(
         modifier = modifier
-            .padding(top = 12.dp)
+            .padding(top = PADDING.times(0.75).dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
     ) {
         LogoHero(
             size = 128,
@@ -258,7 +250,7 @@ fun LogoSection(
         )
 
         Text(
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = PADDING.div(2).dp),
             text = appName,
             fontFamily = fredokaFontFamily,
             fontWeight = FontWeight.Medium,
@@ -299,10 +291,10 @@ fun AboutSection(
     val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = PADDING.dp, vertical = PADDING.div(2).dp),
             text = stringResource(R.string.about),
             style = MaterialTheme.typography.titleMedium
         )
@@ -331,11 +323,11 @@ fun ResetSection(
     onOnboardingReset: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(bottom = 8.dp),
+        modifier = Modifier.padding(bottom = PADDING.div(2).dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = PADDING.dp),
             text = stringResource(R.string.reset),
             style = MaterialTheme.typography.titleMedium
         )
@@ -372,73 +364,27 @@ fun ProviderSection(
     onBack: () -> Unit,
     onboardingIsComplete: Boolean
 ) {
-    val enterTransition = remember {
-        slideInHorizontally(
-            initialOffsetX = { it / 2 },
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        ) + fadeIn(
-            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-        ) + scaleIn(
-            initialScale = 0.8f,
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        )
-    }
-    val exitTransition = remember {
-        slideOutHorizontally(
-            targetOffsetX = { it / 2 },
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        ) + fadeOut(
-            animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-        ) + scaleOut(
-            targetScale = 0.8f,
-            animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-        )
-    }
 
-    val iconState = state.text.toString() != providerRepo.value
-
-    val shouldShowIcon = remember { mutableStateOf(false) }
-
-    when (iconState) {
-        true -> shouldShowIcon.value = true
-        false -> Timer().schedule(delay = 200, action = { shouldShowIcon.value = false })
-    }
-
-    val trailingIcon = if (shouldShowIcon.value) {
-        @Composable {
-            val shouldBeVisible = remember { mutableStateOf(false) }
-            Timer().schedule(delay = 25, action = { shouldBeVisible.value = true })
-
-            AnimatedVisibility(
-                visible = shouldBeVisible.value && iconState,
-                enter = enterTransition,
-                exit = exitTransition
-            ) {
-                IconButton(
-                    onClick = {
-                        onClick(state.text.toString())
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = null
-                    )
-                }
-            }
+    val trailingIcon = trailingButton(
+        textState = state.text.toString(),
+        defaultText = providerRepo.value,
+        icon = Icons.Default.Save,
+        onClick = {
+            onClick(state.text.toString())
         }
-    } else null
+    )
 
     Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = PADDING.dp, vertical = PADDING.div(2).dp),
         text = stringResource(R.string.providerTitle),
         style = MaterialTheme.typography.titleMedium
     )
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = PADDING.div(2).dp)
                 .clip(shape = listShape(0, 2, 24.dp, 4.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
@@ -472,7 +418,7 @@ fun ProviderSection(
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(PADDING.div(2).dp),
                 state = state,
                 shape = MaterialTheme.shapes.large,
                 lineLimits = TextFieldLineLimits.SingleLine,
@@ -488,7 +434,7 @@ fun ProviderSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = PADDING.div(2).dp)
                     .clip(shape = listShape(1, 2, 24.dp, 4.dp))
                     .clickable(
                         onClick = onBack
@@ -497,16 +443,19 @@ fun ProviderSection(
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 12.dp)
+                        .padding(
+                            horizontal = PADDING.div(2).dp,
+                            vertical = PADDING.times(0.75).dp
+                        )
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(PADDING.div(2).dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.secondaryFixedDim)
-                            .padding(8.dp)
+                            .padding(PADDING.div(2).dp)
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.AddRoad,

@@ -10,20 +10,19 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -56,20 +55,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
-import io.github.azakidev.move.ui.fmt
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
 import kotlinx.coroutines.launch
@@ -156,14 +153,19 @@ fun SearchContents(
         ),
     )
 
+    val resultModifier = Modifier
+        .padding(
+            horizontal = PADDING.dp, vertical = PADDING.div(4).dp
+        )
+
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier.padding(horizontal = PADDING.div(2).dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         item {
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(PADDING.div(2).dp)
             ) {
                 val sortedTags = filterTags.sortedBy { filter -> !filter.state.value }
                 items(sortedTags.count()) {
@@ -193,10 +195,7 @@ fun SearchContents(
             if (stopResults.count() != 0) {
                 item {
                     Text(
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 16.dp, vertical = 4.dp
-                            )
+                        modifier = resultModifier
                             .animateItem(
                                 fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                                 placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -211,7 +210,7 @@ fun SearchContents(
                 items(stopResults.count()) {
                     val shape = listShape(it, stopResults.count())
                     val result = stopResults[it]
-                    SearchResultStop(
+                    StopRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem(
@@ -239,10 +238,7 @@ fun SearchContents(
             if (lineResults.count() != 0) {
                 item {
                     Text(
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 16.dp, vertical = 4.dp
-                            )
+                        modifier = resultModifier
                             .animateItem(
                                 fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                                 placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -304,54 +300,6 @@ fun SearchContents(
     }
 }
 
-
-@Composable
-fun SearchResultStop(
-    modifier: Modifier = Modifier,
-    stopItem: StopItem,
-    lines: List<LineItem>,
-    shape: Shape,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.background)
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val stopName = stopItem.name.fmt()
-
-            val textMod =
-                if (stopName.length >= 35 && lines.count() > 2) Modifier.weight(4f)
-                else Modifier
-
-            Text(
-                modifier = textMod.padding(vertical = 4.dp),
-                text = stopName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontSize = 16.sp,
-            )
-            Spacer(
-                modifier = Modifier.width(16.dp)
-            )
-            StopEmblemRow(
-                modifier = Modifier.weight(1f),
-                stopItem = stopItem,
-                lines = lines
-            )
-        }
-    }
-}
-
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Preview
@@ -364,7 +312,8 @@ fun SearchNoResults(
             .padding(48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(
-            space = 16.dp, alignment = Alignment.CenterVertically
+            space = PADDING.dp,
+            alignment = Alignment.CenterVertically
         )
     ) {
         Box(
@@ -389,59 +338,26 @@ fun SearchNoResults(
     }
 }
 
-@Composable
-@Preview
-fun SearchResultPreview() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        SearchResultStop(
-            stopItem = StopItem(
-                lines = listOf(1)
-            ),
-            lines = listOf(
-                LineItem(id = 1)
-            ),
-            shape = MaterialTheme.shapes.medium, onClick = {}
-        )
-        SearchResultStop(
-            stopItem = StopItem(
-                name = "A stop with a many lines",
-                lines = listOf(1, 2, 3)
-            ),
-            lines = listOf(
-                LineItem(id = 1, emblem = "L1"),
-                LineItem(id = 2, emblem = "L2"),
-                LineItem(id = 3, emblem = "L3"),
-            ),
-            shape = MaterialTheme.shapes.medium, onClick = {}
-        )
-        SearchResultStop(
-            stopItem = StopItem(
-                name = "A stop with a really really really long name",
-                lines = listOf(1, 2, 3)
-            ),
-            lines = listOf(
-                LineItem(id = 1, emblem = "L1"),
-                LineItem(id = 2, emblem = "L2"),
-                LineItem(id = 3, emblem = "L3"),
-            ),
-            shape = MaterialTheme.shapes.medium, onClick = {}
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchInputField(
     searchBarState: SearchBarState, textFieldState: TextFieldState
 ) {
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    
+    val trailingIcon = trailingButton(
+        textState = textFieldState.text.toString(),
+        icon = Icons.AutoMirrored.Rounded.Backspace,
+        onClick = {
+            textFieldState.clearText()
+        }
+    )
 
     SearchBarDefaults.InputField(
         searchBarState = searchBarState,
         textFieldState = textFieldState,
-        onSearch = {},
+        onSearch = { focusManager.clearFocus() },
         placeholder = {
             Text(stringResource(R.string.searchPlaceholder))
         },
@@ -454,7 +370,12 @@ fun SearchInputField(
                 when (isCollapsed) {
                     true -> {
                         Icon(
-                            imageVector = Icons.Default.Search, contentDescription = null
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .padding(PADDING.div(2).dp),
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null
                         )
                     }
 
@@ -465,50 +386,13 @@ fun SearchInputField(
                             }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = null
                             )
                         }
                     }
                 }
             }
         },
-        trailingIcon = {
-            val enterTransition = remember {
-                slideInHorizontally(
-                    initialOffsetX = { it / 2 },
-                    animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-                ) + fadeIn(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                ) + scaleIn(
-                    initialScale = 0.8f,
-                    animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-                )
-            }
-            val exitTransition = remember {
-                slideOutHorizontally(
-                    targetOffsetX = { it / 2 },
-                    animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-                ) + fadeOut(
-                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                ) + scaleOut(
-                    targetScale = 0.8f,
-                    animationSpec = MotionScheme.expressive().defaultSpatialSpec()
-                )
-            }
-            AnimatedVisibility(
-                visible = (searchBarState.currentValue != SearchBarValue.Collapsed && !searchBarState.isAnimating),
-                enter = enterTransition,
-                exit = exitTransition
-            ) {
-                IconButton(
-                    onClick = {
-                        textFieldState.edit { delete(0, textFieldState.text.length) }
-                    }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.Backspace,
-                        contentDescription = "Back"
-                    )
-                }
-            }
-        })
+        trailingIcon = trailingIcon
+    )
 }

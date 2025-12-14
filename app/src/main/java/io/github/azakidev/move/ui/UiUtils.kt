@@ -10,6 +10,10 @@ import kotlinx.serialization.Serializable
 import java.util.Locale
 import kotlin.streams.toList
 
+// Common values
+
+const val PADDING = 16
+const val HERO_HEIGHT = 208
 
 // App locations
 @Serializable
@@ -26,7 +30,10 @@ internal data object QrScanner : NavKey
 
 
 fun listShape(
-    count: Int, total: Int, roundingLarge: Dp = 12.dp, roundingSmall: Dp = 4.dp
+    count: Int,
+    total: Int,
+    roundingLarge: Dp = 24.dp,
+    roundingSmall: Dp = 4.dp
 ): Shape {
     if (total == 1) {
         return RoundedCornerShape(

@@ -1,4 +1,4 @@
-package io.github.azakidev.move
+package io.github.azakidev.move.activities
 
 import android.Manifest
 import android.os.Build
@@ -68,6 +68,8 @@ import androidx.window.core.layout.WindowSizeClass
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import io.github.azakidev.move.BuildConfig
+import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.widget.FavStopWidgetReceiver

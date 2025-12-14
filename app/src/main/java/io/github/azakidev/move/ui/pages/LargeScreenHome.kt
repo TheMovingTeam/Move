@@ -20,6 +20,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.QrFAB
 
 const val FAB_PADDING = 8
@@ -50,14 +51,13 @@ fun LargeScreenHome(
             HomePage(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 8.dp, bottom = 0.dp),
+                    .padding(start = PADDING.div(2).dp),
                 fabShouldAppear = false,
                 model = model, sheetModel = sheetModel, backStack = backStack
             )
             LinesPage(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 0.dp),
+                    .weight(1f),
                 appBarCanScroll = false,
                 model = model, sheetModel = sheetModel
             )
@@ -92,14 +92,13 @@ fun LargeScreenHomePagePreview(
         ) {
             HomePagePreview(
                 modifier = Modifier
-                    .fillMaxWidth(.5f)
-                    .padding(0.dp),
+                    .weight(1f)
+                    .padding(start = PADDING.div(2).dp),
                 fabShouldAppear = false
             )
             LinesPagePreview(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp)
+                    .weight(1f),
             )
         }
     }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,6 +38,7 @@ import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.PADDING
 
 @Composable
 fun EmblemShape(
@@ -65,6 +68,7 @@ fun EmblemShape(
 
     Box(
         modifier = modifier
+            .aspectRatio(1f)
             .clip(shapeFromId(line.emblem.hashCode() + line.provider.hashCode()))
             .background(color),
         contentAlignment = Alignment.Center
@@ -138,7 +142,7 @@ fun ShapePreview() {
             val line = LineItem(id = i, emblem = "L$i")
             EmblemShape(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(PADDING.div(2).dp)
                     .size(48.dp)
                     .clip(shape = shapeFromId(i))
                     .background(MaterialTheme.colorScheme.primary),
@@ -148,7 +152,7 @@ fun ShapePreview() {
         val line = LineItem(id = 1, emblem = "CAS")
         EmblemShape(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(PADDING.div(2).dp)
                 .size(48.dp)
                 .clip(shape = shapeFromId(line.emblem.hashCode()))
                 .background(MaterialTheme.colorScheme.primary),
@@ -157,7 +161,7 @@ fun ShapePreview() {
         val line2 = LineItem(id = 1, emblem = "TURI")
         EmblemShape(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(PADDING.div(2).dp)
                 .size(48.dp)
                 .clip(shape = shapeFromId(line2.emblem.hashCode()))
                 .background(MaterialTheme.colorScheme.primary),
@@ -179,7 +183,7 @@ fun StopEmblemRow(
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
-            space = 4.dp,
+            space = PADDING.div(4).dp,
             alignment = Alignment.End
         ),
         maxLines = 1,

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
@@ -65,10 +66,10 @@ fun ChangelogPage() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp)
-            .padding(bottom = 8.dp),
+            .padding(horizontal = PADDING.div(2).dp)
+            .padding(bottom = PADDING.div(2).dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
     ) {
         Box(
             modifier = Modifier
@@ -117,7 +118,7 @@ fun ChangelogPage() {
             ) {
                 Box(
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(PADDING.dp)
                         .clip(MaterialShapes.Cookie6Sided.toShape(count * 30))
                         .background(MaterialTheme.colorScheme.secondaryFixedDim)
                 )

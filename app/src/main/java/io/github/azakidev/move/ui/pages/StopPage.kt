@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -68,6 +69,8 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.HERO_HEIGHT
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.AllLines
@@ -80,7 +83,8 @@ import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.location.AndroidLocationProvider
 import org.maplibre.spatialk.geojson.Position
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+@OptIn(
+    ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
@@ -147,7 +151,7 @@ fun StopPage(
                 onClick = onClick
             )
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(PADDING.dp),
             ) {
                 if (provider.capabilities.contains(Capabilities.Time) || provider.capabilities.contains(
                         Capabilities.DoubleTime
@@ -206,7 +210,7 @@ fun StopPagePreview() {
         ) {
             StopBannerPreview()
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(PADDING.dp),
             ) {
                 StopTimesPreview()
                 StopNotifications(
@@ -261,7 +265,7 @@ fun StopBanner(
                 else 1f
             Text(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(PADDING.dp)
                     .fillMaxWidth(width)
                     .align(Alignment.BottomStart),
                 text = sheetModel.sheetStop.name.fmt(),
@@ -275,7 +279,7 @@ fun StopBanner(
             )
             IconButton(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                    .padding(horizontal = PADDING.times(0.75).dp, vertical = PADDING.dp)
                     .size(55.dp)
                     .align(Alignment.BottomEnd),
                 colors = IconButtonDefaults.iconButtonColors(
@@ -345,7 +349,7 @@ fun StopTimes(
     sheetModel: SheetStopViewModel
 ) {
     Text(
-        modifier = Modifier.padding(bottom = 8.dp),
+        modifier = Modifier.padding(bottom = PADDING.div(2).dp),
         text = stringResource(id = R.string.times),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
@@ -385,7 +389,7 @@ fun StopTimes(
             else -> {
                 Column(
                     modifier = modifier,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                 ) {
                     var count = 0
                     times
@@ -406,25 +410,26 @@ fun StopTimes(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(end = 16.dp)
                                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                         .clip(shape),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.weight(2.5f),
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            PADDING.div(2).dp
+                                        ),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         EmblemShape(
                                             modifier = Modifier
-                                                .padding(8.dp)
+                                                .padding(PADDING.div(2).dp)
                                                 .size(48.dp),
                                             line = line,
                                             emblemOverride = it.emblemOverride
                                         )
                                         Text(
-                                            modifier = Modifier.fillMaxWidth(.60f),
                                             text = (it.destination ?: line.name)
                                                 .fmt()
                                                 .replace(" - ", " > "),
@@ -433,21 +438,30 @@ fun StopTimes(
                                         )
                                     }
                                     Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = PADDING.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            alignment = Alignment.End,
+                                            space = PADDING.div(2).dp
+                                        ),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         val text =
                                             if (it.nextTimeFirst == 0) stringResource(R.string.soon)
                                             else it.nextTimeFirst.toString() + "m."
                                         Text(
-                                            text = text
+                                            text = text,
+                                            maxLines = 1
                                         )
                                         if (it.nextTimeSecond != null) {
                                             Text(
-                                                text = "/"
+                                                text = "/",
+                                                maxLines = 1
                                             )
                                             Text(
-                                                text = it.nextTimeSecond.toString() + "m."
+                                                text = it.nextTimeSecond.toString() + "m.",
+                                                maxLines = 1
                                             )
                                         }
                                     }
@@ -507,7 +521,7 @@ fun StopNotifications(
     notifications: List<String>
 ) {
     Text(
-        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+        modifier = Modifier.padding(top = PADDING.dp, bottom = PADDING.div(2).dp),
         text = stringResource(id = R.string.alerts),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
@@ -520,7 +534,7 @@ fun StopNotifications(
             0 -> {
                 Box(
                     modifier = Modifier
-                        .height(208.dp)
+                        .height(HERO_HEIGHT.dp)
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -545,7 +559,7 @@ fun StopNotifications(
                                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         ) {
                             Text(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(PADDING.dp),
                                 text = it
                             )
                         }
@@ -580,7 +594,7 @@ fun StopMap(
                     )
             )
         Text(
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            modifier = Modifier.padding(top = PADDING.dp, bottom = PADDING.div(2).dp),
             text = stringResource(id = R.string.map),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
@@ -588,7 +602,7 @@ fun StopMap(
         )
         Box(
             modifier = Modifier
-                .height(208.dp)
+                .height(HERO_HEIGHT.dp)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),

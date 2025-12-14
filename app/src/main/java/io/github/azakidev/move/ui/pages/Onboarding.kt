@@ -91,6 +91,7 @@ import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.data.MoveViewModel
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.ProvidersList
@@ -245,9 +246,10 @@ fun WelcomePage(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 48.dp, start = 16.dp, end = 16.dp),
+                    .padding(bottom = PADDING.times(3).dp)
+                    .padding(horizontal = PADDING.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
             ) {
                 val uriHandler = LocalUriHandler.current
                 Button(
@@ -262,7 +264,7 @@ fun WelcomePage(
                     )
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(PADDING.times(0.75).dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -281,7 +283,7 @@ fun WelcomePage(
                     )
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(PADDING.times(0.75).dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -448,8 +450,8 @@ fun FeaturePage(
             )
             Scaffold(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 64.dp)
+                    .padding(horizontal = PADDING.dp)
+                    .padding(top = PADDING.times(4).dp)
                     .width((windowSizeClass.minWidthDp * 0.55).dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(MaterialTheme.colorScheme.background)
@@ -458,7 +460,8 @@ fun FeaturePage(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                            .padding(bottom = PADDING.times(3).dp, top = PADDING.div(2).dp)
+                            .padding(horizontal = PADDING.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         IconButton(
@@ -490,22 +493,22 @@ fun FeaturePage(
                         .fillMaxSize()
                         .padding(paddingValues),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                 ) {
                     Text(
-                        modifier = Modifier.padding(vertical = 12.dp),
+                        modifier = Modifier.padding(vertical = PADDING.times(0.75).dp),
                         text = stringResource(R.string.whatIsMove),
                         style = MaterialTheme.typography.displaySmall,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                     ) {
                         items(entryTitles.count()) { i ->
                             ExplainingRow(
                                 index = i + 1,
                                 shape = listShape(i, entryTitles.count()),
-                                modifier = Modifier.padding(horizontal = 8.dp),
+                                modifier = Modifier.padding(horizontal = PADDING.div(2).dp),
                                 title = entryTitles[i],
                                 description = entryDescriptions[i]
                             )
@@ -523,7 +526,8 @@ fun FeaturePage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                        .padding(bottom = PADDING.times(3).dp, top = PADDING.div(2).dp)
+                        .padding(horizontal = PADDING.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(
@@ -555,12 +559,13 @@ fun FeaturePage(
                     .fillMaxSize()
                     .padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
             ) {
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+                        .padding(top = PADDING.div(2).dp)
+                        .padding(horizontal = PADDING.div(2).dp)
                         .clip(MaterialTheme.shapes.large)
                         .aspectRatio(16 / 9f),
                     painter = painterResource(R.drawable.banner),
@@ -568,19 +573,19 @@ fun FeaturePage(
                     contentDescription = null
                 )
                 Text(
-                    modifier = Modifier.padding(vertical = (12 - 4).dp),
+                    modifier = Modifier.padding(vertical = PADDING.div(4).dp),
                     text = stringResource(R.string.whatIsMove),
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                 ) {
                     items(entryTitles.count()) { i ->
                         ExplainingRow(
                             index = i + 1,
                             shape = listShape(i, entryTitles.count()),
-                            modifier = Modifier.padding(horizontal = 8.dp),
+                            modifier = Modifier.padding(horizontal = PADDING.div(2).dp),
                             title = entryTitles[i],
                             description = entryDescriptions[i]
                         )
@@ -617,8 +622,11 @@ fun ExplainingRow(
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(
+                horizontal = PADDING.div(2).dp,
+                vertical = PADDING.times(0.75).dp
+            ),
+            horizontalArrangement = Arrangement.spacedBy(PADDING.times(0.75).dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -740,8 +748,8 @@ fun ProviderContent(
             )
             Scaffold(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 64.dp)
+                    .padding(horizontal = PADDING.dp)
+                    .padding(top = PADDING.times(4).dp)
                     .width((windowSizeClass.minWidthDp / 2).dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(MaterialTheme.colorScheme.background),
@@ -778,7 +786,8 @@ fun ProviderContent(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                            .padding(bottom = PADDING.times(3).dp, top = PADDING.div(2).dp)
+                            .padding(horizontal = PADDING.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         IconButton(
@@ -854,7 +863,8 @@ fun ProviderContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 48.dp, start = 16.dp, end = 16.dp, top = 8.dp),
+                        .padding(bottom = PADDING.times(3).dp, top = PADDING.div(2).dp)
+                        .padding(horizontal = PADDING.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(

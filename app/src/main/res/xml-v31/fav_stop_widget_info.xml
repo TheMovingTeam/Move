@@ -10,6 +10,6 @@
     android:resizeMode="horizontal | vertical"
     android:description="@string/favStopWidgetAbout"
     android:widgetFeatures="reconfigurable"
-    android:configure="io.github.azakidev.move.FavStopWidgetConfigureActivity"
+    android:configure="io.github.azakidev.move.activities.FavStopWidgetConfigureActivity"
     >
 </appwidget-provider>

@@ -46,6 +46,7 @@ import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.components.AllLines
 import io.github.azakidev.move.ui.components.AllStops
@@ -160,7 +161,7 @@ fun MapPage(
     Scaffold(
         topBar = {
             AppBarWithSearch(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
@@ -180,7 +181,7 @@ fun MapPage(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(PADDING.div(2).dp),
                 shape = FloatingActionButtonDefaults.largeShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -244,7 +245,7 @@ fun MapPagePreview() {
     Scaffold(
         topBar = {
             AppBarWithSearch(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = rememberSearchBarState(),
                 inputField = {
                     SearchBarDefaults.InputField(
@@ -261,7 +262,7 @@ fun MapPagePreview() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(PADDING.div(2).dp),
                 shape = FloatingActionButtonDefaults.largeShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,

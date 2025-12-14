@@ -19,8 +19,10 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,6 +42,7 @@ import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LineRow
@@ -75,7 +78,7 @@ fun LinesPage(
         modifier = modifier,
         topBar = {
             AppBarWithSearch(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
@@ -137,8 +140,8 @@ fun LineList(
     LazyColumn(
         modifier = modifier
             .fillMaxHeight()
-            .padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = PADDING.times(0.75).dp),
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp),
     ) {
         items(lineItems.count()) {
             val lineItem = lineItems
@@ -170,7 +173,7 @@ fun LineList(
         }
         item {
             Spacer(
-                modifier = Modifier.height(4.dp)
+                modifier = Modifier.height(PADDING.div(4).dp)
             )
         }
     }
@@ -207,7 +210,7 @@ fun LinesPagePreview(
         modifier = modifier,
         topBar = {
             AppBarWithSearch(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
@@ -265,7 +268,7 @@ fun EmptyLinesPreview() {
     Scaffold(
         topBar = {
             AppBarWithSearch(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = searchBarState,
                 inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(

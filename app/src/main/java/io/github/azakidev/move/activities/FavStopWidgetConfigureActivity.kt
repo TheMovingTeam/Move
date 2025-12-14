@@ -1,4 +1,4 @@
-package io.github.azakidev.move
+package io.github.azakidev.move.activities
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.rounded.Backspace
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -48,11 +52,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import io.github.azakidev.move.R
+import io.github.azakidev.move.data.db.dao.LineDao
+import io.github.azakidev.move.data.db.dao.StopDao
 import io.github.azakidev.move.data.db.entities.toLineItem
 import io.github.azakidev.move.data.db.entities.toStopItem
-import io.github.azakidev.move.ui.components.SearchResultStop
+import io.github.azakidev.move.ui.PADDING
+import io.github.azakidev.move.ui.components.StopRow
+import io.github.azakidev.move.ui.components.trailingButton
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
 
@@ -62,8 +75,8 @@ class FavStopWidgetConfigureActivity : ComponentActivity() {
 
     private lateinit var userStore: UserStore
     private lateinit var database: MoveDatabase
-    private lateinit var stopDao: io.github.azakidev.move.data.db.dao.StopDao
-    private lateinit var lineDao: io.github.azakidev.move.data.db.dao.LineDao
+    private lateinit var stopDao: StopDao
+    private lateinit var lineDao: LineDao
 
     private var favouriteStops: List<Int> by mutableStateOf(emptyList())
     private var allStops: List<StopItem> by mutableStateOf(emptyList())
@@ -163,6 +176,21 @@ fun SelectStopScreen(
                 || textFieldState.text.isEmpty()
     }.filterNot { favStopItems.contains(it) }.sortedBy { it.name }
 
+    val trailingIcon = trailingButton(
+        textState = textFieldState.text.toString(),
+        icon = Icons.AutoMirrored.Rounded.Backspace,
+        onClick = {
+            textFieldState.clearText()
+        }
+    )
+
+    val fredokaFontFamily = FontFamily(
+        Font(R.font.fredoka_medium, FontWeight.Medium),
+        Font(R.font.fredoka_bold, FontWeight.Bold)
+    )
+
+    val titleModifier = Modifier.padding(start = PADDING.dp)
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -173,8 +201,11 @@ fun SelectStopScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.favStopWidgetSelectorTitle),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontFamily = fredokaFontFamily,
+                        style = MaterialTheme.typography.displaySmallEmphasized,
+                        fontWeight = FontWeight.Bold
                     )
                 })
         }) { paddingValues ->
@@ -189,21 +220,27 @@ fun SelectStopScreen(
                 .fillMaxSize()
                 .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(horizontal = PADDING.div(2).dp),
+            verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
         ) {
             item {
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
-                        .padding(horizontal = 8.dp),
+                        .padding(top = PADDING.dp)
+                        .padding(horizontal = PADDING.div(3).dp),
                     shape = MaterialTheme.shapes.large,
                     leadingIcon = {
                         Icon(
-                            Icons.Rounded.Search, contentDescription = null
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .padding(PADDING.div(3).dp),
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = null
                         )
                     },
+                    trailingIcon = trailingIcon,
                     placeholder = {
                         Text(
                             text = stringResource(R.string.searchPlaceholder)
@@ -214,11 +251,15 @@ fun SelectStopScreen(
                         imeAction = ImeAction.Search
                     )
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(PADDING.div(4).dp))
             }
             if (filteredFavStops.count() >= 1) {
                 item {
                     Text(
+                        modifier = titleModifier,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary,
                         text = stringResource(R.string.favouriteStops)
                     )
                 }
@@ -226,7 +267,7 @@ fun SelectStopScreen(
                     val shape = listShape(it, filteredFavStops.count())
                     val result = filteredFavStops[it]
 
-                    SearchResultStop(
+                    StopRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem(
@@ -243,13 +284,17 @@ fun SelectStopScreen(
             if (filteredStops.count() >= 1) {
                 item {
                     Text(
+                        modifier = titleModifier,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary,
                         text = stringResource(R.string.allStops)
                     )
                 }
                 items(filteredStops.count()) {
                     val shape = listShape(it, filteredStops.count())
                     val result = filteredStops[it]
-                    SearchResultStop(
+                    StopRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem(
@@ -266,7 +311,7 @@ fun SelectStopScreen(
                     Spacer(
                         Modifier
                             .fillMaxWidth()
-                            .height(8.dp)
+                            .height(PADDING.div(2).dp)
                     )
                 }
             }
@@ -278,9 +323,29 @@ fun SelectStopScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewSelectStopScreen() {
+
+    val favStops = listOf(1)
+
+    val stops = listOf(
+        StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2)),
+        StopItem(id = 2, name = "Stop 2", lines = listOf(2)),
+        StopItem(id = 3, name = "Stop 3", lines = listOf(1, 2))
+    )
+    val lines = listOf(
+        LineItem(id = 1, name = "Line 1", emblem = "L1", stops = (1..3).toList()),
+        LineItem(
+            id = 2,
+            name = "A line with an obscenely long name to which I would rather not read but I might need regardless",
+            emblem = "ELNL",
+            stops = listOf(1, 2, 3)
+        )
+    )
+
     MoveTheme {
         SelectStopScreen(
-            favouriteStops = emptyList(), allStops = emptyList(), allLines = emptyList()
+            favouriteStops = favStops,
+            allStops = stops,
+            allLines = lines
         )
     }
 }

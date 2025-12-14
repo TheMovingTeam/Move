@@ -9,9 +9,11 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.QrScanner
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -29,7 +31,7 @@ fun QrFAB(
         Icon(
             modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
             imageVector = Icons.Rounded.QrCode,
-            contentDescription = null
+            contentDescription = stringResource(R.string.qrScan)
         )
     }
 }

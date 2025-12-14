@@ -48,6 +48,8 @@ import coil3.request.crossfade
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
 import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.ui.HERO_HEIGHT
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,10 +80,9 @@ fun FavStopCarousel(
                     state = rememberCarouselState { sortedFavStops.count() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(top = 16.dp, bottom = 16.dp),
-                    itemSpacing = 8.dp,
-                    contentPadding = PaddingValues(horizontal = 16.dp),
+                        .wrapContentHeight(),
+                    itemSpacing = PADDING.div(2).dp,
+                    contentPadding = PaddingValues(horizontal = PADDING.dp),
                 ) { i ->
                     val stopItem = sortedFavStops[i]
                     val provider =
@@ -90,7 +91,7 @@ fun FavStopCarousel(
                     val url = "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
                     HeroCarrouselItem(
                         modifier = Modifier
-                            .height(208.dp)
+                            .height(HERO_HEIGHT.dp)
                             .maskClip(MaterialTheme.shapes.extraLarge)
                             .clickable(
                                 enabled = true,
@@ -152,16 +153,16 @@ fun HeroCarrouselItem(
                         )
                     )
                 )
-                .padding(bottom = 8.dp),
+                .padding(bottom = PADDING.div(2).dp),
             verticalArrangement = Arrangement.spacedBy(
-                space = 4.dp,
+                space = PADDING.div(4).dp,
                 alignment = Alignment.Bottom
             ),
         ) {
             item {
                 Text(
                     modifier = Modifier
-                        .padding(start = 12.dp, bottom = 4.dp),
+                        .padding(start = PADDING.times(1.5).dp, bottom = PADDING.div(4).dp),
                     text = stopItem.name.fmt(),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
@@ -175,7 +176,7 @@ fun HeroCarrouselItem(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
+                        .padding(horizontal = PADDING.times(0.75).dp)
                         .animateItem(
                             fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                             placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -186,7 +187,7 @@ fun HeroCarrouselItem(
                     Row(
                         modifier = Modifier.fillMaxWidth(.85f),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                     ) {
                         EmblemShape(
                             modifier = Modifier.size(26.dp),
@@ -225,9 +226,8 @@ fun HeroCarrouselItem(
 fun EmptyCarrousel() {
     Box(
         modifier = Modifier
-            .height(208.dp)
+            .height(HERO_HEIGHT.dp)
             .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 16.dp)
             .clip(MaterialTheme.shapes.extraLarge)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center
@@ -268,16 +268,15 @@ fun FavStopCarouselPreview() {
         state = rememberCarouselState { stops.count() },
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(top = 16.dp, bottom = 16.dp),
-        itemSpacing = 8.dp,
-        contentPadding = PaddingValues(horizontal = 16.dp),
+            .wrapContentHeight(),
+        itemSpacing = PADDING.div(2).dp,
+        contentPadding = PaddingValues(horizontal = PADDING.dp),
     ) { i ->
         val stopItem = stops[i]
         val url = ""
         HeroCarrouselItem(
             modifier = Modifier
-                .height(208.dp)
+                .height(HERO_HEIGHT.dp)
                 .maskClip(MaterialTheme.shapes.extraLarge)
                 .clickable(
                     enabled = true,

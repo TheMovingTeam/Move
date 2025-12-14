@@ -2,19 +2,15 @@ package io.github.azakidev.move.ui.pages
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,23 +39,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
-import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.R
-import io.github.azakidev.move.ui.Settings
-import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
-import io.github.azakidev.move.ui.fmt
-import io.github.azakidev.move.ui.listShape
+import io.github.azakidev.move.ui.HERO_HEIGHT
+import io.github.azakidev.move.ui.MainView
+import io.github.azakidev.move.ui.PADDING
+import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.ui.components.FavStopCarousel
 import io.github.azakidev.move.ui.components.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.QrFAB
-import io.github.azakidev.move.ui.components.StopEmblemRow
+import io.github.azakidev.move.ui.components.StopRow
+import io.github.azakidev.move.ui.listShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -78,6 +74,7 @@ fun HomePage(
             stopMap[id]
         }
         .reversed()
+
     HomePageView(
         modifier = modifier,
         backStack = backStack,
@@ -113,8 +110,10 @@ fun HomePageView(
         Font(R.font.fredoka_bold, FontWeight.Bold)
     )
 
+    val sectionTitleModifier = Modifier.padding(start = PADDING.times(0.75).dp)
+
     Scaffold(
-        modifier = modifier.padding(bottom = 0.dp),
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -160,26 +159,37 @@ fun HomePageView(
                         end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                         bottom = 0.dp
                     )
-                    .padding(bottom = 0.dp)
-                    .clip(shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp))
+                    .clip(
+                        shape = RoundedCornerShape(
+                            30.dp,
+                            30.dp,
+                            0.dp,
+                            0.dp
+                        )
+                    )
                     .background(MaterialTheme.colorScheme.surfaceContainer),
             ) {
                 LazyColumn(
-                    modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    modifier = Modifier
+                        .padding(top = PADDING.dp)
+                        .padding(horizontal = PADDING.dp),
+                    verticalArrangement = Arrangement.spacedBy(PADDING.dp)
                 ) {
                     item {
                         Text(
-                            modifier = Modifier.padding(start = 16.dp),
-                            text = stringResource(id = R.string.favouriteStops),
+                            modifier = sectionTitleModifier,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.secondary,
+                            text = stringResource(id = R.string.favouriteStops),
                         )
+                    }
+                    item {
                         favStopCarrousel()
                     }
                     item {
                         Text(
-                            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
+                            modifier = sectionTitleModifier,
                             text = stringResource(id = R.string.recentStops),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
@@ -192,7 +202,7 @@ fun HomePageView(
                                 0 -> {
                                     Box(
                                         modifier = Modifier
-                                            .height(208.dp)
+                                            .height(HERO_HEIGHT.dp)
                                             .fillMaxWidth()
                                             .clip(MaterialTheme.shapes.extraLarge)
                                             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -208,53 +218,19 @@ fun HomePageView(
 
                                 else -> {
                                     Column(
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                                     ) {
                                         lastStops.forEach { stopItem ->
                                             val shape = listShape(
                                                 lastStops.indexOf(stopItem),
                                                 lastStops.count()
                                             )
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clip(shape = shape)
-                                                    .clickable(
-                                                        onClick = { onRecentOpen(stopItem) }
-                                                    )
-                                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                                    .padding(12.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                val stopName = stopItem.name.fmt()
-                                                val emblems =
-                                                    lines.filter { it.provider == stopItem.provider }
-
-                                                val textMod =
-                                                    if (stopName.length >= 35 && emblems.count() > 2) Modifier.weight(
-                                                        4f
-                                                    )
-                                                    else Modifier
-
-                                                Text(
-                                                    modifier = textMod.padding(vertical = 4.dp),
-                                                    text = stopName,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    fontSize = 16.sp,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Spacer(
-                                                    modifier = Modifier.width(16.dp)
-                                                )
-                                                StopEmblemRow(
-                                                    modifier = Modifier
-                                                        .weight(1f),
-                                                    stopItem = stopItem,
-                                                    lines = lines.filter { it.provider == stopItem.provider }
-                                                )
-                                            }
+                                            StopRow(
+                                                shape = shape,
+                                                stopItem = stopItem,
+                                                lines = lines,
+                                                onClick = { onRecentOpen(stopItem) }
+                                            )
                                         }
                                     }
                                 }

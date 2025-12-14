@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,11 +24,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.azakidev.move.ui.PADDING
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Preview
 fun RowButton(
-    shape: Shape = RoundedCornerShape(24.dp),
+    shape: Shape = MaterialTheme.shapes.largeIncreased,
     color: Color = MaterialTheme.colorScheme.secondaryFixed,
     iconColor: Color = MaterialTheme.colorScheme.onSecondaryFixed,
     icon: ImageVector = Icons.Rounded.BugReport,
@@ -37,7 +40,7 @@ fun RowButton(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = PADDING.div(2).dp)
             .clip(shape = shape)
             .clickable(
                 onClick = onClick
@@ -46,16 +49,16 @@ fun RowButton(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 12.dp)
+                .padding(horizontal = PADDING.div(2).dp, vertical = PADDING.times(0.75).dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(PADDING.div(2).dp)
         ) {
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(color)
-                    .padding(8.dp)
+                    .padding(PADDING.div(2).dp)
             ) {
                 Icon(
                     imageVector = icon,

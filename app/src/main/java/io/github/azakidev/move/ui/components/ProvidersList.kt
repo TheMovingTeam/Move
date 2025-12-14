@@ -52,6 +52,7 @@ import coil3.request.crossfade
 import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -92,8 +93,9 @@ fun ProvidersList(
                         if (scrollBehavior != null) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
                     LazyColumn(
                         modifier = modifier
-                            .padding(start = 8.dp, end = 8.dp, top = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                            .padding(top = PADDING.div(2).dp)
+                            .padding(horizontal = PADDING.div(2).dp),
+                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                     ) {
                         items(visibleProviders.count()) { i ->
                             val provider = visibleProviders.sortedBy { it.name }[i]
@@ -118,7 +120,7 @@ fun ProvidersList(
                             Spacer(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(16.dp)
+                                    .height(PADDING.dp)
                             )
                         }
                     }
@@ -174,12 +176,12 @@ fun ProviderEntry(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(PADDING.div(2).dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(PADDING.div(2).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val imgUrl =
@@ -248,7 +250,8 @@ fun ProviderEntry(
         if (provider.description.isNotEmpty()) {
             Text(
                 modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 8.dp),
+                    .padding(horizontal = PADDING.dp)
+                    .padding(bottom = PADDING.times(0.75).dp, top = PADDING.div(2).dp),
                 text = provider.description,
                 style = MaterialTheme.typography.bodySmall
             )
