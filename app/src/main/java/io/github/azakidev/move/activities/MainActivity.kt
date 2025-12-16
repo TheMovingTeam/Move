@@ -370,7 +370,8 @@ fun AppNavigator(
                 .nestedScroll(nestedScroll),
             onDismissRequest = {
                 sheetModel.showBottomSheet = false
-                model.removeToFetchLoop(sheetModel.sheetStop.id)
+                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+                model.removeToFetchLoop(stopKey)
             },
             containerColor = MaterialTheme.colorScheme.background,
             sheetState = sheetState,

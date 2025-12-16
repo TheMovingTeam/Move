@@ -274,7 +274,7 @@ fun AboutSection(
         AboutElement(
             icon = Icons.Rounded.BugReport,
             description = R.string.bugReport,
-            link = "mailto:zazaguichi@outlook.com"
+            link = "mailto:support@movetransit.app"
         ),
         AboutElement(
             icon = Icons.Rounded.AlternateEmail,

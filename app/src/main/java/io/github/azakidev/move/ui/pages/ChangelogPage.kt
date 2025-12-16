@@ -49,7 +49,8 @@ import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
 
-@Composable @Preview
+@Composable
+@Preview
 fun ChangelogPage() {
     val infiniteTransition = rememberInfiniteTransition(label = "moveCookieRotate")
     val shapeAngle = infiniteTransition.animateFloat(
@@ -105,13 +106,23 @@ fun ChangelogPage() {
         )
         var count = 0
         changelogEntry.forEach {
+            val isBreaking = it.contains("[BREAKING]")
+
+            val color =
+                if (isBreaking) MaterialTheme.colorScheme.errorContainer
+                else MaterialTheme.colorScheme.surfaceContainer
+
+            val badgeColor =
+                if (isBreaking) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.secondaryFixedDim
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 48.dp)
                     .padding(horizontal = 8.dp)
                     .clip(listShape(count, changelogEntry.count()))
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .background(color)
                     .padding(6.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -120,10 +131,11 @@ fun ChangelogPage() {
                     modifier = Modifier
                         .size(PADDING.dp)
                         .clip(MaterialShapes.Cookie6Sided.toShape(count * 30))
-                        .background(MaterialTheme.colorScheme.secondaryFixedDim)
+                        .background(badgeColor)
                 )
                 Text(
-                    text = it,
+                    text = it
+                        .removePrefix("[BREAKING]"),
                 )
             }
             count++

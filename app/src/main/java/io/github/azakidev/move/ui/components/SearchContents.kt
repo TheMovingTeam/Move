@@ -224,7 +224,8 @@ fun SearchContents(
                         onClick = {
                             sheetModel.sheetStop = result
                             sheetModel.showBottomSheet = true
-                            model.saveLastStop(sheetModel.sheetStop.id)
+                            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+                            model.saveLastStop(stopKey)
                             textFieldState.edit {
                                 delete(
                                     0, textFieldState.text.length
@@ -270,7 +271,8 @@ fun SearchContents(
                         onClick = { stopItem ->
                             sheetModel.sheetStop = stopItem
                             sheetModel.showBottomSheet = true
-                            model.saveLastStop(sheetModel.sheetStop.id)
+                            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+                            model.saveLastStop(stopKey)
                             textFieldState.edit {
                                 delete(
                                     0, textFieldState.text.length

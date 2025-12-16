@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -93,8 +92,10 @@ fun StopPage(
     sheetModel: SheetStopViewModel,
     currentLocation: AndroidLocationProvider?
 ) {
+    val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+
     val roundness: Int =
-        if (sheetModel.sheetStop.id in model.favouriteStops.collectAsState().value) {
+        if (stopKey in model.favouriteStops.collectAsState().value) {
             25
         } else {
             50
@@ -105,13 +106,13 @@ fun StopPage(
         animationSpec = MotionScheme.expressive().fastSpatialSpec()
     )
 
-    model.addToFetchLoop(sheetModel.sheetStop.id)
+    model.addToFetchLoop(stopKey)
 
     val onClick = {
-        if (sheetModel.sheetStop.id !in model.favouriteStops.value) {
-            model.addFavStop(sheetModel.sheetStop.id)
+        if (stopKey !in model.favouriteStops.value) {
+            model.addFavStop(stopKey)
         } else {
-            model.removeFavStop(sheetModel.sheetStop.id)
+            model.removeFavStop(stopKey)
         }
     }
 
@@ -227,7 +228,7 @@ fun StopPagePreview() {
 @Composable
 fun StopBanner(
     imgUrl: String,
-    favStops: List<Int>,
+    favStops: List<Pair<Int, Int>>,
     shape: Shape,
     onClick: () -> Unit,
     sheetModel: SheetStopViewModel
@@ -288,8 +289,9 @@ fun StopBanner(
                 shape = shape,
                 onClick = onClick
             ) {
+                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
                 AnimatedContent(
-                    targetState = sheetModel.sheetStop.id in favStops,
+                    targetState = stopKey in favStops,
                     transitionSpec = {
                         fadeIn(
                             animationSpec = MotionScheme.expressive().fastEffectsSpec()

@@ -59,22 +59,25 @@ fun FavStopCarousel(
     sheetModel: SheetStopViewModel
 ) {
     val favStops = model.stops.collectAsState().value.filter {
-        model.favouriteStops.collectAsState().value.contains(it.id)
+        model.favouriteStops.collectAsState().value.map { stop -> stop.first }.contains(it.id)
     }
 
     val map = favStops.associateBy { stopItem -> stopItem.id }
 
     val sortedFavStops = model.favouriteStops.collectAsState().value.mapNotNull { id ->
-        map[id]
+        map[id.first]
     }.reversed()
 
     sortedFavStops.parallelStream().forEach { stopItem ->
-        model.addToFetchLoop(stopItem.id)
+        model.addToFetchLoop(Pair(stopItem.id, stopItem.provider))
     }
 
     AnimatedContent(sortedFavStops.count()) { count ->
         when (count) {
-            0 -> { EmptyCarrousel() }
+            0 -> {
+                EmptyCarrousel()
+            }
+
             else -> {
                 HorizontalCenteredHeroCarousel(
                     state = rememberCarouselState { sortedFavStops.count() },
@@ -88,7 +91,8 @@ fun FavStopCarousel(
                     val provider =
                         model.providers.collectAsState().value.find { it.id == stopItem.id }
                             ?: ProviderItem()
-                    val url = "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
+                    val url =
+                        "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
                     HeroCarrouselItem(
                         modifier = Modifier
                             .height(HERO_HEIGHT.dp)
@@ -171,7 +175,8 @@ fun HeroCarrouselItem(
 
             items(sortedLineTimes.count()) { lineTimeId ->
                 val lineTime = sortedLineTimes[lineTimeId]
-                val line = lineItems.find { lineItem -> lineItem.id == lineTime.lineId } ?: LineItem()
+                val line =
+                    lineItems.find { lineItem -> lineItem.id == lineTime.lineId } ?: LineItem()
 
                 Row(
                     modifier = Modifier
@@ -206,7 +211,8 @@ fun HeroCarrouselItem(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    val text = if (lineTime.nextTimeFirst == 0) stringResource(R.string.soon) else lineTime.nextTimeFirst.toString() + "m."
+                    val text =
+                        if (lineTime.nextTimeFirst == 0) stringResource(R.string.soon) else lineTime.nextTimeFirst.toString() + "m."
                     Text(
                         text = text,
                         maxLines = 1,

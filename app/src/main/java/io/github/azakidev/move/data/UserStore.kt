@@ -57,32 +57,39 @@ class UserStore(private val context: Context) {
     }
 
     // Favourite Stops
-    val favouriteStopsFlow: Flow<List<Int>> = context.dataStore.data
+    val favouriteStopsFlow: Flow<List<Pair<Int, Int>>> = context.dataStore.data
         .map { preferences ->
             // Read as Set<String>, then convert to List<Int>
             // Provide an empty set as default if not found
-            (preferences[PreferencesKeys.FAVOURITE_STOPS_IDS] ?: emptySet()).mapNotNull { it.toIntOrNull() }
+            (preferences[PreferencesKeys.FAVOURITE_STOPS_IDS] ?: emptySet()).map { pair ->
+                val intPair = pair.split(",").mapNotNull{ digit -> digit.toIntOrNull() }
+                Pair(intPair.first(), intPair.last())
+            }
         }
 
-    suspend fun saveFavouriteStops(stopIds: List<Int>) {
-        // Convert List<Int> to Set<String> for saving
-        val stringSet = stopIds.map { it.toString() }.toSet()
+    /*
+        stopPairs is a list of pairs where the first digit is the stopId and the second is the providerId
+     */
+    suspend fun saveFavouriteStops(stopPairs: List<Pair<Int, Int>>) {
+        val stringSet = stopPairs.map { "${it.first},${it.second}" }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.FAVOURITE_STOPS_IDS] = stringSet
         }
     }
 
     // Favourite Stops
-    val lastStopsFlow: Flow<List<Int>> = context.dataStore.data
+    val lastStopsFlow: Flow<List<Pair<Int, Int>>> = context.dataStore.data
         .map { preferences ->
             // Read as Set<String>, then convert to List<Int>
             // Provide an empty set as default if not found
-            (preferences[PreferencesKeys.LAST_STOPS_IDS] ?: emptySet()).mapNotNull { it.toIntOrNull() }
+            (preferences[PreferencesKeys.LAST_STOPS_IDS] ?: emptySet()).map { pair ->
+                val intPair = pair.split(",").mapNotNull{ digit -> digit.toIntOrNull() }
+                Pair(intPair.first(), intPair.last())
+            }
         }
 
-    suspend fun saveLastStops(stopIds: List<Int>) {
-        // Convert List<Int> to Set<String> for saving
-        val stringSet = stopIds.map { it.toString() }.toSet()
+    suspend fun saveLastStops(stopPairs: List<Pair<Int, Int>>) {
+        val stringSet = stopPairs.map { "${it.first},${it.second}" }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_STOPS_IDS] = stringSet
         }

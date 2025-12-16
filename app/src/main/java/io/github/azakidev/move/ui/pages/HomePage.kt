@@ -67,11 +67,11 @@ fun HomePage(
     fabShouldAppear: Boolean = true,
 ) {
     val unorderedLastStops = model.stops.collectAsState().value
-        .filter { model.lastStops.collectAsState().value.contains(it.id) }
+        .filter { model.lastStops.collectAsState().value.map{ stop -> stop.first }.contains(it.id) }
     val stopMap = unorderedLastStops.associateBy { it.id }
     val lastStops = model.lastStops.collectAsState().value
         .mapNotNull { id ->
-            stopMap[id]
+            stopMap[id.first]
         }
         .reversed()
 
@@ -83,7 +83,8 @@ fun HomePage(
         onRecentOpen = { stopItem ->
             sheetModel.sheetStop = stopItem
             sheetModel.showBottomSheet = true
-            model.saveLastStop(sheetModel.sheetStop.id)
+            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+            model.saveLastStop(stopKey)
         },
         favStopCarrousel = { FavStopCarousel(model, sheetModel) },
         fabShouldAppear

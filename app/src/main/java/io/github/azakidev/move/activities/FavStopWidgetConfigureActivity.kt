@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
-import androidx.compose.material.icons.rounded.Backspace
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -78,7 +77,7 @@ class FavStopWidgetConfigureActivity : ComponentActivity() {
     private lateinit var stopDao: StopDao
     private lateinit var lineDao: LineDao
 
-    private var favouriteStops: List<Int> by mutableStateOf(emptyList())
+    private var favouriteStops: List<Pair<Int, Int>> by mutableStateOf(emptyList())
     private var allStops: List<StopItem> by mutableStateOf(emptyList())
     private var allLines: List<LineItem> by mutableStateOf(emptyList())
 
@@ -157,13 +156,13 @@ class FavStopWidgetConfigureActivity : ComponentActivity() {
 @Composable
 fun SelectStopScreen(
     onStopSelected: (Int, Int) -> Unit = { _, _ -> },
-    favouriteStops: List<Int>,
+    favouriteStops: List<Pair<Int, Int>>,
     allStops: List<StopItem>,
     allLines: List<LineItem>
 ) {
     val textFieldState = rememberTextFieldState()
 
-    val favStopItems = allStops.filter { stop -> favouriteStops.contains(stop.id) }
+    val favStopItems = allStops.filter { stop -> favouriteStops.map { it.first }.contains(stop.id) }
 
     val filteredFavStops = favStopItems.filter { stop ->
         (stop.name.fmtSearch().contains(textFieldState.text.toString().fmtSearch())
@@ -324,7 +323,7 @@ fun SelectStopScreen(
 @Composable
 fun PreviewSelectStopScreen() {
 
-    val favStops = listOf(1)
+    val favStops = listOf(Pair(1, 1))
 
     val stops = listOf(
         StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2)),

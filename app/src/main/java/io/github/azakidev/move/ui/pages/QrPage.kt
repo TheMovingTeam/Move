@@ -140,7 +140,8 @@ fun QrPage(
                                     backStack.removeLastOrNull()
                                 }
                                 sheetModel.sheetStop = stopItem
-                                model.saveLastStop(stopItem.id)
+                                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+                                model.saveLastStop(stopKey)
                                 sheetModel.showBottomSheet = true
                             } else {
                                 Toast.makeText(

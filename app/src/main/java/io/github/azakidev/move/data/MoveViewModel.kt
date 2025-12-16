@@ -67,14 +67,14 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     var lines = _lines.asStateFlow()
     private val _stops: MutableStateFlow<List<StopItem>> = MutableStateFlow(emptyList())
     var stops = _stops.asStateFlow()
-    val favouriteStops: StateFlow<List<Int>> = _userStore.favouriteStopsFlow
+    val favouriteStops: StateFlow<List<Pair<Int, Int>>> = _userStore.favouriteStopsFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val lastStops: StateFlow<List<Int>> = _userStore.lastStopsFlow
+    val lastStops: StateFlow<List<Pair<Int, Int>>> = _userStore.lastStopsFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -97,7 +97,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = -1
         )
 
-    private val _stopsToLoad: MutableList<Int> = mutableListOf()
+    private val _stopsToLoad: MutableList<Pair<Int, Int>> = mutableListOf()
 
     init {
         // Collect provider repo value
@@ -374,13 +374,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun removeSavedProvider(providerId: Int) {
 
         val stopsToStopLoading =
-            _stopsToLoad.filter { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+            _stopsToLoad.filter { it.second == providerId }
 
         val favStopsToKeep =
-            favouriteStops.value.filterNot { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+            favouriteStops.value.filterNot { it.second == providerId }
 
         val lastStopsToKeep =
-            lastStops.value.filterNot { stops.value.find { stop -> stop.id == it && stop.provider == providerId } != null }
+            lastStops.value.filterNot { it.second == providerId }
         
         viewModelScope.launch {
             _stopsToLoad -= stopsToStopLoading.toSet()
@@ -427,35 +427,35 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addFavStop(stopId: Int) {
+    fun addFavStop(stopPair: Pair<Int, Int>) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
-            if (!currentFavStops.contains(stopId)) {
-                currentFavStops.add(stopId)
+            if (!currentFavStops.contains(stopPair)) {
+                currentFavStops.add(stopPair)
                 _userStore.saveFavouriteStops(currentFavStops)
             }
         }
     }
 
-    fun removeFavStop(stopId: Int) {
+    fun removeFavStop(stopPair: Pair<Int, Int>) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
-            if (currentFavStops.remove(stopId)) {
+            if (currentFavStops.remove(stopPair)) {
                 _userStore.saveFavouriteStops(currentFavStops)
             }
         }
     }
 
-    fun saveLastStop(stopId: Int) {
+    fun saveLastStop(stopPair: Pair<Int, Int>) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentLastStops = lastStops.value.toMutableList()
-            if (!currentLastStops.contains(stopId)) {
-                currentLastStops.add(stopId)
+            if (!currentLastStops.contains(stopPair)) {
+                currentLastStops.add(stopPair)
                 _userStore.saveLastStops(currentLastStops)
-            } else if (currentLastStops.last() != stopId) {
-                currentLastStops.remove(stopId)
+            } else if (currentLastStops.last() != stopPair) {
+                currentLastStops.remove(stopPair)
                 _userStore.saveLastStops(currentLastStops)
-                currentLastStops += stopId
+                currentLastStops += stopPair
                 _userStore.saveLastStops(currentLastStops)
             }
             if (currentLastStops.count() > 5) {
@@ -530,8 +530,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     LogTags.MoveModel.name,
                     "Stops to fetch: $_stopsToLoad"
                 )
-                _stopsToLoad.forEach { id ->
-                    val stop = stops.value.find { stop -> stop.id == id }
+                _stopsToLoad.forEach {
+                    val stop = stops.value.find { stop -> stop.id == it.first }
                     if (stop != null) {
                         fetchTimes(stop)
                     }
@@ -540,21 +540,21 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun addToFetchLoop(stopId: Int) {
-        if (!_stopsToLoad.contains(stopId)) { // Avoid duplicates
+    fun addToFetchLoop(stopPair: Pair<Int, Int>) {
+        if (!_stopsToLoad.contains(stopPair)) { // Avoid duplicates
 
-            val stopItem = stops.value.find { it.id == stopId }
+            val stopItem = stops.value.find { it.id == stopPair.first && it.provider == stopPair.second }
             if (stopItem != null) {
                 fetchTimes(stopItem) // Force first fetch
             }
 
-            _stopsToLoad.add(stopId)
+            _stopsToLoad.add(stopPair)
         }
     }
 
-    fun removeToFetchLoop(stopId: Int) {
-        if (!favouriteStops.value.contains(stopId)) { // Only remove if it's NOT in favourites
-            _stopsToLoad.remove(stopId)
+    fun removeToFetchLoop(stopPair: Pair<Int, Int>) {
+        if (!favouriteStops.value.contains(stopPair)) { // Only remove if it's NOT in favourites
+            _stopsToLoad.remove(stopPair)
         }
     }
 

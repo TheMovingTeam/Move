@@ -19,10 +19,8 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -118,7 +116,8 @@ fun LinesPage(
                 onClick = { stopItem ->
                     sheetModel.sheetStop = stopItem
                     sheetModel.showBottomSheet = true
-                    model.saveLastStop(sheetModel.sheetStop.id)
+                    val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+                    model.saveLastStop(stopKey)
                 }
             )
         } else {
