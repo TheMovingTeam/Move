@@ -71,8 +71,8 @@ class UserStore(private val context: Context) {
     /*
         stopPairs is a list of pairs where the first digit is the stopId and the second is the providerId
      */
-    suspend fun saveFavouriteStops(stopPairs: List<StopKey>) {
-        val stringSet = stopPairs.map { "${it.stopId},${it.providerId}" }.toSet()
+    suspend fun saveFavouriteStops(stopKeys: List<StopKey>) {
+        val stringSet = stopKeys.map { "${it.stopId},${it.providerId}" }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.FAVOURITE_STOPS_IDS] = stringSet
         }
@@ -89,8 +89,8 @@ class UserStore(private val context: Context) {
             }
         }
 
-    suspend fun saveLastStops(stopPairs: List<StopKey>) {
-        val stringSet = stopPairs.map { "${it.stopId},${it.providerId}" }.toSet()
+    suspend fun saveLastStops(stopKeys: List<StopKey>) {
+        val stringSet = stopKeys.map { "${it.stopId},${it.providerId}" }.toSet()
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_STOPS_IDS] = stringSet
         }

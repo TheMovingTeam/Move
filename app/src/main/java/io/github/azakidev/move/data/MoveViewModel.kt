@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -141,30 +142,33 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        viewModelScope.launch {
-            val migratedFavStops = favouriteStops.value.mapNotNull {
-                // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
-                // This ensures it's migrated properly
-                if (it.stopId == it.providerId) {
-                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
-                } else it
-            }
-
-            _userStore.saveFavouriteStops(migratedFavStops)
-
-            val migratedLastStops = lastStops.value.mapNotNull {
-                // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
-                // This ensures it's migrated properly
-                if (it.stopId == it.providerId) {
-                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
-                } else it
-            }
-
-            _userStore.saveLastStops(migratedLastStops)
-        }
-
         // Initial load of providers from DB when ViewModel is created
         loadProvidersFromDb()
+
+        // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
+        // This ensures it's migrated properly
+        viewModelScope.launch {
+            val migratedFavStops = _userStore.favouriteStopsFlow.first().mapNotNull {
+                if (it.stopId == it.providerId) {
+                    _stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            if (migratedFavStops.isNotEmpty() && migratedFavStops != favouriteStops) {
+                _userStore.saveFavouriteStops(migratedFavStops)
+            }
+
+            val migratedLastStops = _userStore.lastStopsFlow.first().mapNotNull {
+                if (it.stopId == it.providerId) {
+                    _stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            if (migratedLastStops.isNotEmpty() && migratedLastStops != lastStops) {
+                _userStore.saveLastStops(migratedLastStops)
+            }
+        }
+
         // Initiate stop fetching
         startFetchLoop()
 
