@@ -23,6 +23,7 @@ import io.github.azakidev.move.data.items.ProviderListResponse
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -138,6 +140,29 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+
+        viewModelScope.launch {
+            val migratedFavStops = favouriteStops.value.mapNotNull {
+                // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
+                // This ensures it's migrated properly
+                if (it.stopId == it.providerId) {
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            _userStore.saveFavouriteStops(migratedFavStops)
+
+            val migratedLastStops = lastStops.value.mapNotNull {
+                // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
+                // This ensures it's migrated properly
+                if (it.stopId == it.providerId) {
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            _userStore.saveLastStops(migratedLastStops)
+        }
+
         // Initial load of providers from DB when ViewModel is created
         loadProvidersFromDb()
         // Initiate stop fetching
@@ -382,7 +407,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
         val lastStopsToKeep =
             lastStops.value.filterNot { it.providerId == providerId }
-        
+
         viewModelScope.launch {
             _stopsToLoad -= stopsToStopLoading.toSet()
             _userStore.saveFavouriteStops(favStopsToKeep)
@@ -502,7 +527,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         val provider = providers.value.find { providerItem -> providerItem.id == stopItem.provider }
 
         if (provider == null) {
-            Log.w(LogTags.Networking.name , "Provider cannot be null")
+            Log.w(LogTags.Networking.name, "Provider cannot be null")
             return
         }
 
@@ -544,7 +569,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun addToFetchLoop(stopKey: StopKey) {
         if (!_stopsToLoad.contains(stopKey)) { // Avoid duplicates
 
-            val stopItem = stops.value.find { it.id == stopKey.stopId && it.provider == stopKey.providerId }
+            val stopItem =
+                stops.value.find { it.id == stopKey.stopId && it.provider == stopKey.providerId }
             if (stopItem != null) {
                 fetchTimes(stopItem) // Force first fetch
             }
