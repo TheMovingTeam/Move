@@ -72,6 +72,7 @@ import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.widget.FavStopWidgetReceiver
 import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.ui.Providers
@@ -370,8 +371,7 @@ fun AppNavigator(
                 .nestedScroll(nestedScroll),
             onDismissRequest = {
                 sheetModel.showBottomSheet = false
-                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-                model.removeToFetchLoop(stopKey)
+                model.removeToFetchLoop(sheetModel.sheetStop.toKey())
             },
             containerColor = MaterialTheme.colorScheme.background,
             sheetState = sheetState,

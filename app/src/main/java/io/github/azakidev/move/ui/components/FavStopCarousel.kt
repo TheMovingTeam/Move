@@ -48,6 +48,7 @@ import coil3.request.crossfade
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
 import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmt
@@ -59,17 +60,17 @@ fun FavStopCarousel(
     sheetModel: SheetStopViewModel
 ) {
     val favStops = model.stops.collectAsState().value.filter {
-        model.favouriteStops.collectAsState().value.map { stop -> stop.first }.contains(it.id)
+        model.favouriteStops.collectAsState().value.map { stop -> stop.stopId }.contains(it.id)
     }
 
     val map = favStops.associateBy { stopItem -> stopItem.id }
 
     val sortedFavStops = model.favouriteStops.collectAsState().value.mapNotNull { id ->
-        map[id.first]
+        map[id.stopId]
     }.reversed()
 
     sortedFavStops.parallelStream().forEach { stopItem ->
-        model.addToFetchLoop(Pair(stopItem.id, stopItem.provider))
+        model.addToFetchLoop(stopItem.toKey())
     }
 
     AnimatedContent(sortedFavStops.count()) { count ->

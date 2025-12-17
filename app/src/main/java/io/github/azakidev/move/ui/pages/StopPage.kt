@@ -68,6 +68,8 @@ import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.StopKey
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.AllLines
@@ -92,7 +94,7 @@ fun StopPage(
     sheetModel: SheetStopViewModel,
     currentLocation: AndroidLocationProvider?
 ) {
-    val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
+    val stopKey = sheetModel.sheetStop.toKey()
 
     val roundness: Int =
         if (stopKey in model.favouriteStops.collectAsState().value) {
@@ -228,7 +230,7 @@ fun StopPagePreview() {
 @Composable
 fun StopBanner(
     imgUrl: String,
-    favStops: List<Pair<Int, Int>>,
+    favStops: List<StopKey>,
     shape: Shape,
     onClick: () -> Unit,
     sheetModel: SheetStopViewModel
@@ -289,9 +291,8 @@ fun StopBanner(
                 shape = shape,
                 onClick = onClick
             ) {
-                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
                 AnimatedContent(
-                    targetState = stopKey in favStops,
+                    targetState = sheetModel.sheetStop.toKey() in favStops,
                     transitionSpec = {
                         fadeIn(
                             animationSpec = MotionScheme.expressive().fastEffectsSpec()

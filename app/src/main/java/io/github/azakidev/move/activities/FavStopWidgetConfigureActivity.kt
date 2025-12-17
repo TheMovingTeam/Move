@@ -58,6 +58,7 @@ import io.github.azakidev.move.data.db.entities.toLineItem
 import io.github.azakidev.move.data.db.entities.toStopItem
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.StopRow
 import io.github.azakidev.move.ui.components.trailingButton
@@ -77,7 +78,7 @@ class FavStopWidgetConfigureActivity : ComponentActivity() {
     private lateinit var stopDao: StopDao
     private lateinit var lineDao: LineDao
 
-    private var favouriteStops: List<Pair<Int, Int>> by mutableStateOf(emptyList())
+    private var favouriteStops: List<StopKey> by mutableStateOf(emptyList())
     private var allStops: List<StopItem> by mutableStateOf(emptyList())
     private var allLines: List<LineItem> by mutableStateOf(emptyList())
 
@@ -156,13 +157,13 @@ class FavStopWidgetConfigureActivity : ComponentActivity() {
 @Composable
 fun SelectStopScreen(
     onStopSelected: (Int, Int) -> Unit = { _, _ -> },
-    favouriteStops: List<Pair<Int, Int>>,
+    favouriteStops: List<StopKey>,
     allStops: List<StopItem>,
     allLines: List<LineItem>
 ) {
     val textFieldState = rememberTextFieldState()
 
-    val favStopItems = allStops.filter { stop -> favouriteStops.map { it.first }.contains(stop.id) }
+    val favStopItems = allStops.filter { stop -> favouriteStops.map { it.stopId }.contains(stop.id) }
 
     val filteredFavStops = favStopItems.filter { stop ->
         (stop.name.fmtSearch().contains(textFieldState.text.toString().fmtSearch())
@@ -323,7 +324,7 @@ fun SelectStopScreen(
 @Composable
 fun PreviewSelectStopScreen() {
 
-    val favStops = listOf(Pair(1, 1))
+    val favStops = listOf(StopKey(1, 1))
 
     val stops = listOf(
         StopItem(id = 1, name = "A stop with a really really long name", lines = listOf(1, 2)),

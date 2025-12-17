@@ -40,6 +40,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.LineRow
 import io.github.azakidev.move.ui.components.SearchContents
@@ -116,8 +117,7 @@ fun LinesPage(
                 onClick = { stopItem ->
                     sheetModel.sheetStop = stopItem
                     sheetModel.showBottomSheet = true
-                    val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-                    model.saveLastStop(stopKey)
+                    model.saveLastStop(sheetModel.sheetStop.toKey())
                 }
             )
         } else {

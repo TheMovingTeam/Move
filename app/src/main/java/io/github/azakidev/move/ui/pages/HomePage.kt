@@ -47,6 +47,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.ui.PADDING
@@ -67,11 +68,11 @@ fun HomePage(
     fabShouldAppear: Boolean = true,
 ) {
     val unorderedLastStops = model.stops.collectAsState().value
-        .filter { model.lastStops.collectAsState().value.map{ stop -> stop.first }.contains(it.id) }
+        .filter { model.lastStops.collectAsState().value.map{ stop -> stop.stopId }.contains(it.id) }
     val stopMap = unorderedLastStops.associateBy { it.id }
     val lastStops = model.lastStops.collectAsState().value
         .mapNotNull { id ->
-            stopMap[id.first]
+            stopMap[id.stopId]
         }
         .reversed()
 
@@ -83,8 +84,7 @@ fun HomePage(
         onRecentOpen = { stopItem ->
             sheetModel.sheetStop = stopItem
             sheetModel.showBottomSheet = true
-            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-            model.saveLastStop(stopKey)
+            model.saveLastStop(stopItem.toKey())
         },
         favStopCarrousel = { FavStopCarousel(model, sheetModel) },
         fabShouldAppear

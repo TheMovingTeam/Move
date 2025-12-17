@@ -47,6 +47,7 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.components.QrScannerViewFinder
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
@@ -140,8 +141,7 @@ fun QrPage(
                                     backStack.removeLastOrNull()
                                 }
                                 sheetModel.sheetStop = stopItem
-                                val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-                                model.saveLastStop(stopKey)
+                                model.saveLastStop(sheetModel.sheetStop.toKey())
                                 sheetModel.showBottomSheet = true
                             } else {
                                 Toast.makeText(

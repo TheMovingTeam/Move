@@ -21,6 +21,7 @@ import io.github.azakidev.move.data.items.LineResponse
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.ProviderListResponse
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
 import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
@@ -67,14 +68,14 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     var lines = _lines.asStateFlow()
     private val _stops: MutableStateFlow<List<StopItem>> = MutableStateFlow(emptyList())
     var stops = _stops.asStateFlow()
-    val favouriteStops: StateFlow<List<Pair<Int, Int>>> = _userStore.favouriteStopsFlow
+    val favouriteStops: StateFlow<List<StopKey>> = _userStore.favouriteStopsFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val lastStops: StateFlow<List<Pair<Int, Int>>> = _userStore.lastStopsFlow
+    val lastStops: StateFlow<List<StopKey>> = _userStore.lastStopsFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -97,7 +98,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = -1
         )
 
-    private val _stopsToLoad: MutableList<Pair<Int, Int>> = mutableListOf()
+    private val _stopsToLoad: MutableList<StopKey> = mutableListOf()
 
     init {
         // Collect provider repo value
@@ -374,13 +375,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun removeSavedProvider(providerId: Int) {
 
         val stopsToStopLoading =
-            _stopsToLoad.filter { it.second == providerId }
+            _stopsToLoad.filter { it.providerId == providerId }
 
         val favStopsToKeep =
-            favouriteStops.value.filterNot { it.second == providerId }
+            favouriteStops.value.filterNot { it.providerId == providerId }
 
         val lastStopsToKeep =
-            lastStops.value.filterNot { it.second == providerId }
+            lastStops.value.filterNot { it.providerId == providerId }
         
         viewModelScope.launch {
             _stopsToLoad -= stopsToStopLoading.toSet()
@@ -427,35 +428,35 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addFavStop(stopPair: Pair<Int, Int>) {
+    fun addFavStop(stopKey: StopKey) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
-            if (!currentFavStops.contains(stopPair)) {
-                currentFavStops.add(stopPair)
+            if (!currentFavStops.contains(stopKey)) {
+                currentFavStops.add(stopKey)
                 _userStore.saveFavouriteStops(currentFavStops)
             }
         }
     }
 
-    fun removeFavStop(stopPair: Pair<Int, Int>) {
+    fun removeFavStop(stopKey: StopKey) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentFavStops = favouriteStops.value.toMutableList()
-            if (currentFavStops.remove(stopPair)) {
+            if (currentFavStops.remove(stopKey)) {
                 _userStore.saveFavouriteStops(currentFavStops)
             }
         }
     }
 
-    fun saveLastStop(stopPair: Pair<Int, Int>) {
+    fun saveLastStop(stopKey: StopKey) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentLastStops = lastStops.value.toMutableList()
-            if (!currentLastStops.contains(stopPair)) {
-                currentLastStops.add(stopPair)
+            if (!currentLastStops.contains(stopKey)) {
+                currentLastStops.add(stopKey)
                 _userStore.saveLastStops(currentLastStops)
-            } else if (currentLastStops.last() != stopPair) {
-                currentLastStops.remove(stopPair)
+            } else if (currentLastStops.last() != stopKey) {
+                currentLastStops.remove(stopKey)
                 _userStore.saveLastStops(currentLastStops)
-                currentLastStops += stopPair
+                currentLastStops += stopKey
                 _userStore.saveLastStops(currentLastStops)
             }
             if (currentLastStops.count() > 5) {
@@ -531,7 +532,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     "Stops to fetch: $_stopsToLoad"
                 )
                 _stopsToLoad.forEach {
-                    val stop = stops.value.find { stop -> stop.id == it.first }
+                    val stop = stops.value.find { stop -> stop.id == it.stopId }
                     if (stop != null) {
                         fetchTimes(stop)
                     }
@@ -540,21 +541,21 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun addToFetchLoop(stopPair: Pair<Int, Int>) {
-        if (!_stopsToLoad.contains(stopPair)) { // Avoid duplicates
+    fun addToFetchLoop(stopKey: StopKey) {
+        if (!_stopsToLoad.contains(stopKey)) { // Avoid duplicates
 
-            val stopItem = stops.value.find { it.id == stopPair.first && it.provider == stopPair.second }
+            val stopItem = stops.value.find { it.id == stopKey.stopId && it.provider == stopKey.providerId }
             if (stopItem != null) {
                 fetchTimes(stopItem) // Force first fetch
             }
 
-            _stopsToLoad.add(stopPair)
+            _stopsToLoad.add(stopKey)
         }
     }
 
-    fun removeToFetchLoop(stopPair: Pair<Int, Int>) {
-        if (!favouriteStops.value.contains(stopPair)) { // Only remove if it's NOT in favourites
-            _stopsToLoad.remove(stopPair)
+    fun removeToFetchLoop(stopKey: StopKey) {
+        if (!favouriteStops.value.contains(stopKey)) { // Only remove if it's NOT in favourites
+            _stopsToLoad.remove(stopKey)
         }
     }
 

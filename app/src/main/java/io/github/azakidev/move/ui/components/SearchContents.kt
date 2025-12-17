@@ -59,6 +59,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
@@ -217,8 +218,7 @@ fun SearchContents(
                         onClick = {
                             sheetModel.sheetStop = result
                             sheetModel.showBottomSheet = true
-                            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-                            model.saveLastStop(stopKey)
+                            model.saveLastStop(sheetModel.sheetStop.toKey())
                             textFieldState.edit {
                                 delete(
                                     0, textFieldState.text.length
@@ -264,8 +264,7 @@ fun SearchContents(
                         onClick = { stopItem ->
                             sheetModel.sheetStop = stopItem
                             sheetModel.showBottomSheet = true
-                            val stopKey = Pair(sheetModel.sheetStop.id, sheetModel.sheetStop.provider)
-                            model.saveLastStop(stopKey)
+                            model.saveLastStop(stopItem.toKey())
                             textFieldState.edit {
                                 delete(
                                     0, textFieldState.text.length
@@ -340,7 +339,7 @@ fun SearchInputField(
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
-    
+
     val trailingIcon = trailingButton(
         textState = textFieldState.text.toString(),
         icon = Icons.AutoMirrored.Rounded.Backspace,
