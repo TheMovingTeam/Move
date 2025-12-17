@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -69,7 +71,6 @@ fun ChangelogPage() {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = PADDING.div(2).dp)
             .padding(bottom = PADDING.div(2).dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
     ) {
         Box(
@@ -83,27 +84,32 @@ fun ChangelogPage() {
                 color = Color.White
             )
         }
-        LogoHero(
-            size = 108,
-            shapeAngle = shapeAngle.value.toInt()
-        )
-        val appVersion =
-            if (BuildConfig.DEBUG) BuildConfig.VERSION_NAME + "_BETA"
-            else BuildConfig.VERSION_NAME
-        val titleString = stringResource(R.string.changelogVersion)
-            .replace("{app}", stringResource(R.string.app_name))
-            .replace("{ver}", appVersion)
-        Text(
-            modifier = Modifier.padding(top = 8.dp),
-            text = titleString,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            modifier = Modifier.padding(bottom = 8.dp),
-            text = stringResource(R.string.changelogFlavor),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.outline
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            LogoHero(
+                size = 108,
+                shapeAngle = shapeAngle.value.toInt()
+            )
+            val appVersion =
+                if (BuildConfig.DEBUG) BuildConfig.VERSION_NAME + "_BETA"
+                else BuildConfig.VERSION_NAME
+            val titleString = stringResource(R.string.changelogVersion)
+                .replace("{app}", stringResource(R.string.app_name))
+                .replace("{ver}", appVersion)
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = titleString,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = stringResource(R.string.changelogFlavor),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
         var count = 0
         changelogEntry.forEach {
             val isBreaking = it.contains("[BREAKING]")
@@ -120,20 +126,22 @@ fun ChangelogPage() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 48.dp)
-                    .padding(horizontal = 8.dp)
-                    .clip(listShape(count, changelogEntry.count()))
+                    .padding(horizontal = PADDING.div(2).dp)
+                    .clip(listShape(count, changelogEntry.count(), roundingLarge = PADDING.dp))
                     .background(color)
-                    .padding(6.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(PADDING.div(2).dp),
+                horizontalArrangement = Arrangement.spacedBy(PADDING.div(2).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
+                        .padding(start = PADDING.div(2).dp)
                         .size(PADDING.dp)
                         .clip(MaterialShapes.Cookie6Sided.toShape(count * 30))
                         .background(badgeColor)
                 )
                 Text(
+                    modifier = Modifier.padding(PADDING.div(2).dp),
                     text = it
                         .removePrefix("[BREAKING]"),
                 )
@@ -142,13 +150,21 @@ fun ChangelogPage() {
         }
 
         Spacer(
-            modifier = Modifier
+            modifier = Modifier.height(PADDING.div(2).dp)
+        )
+
+        Text(
+            modifier = Modifier.padding(start = PADDING.times(0.75).dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary,
+            text = stringResource(R.string.changelogHistory),
         )
 
         val uriHandler = LocalUriHandler.current
         RowButton(
             icon = Icons.Rounded.Link,
-            description = stringResource(R.string.changelogHistory),
+            description = stringResource(R.string.showChangeLog),
             onClick = {
                 uriHandler.openUri("https://movetransit.app/changelog/")
             }

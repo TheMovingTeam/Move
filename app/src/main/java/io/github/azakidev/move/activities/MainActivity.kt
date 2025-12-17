@@ -394,7 +394,7 @@ fun AppNavigator(
             onDismissRequest = {
                 model.shouldShowChangelog.value = !model.shouldShowChangelog.value
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             sheetState = sheetState,
             dragHandle = { },
         ) {

@@ -88,7 +88,10 @@
         <item>If you like the app, please consider supporting the development with a donation after using it for a while. That way more features can be added to Move in the future.</item>
     </string-array>
     <string-array name="changelogItems">
-        <item>[BREAKING] Fix interference in favourite or recent stops. You may need to delete all app data.</item>
+        <item>
+            [BREAKING] Fix interference in favourite or recent stops.\n
+            You may need to delete all app data if automatic migration fails.
+        </item>
         <item>UI fixes and improvements</item>
     </string-array>
 </resources>

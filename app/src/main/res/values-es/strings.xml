@@ -88,7 +88,10 @@
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
     <string-array name="changelogItems">
-        <item>[BREAKING] Arregla interferencias en paradas recientes o favoritas. Puede que necesites borrar los datos de app manualmente.</item>
+        <item>
+            [BREAKING] Arregla interferencias en paradas recientes o favoritas.\n
+            Puede que necesites borrar los datos de app manualmente si la migración automática falla.
+        </item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>
 </resources>
