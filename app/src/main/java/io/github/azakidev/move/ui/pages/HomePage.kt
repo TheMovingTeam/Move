@@ -68,7 +68,7 @@ fun HomePage(
     fabShouldAppear: Boolean = true,
 ) {
     val unorderedLastStops = model.stops.collectAsState().value
-        .filter { model.lastStops.collectAsState().value.map{ stop -> stop.stopId }.contains(it.id) }
+        .filter { model.lastStops.collectAsState().value.contains(it.toKey()) }
     val stopMap = unorderedLastStops.associateBy { it.id }
     val lastStops = model.lastStops.collectAsState().value
         .mapNotNull { id ->

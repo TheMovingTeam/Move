@@ -60,7 +60,7 @@ fun FavStopCarousel(
     sheetModel: SheetStopViewModel
 ) {
     val favStops = model.stops.collectAsState().value.filter {
-        model.favouriteStops.collectAsState().value.map { stop -> stop.stopId }.contains(it.id)
+        model.favouriteStops.collectAsState().value.contains(it.toKey())
     }
 
     val map = favStops.associateBy { stopItem -> stopItem.id }
