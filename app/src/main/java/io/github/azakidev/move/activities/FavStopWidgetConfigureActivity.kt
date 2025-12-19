@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -213,8 +214,8 @@ fun SelectStopScreen(
             modifier = Modifier
                 .padding(
                     top = paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
-                    end = paddingValues.calculateRightPadding(LayoutDirection.Ltr),
+                    start = paddingValues.calculateLeftPadding(LocalLayoutDirection.current),
+                    end = paddingValues.calculateRightPadding(LocalLayoutDirection.current),
                     bottom = 0.dp
                 )
                 .fillMaxSize()
