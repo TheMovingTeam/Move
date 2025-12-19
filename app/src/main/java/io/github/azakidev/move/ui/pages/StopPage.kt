@@ -452,7 +452,7 @@ fun StopTimes(
                                     ) {
                                         val text =
                                             if (it.nextTimeFirst == 0) stringResource(R.string.soon)
-                                            else it.nextTimeFirst.toString() + "m."
+                                            else it.nextTimeFirst.toString() + stringResource(R.string.minuteMark)
                                         Text(
                                             text = text,
                                             maxLines = 1
@@ -463,7 +463,7 @@ fun StopTimes(
                                                 maxLines = 1
                                             )
                                             Text(
-                                                text = it.nextTimeSecond.toString() + "m.",
+                                                text = it.nextTimeSecond.toString() + stringResource(R.string.minuteMark),
                                                 maxLines = 1
                                             )
                                         }

@@ -213,7 +213,8 @@ fun HeroCarrouselItem(
                         )
                     }
                     val text =
-                        if (lineTime.nextTimeFirst == 0) stringResource(R.string.soon) else lineTime.nextTimeFirst.toString() + "m."
+                        if (lineTime.nextTimeFirst == 0) stringResource(R.string.soon) else
+                            lineTime.nextTimeFirst.toString() + stringResource(R.string.minuteMark)
                     Text(
                         text = text,
                         maxLines = 1,

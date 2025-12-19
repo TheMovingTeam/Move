@@ -4,29 +4,36 @@
     <string name="start">Cool! Let\'s get started</string>
     <string name="chooseProvider">Choose a least one provider</string>
     <string name="whatIsMove">What is Move?</string>
+
     <string name="home">Home</string>
     <string name="lines">Lines</string>
     <string name="map">Map</string>
     <string name="stops">Stops</string>
     <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="providerTitle">Providers</string>
+    <string name="qrScan">Scan</string>
+
     <string name="favouriteStops">Favourite stops</string>
     <string name="recentStops">Recent stops</string>
+
     <string name="noFavStops">No stops have been added to favourites</string>
     <string name="noRecentStops">No stops have been seen recently</string>
     <string name="noResults">No stops or lines found</string>
     <string name="noLines">No lines have been added</string>
-    <string name="settings">Settings</string>
-    <string name="about">About</string>
+
     <string name="bugReport">Report an issue</string>
     <string name="socialMedia">Follow Move</string>
+
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid source</string>
-    <string name="providerTitle">Providers</string>
     <string name="savedProviders">Saved providers</string>
+
     <string name="reset">Reset</string>
     <string name="resetDesc">Reset lines, stops, and providers</string>
     <string name="resetOnboarding">Restart onboarding</string>
-    <string name="qrScan">Scan</string>
+
     <string name="qrNotFound">URL not recognized</string>
     <string name="noQrProviders">No providers found with support for QR codes</string>
     <string name="noCameraPermission">The camera permission has not been granted</string>
@@ -35,6 +42,7 @@
     <string name="noTimes">No estimations found</string>
     <string name="soon">Soon</string>
     <string name="alerts">Alerts</string>
+    <string name="minuteMark">m</string>
 
     <string name="noAlerts">There are no alerts for this stop</string>
     <string name="privacyPolicy">Privacy Policy</string>

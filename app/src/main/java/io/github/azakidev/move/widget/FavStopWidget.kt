@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toColorLong
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -552,7 +553,7 @@ fun MoreTimes(modifier: GlanceModifier, lineItems: List<LineItem>, lineTimes: Li
                     )
                     Text(
                         modifier = GlanceModifier.defaultWeight(),
-                        text = "$text m.",
+                        text = text + context.resources.getString(R.string.minuteMark),
                         maxLines = 1,
                         style = TextStyle(
                             color = GlanceTheme.colors.onBackground,

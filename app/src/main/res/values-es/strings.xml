@@ -35,6 +35,7 @@
     <string name="noTimes">No se han encontrado estimaciones</string>
     <string name="soon">Pronto</string>
     <string name="alerts">Alertas</string>
+    <string name="minuteMark">m</string>
     <string name="noAlerts">No hay ninguna alerta en esta parada</string>
 
     <string name="privacyPolicy">Política de Privacidad</string>

@@ -322,7 +322,7 @@ fun SearchNoResults(
                     .padding(24.dp)
                     .size(108.dp),
                 imageVector = Icons.Rounded.Search,
-                contentDescription = stringResource(R.string.search),
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
@@ -370,7 +370,7 @@ fun SearchInputField(
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
                                 .padding(PADDING.div(2).dp),
                             imageVector = Icons.Default.Search,
-                            contentDescription = null
+                            contentDescription = stringResource(id = R.string.search)
                         )
                     }
 
