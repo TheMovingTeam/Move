@@ -348,6 +348,9 @@ fun SearchInputField(
         }
     )
 
+    val isCollapsed =
+        (searchBarState.currentValue == SearchBarValue.Collapsed) && !searchBarState.isAnimating
+
     SearchBarDefaults.InputField(
         searchBarState = searchBarState,
         textFieldState = textFieldState,
@@ -356,8 +359,6 @@ fun SearchInputField(
             Text(stringResource(R.string.searchPlaceholder))
         },
         leadingIcon = {
-            val isCollapsed =
-                searchBarState.currentValue == SearchBarValue.Collapsed && !searchBarState.isAnimating
             AnimatedContent(
                 targetState = isCollapsed
             ) { isCollapsed ->

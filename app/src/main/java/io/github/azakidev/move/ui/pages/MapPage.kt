@@ -252,18 +252,17 @@ fun MapPage(
 )
 @Preview(showSystemUi = true)
 fun MapPagePreview() {
+    val textFieldState = rememberTextFieldState()
+    val searchBarState = rememberSearchBarState()
+
+    val inputField = @Composable { SearchInputField(searchBarState, textFieldState) }
+    
     Scaffold(
         topBar = {
             AppBarWithSearch(
                 modifier = Modifier.padding(bottom = PADDING.div(2).dp),
                 state = rememberSearchBarState(),
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        textFieldState = rememberTextFieldState(),
-                        searchBarState = rememberSearchBarState(),
-                        onSearch = {},
-                    )
-                },
+                inputField = inputField,
                 colors = SearchBarDefaults.appBarWithSearchColors(
                     appBarContainerColor = Color.Transparent,
                     scrolledAppBarContainerColor = Color.Transparent,

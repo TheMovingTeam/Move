@@ -25,7 +25,6 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +33,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
@@ -48,7 +46,6 @@ import io.github.azakidev.move.ui.components.SearchContents
 import io.github.azakidev.move.ui.components.SearchInputField
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -179,6 +176,21 @@ fun LineList(
     }
 }
 
+@Composable
+fun EmptyLines(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.noLines),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
@@ -187,20 +199,9 @@ fun LinesPagePreview(
 ) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
-    val scope = rememberCoroutineScope()
 
-    val inputField = @Composable {
-        SearchBarDefaults.InputField(
-            searchBarState = searchBarState,
-            textFieldState = textFieldState,
-            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.searchPlaceholder)
-                )
-            },
-        )
-    }
+    val inputField = @Composable { SearchInputField(searchBarState, textFieldState) }
+
     val lineItems = listOf(
         LineItem(id = 1),
         LineItem(id = 2),
@@ -230,41 +231,15 @@ fun LinesPagePreview(
     }
 }
 
-@Composable
-fun EmptyLines(
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.noLines),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun EmptyLinesPreview() {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
-    val scope = rememberCoroutineScope()
 
-    val inputField = @Composable {
-        SearchBarDefaults.InputField(
-            searchBarState = searchBarState,
-            textFieldState = textFieldState,
-            onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.searchPlaceholder)
-                )
-            },
-        )
-    }
+    val inputField = @Composable { SearchInputField(searchBarState, textFieldState) }
+
     Scaffold(
         topBar = {
             AppBarWithSearch(
