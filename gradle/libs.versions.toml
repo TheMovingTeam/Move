@@ -1,11 +1,11 @@
 [versions]
 agp = "8.13.2"
 xmlutil = "0.91.3"
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 ksp = "2.3.3"
 junit = "4.13.2"
-activityCompose = "1.12.1"
-material3AdaptiveNavigationSuite = "1.5.0-alpha10"
+activityCompose = "1.12.2"
+material3AdaptiveNavigationSuite = "1.5.0-alpha11"
 playServicesLocation = "21.3.0"
 navigation3 = "1.0.0"
 materialIcons = "1.7.8"
@@ -37,7 +37,7 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.12.00" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.12.01" }
 # UI
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }

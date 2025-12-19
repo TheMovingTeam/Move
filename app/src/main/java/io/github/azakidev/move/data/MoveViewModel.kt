@@ -2,8 +2,6 @@ package io.github.azakidev.move.data
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.azakidev.move.BuildConfig
@@ -29,10 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -50,27 +45,28 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _userStore = UserStore(application.applicationContext)
 
-    private val _providerRepo: StateFlow<String> = _userStore.providerRepoUrlFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000), // Keep active for 5s after last subscriber
-            initialValue = if (BuildConfig.APPLICATION_ID.contains("debug")) // Initial fallback
+    val providerRepo: StateFlow<String>
+        field = MutableStateFlow(
+            if (BuildConfig.APPLICATION_ID.contains("debug")) // Initial fallback
                 "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/testing"
             else "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
         )
-    var providerRepo: MutableState<String> = mutableStateOf(_providerRepo.value)
-    private val _providers: MutableStateFlow<List<ProviderItem>> = MutableStateFlow(emptyList())
-    var providers = _providers.asStateFlow()
+
+    val providers: StateFlow<List<ProviderItem>>
+        field =  MutableStateFlow(emptyList())
+
+    val lines: StateFlow<List<LineItem>>
+        field = MutableStateFlow(emptyList())
+
+    val stops: StateFlow<List<StopItem>>
+        field = MutableStateFlow(emptyList())
+
     val savedProviders: StateFlow<List<Int>> = _userStore.savedProvidersFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    private val _lines: MutableStateFlow<List<LineItem>> = MutableStateFlow(emptyList())
-    var lines = _lines.asStateFlow()
-    private val _stops: MutableStateFlow<List<StopItem>> = MutableStateFlow(emptyList())
-    var stops = _stops.asStateFlow()
     val favouriteStops: StateFlow<List<StopKey>> = _userStore.favouriteStopsFlow
         .stateIn(
             scope = viewModelScope,
@@ -92,7 +88,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = true
         )
 
-    val shouldShowChangelog = mutableStateOf(false)
+    val shouldShowChangelog: StateFlow<Boolean>
+        field = MutableStateFlow(false)
 
     private val _lastOpenedVersionCode: StateFlow<Int> = _userStore.lastOpenedVersionCodeFlow
         .stateIn(
@@ -106,7 +103,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // Collect provider repo value
         viewModelScope.launch {
-            _providerRepo.collect { savedUrl ->
+            _userStore.providerRepoUrlFlow.collect { savedUrl ->
                 providerRepo.value = savedUrl
             }
         }
@@ -115,7 +112,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             savedProviders.collect { savedProviderIds ->
                 if (savedProviderIds.isNotEmpty()) {
                     // Load providers if not already loaded, then lines/stops
-                    if (_providers.value.isEmpty() && providerRepo.value.isNotEmpty()) {
+                    if (providers.value.isEmpty() && providerRepo.value.isNotEmpty()) {
                         fetchProviders() // This will load from DB or fetch if necessary
                     }
                     // Wait for providers to be available if they were just fetched
@@ -124,20 +121,17 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     // Observing lines and stops from DB, each must be in a coroutine to not obstruct each other
                     viewModelScope.launch(Dispatchers.IO) {
                         _lineDao.getLinesForProviders(savedProviderIds).collect { lineEntities ->
-                            _lines.value = lineEntities.map { it.toLineItem() }
+                            lines.value = lineEntities.map { it.toLineItem() }
                         }
                     }
 
                     viewModelScope.launch(Dispatchers.IO) {
                         _stopDao.getStopsForProviders(savedProviderIds).collect { stopEntities ->
-                            _stops.value = stopEntities.map { it.toStopItem() }
+                            stops.value = stopEntities.map { it.toStopItem() }
                         }
                     }
                     // Trigger a check/fetch for these saved providers
                     fetchInfoForProviders(savedProviderIds)
-                } else {
-                    _lines.value = emptyList()
-                    _stops.value = emptyList()
                 }
             }
         }
@@ -150,7 +144,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val migratedFavStops = _userStore.favouriteStopsFlow.first().mapNotNull {
                 if (it.stopId == it.providerId) {
-                    _stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
                 } else it
             }
 
@@ -160,7 +154,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
             val migratedLastStops = _userStore.lastStopsFlow.first().mapNotNull {
                 if (it.stopId == it.providerId) {
-                    _stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
                 } else it
             }
 
@@ -209,6 +203,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             try {
+                Log.i(LogTags.MoveModel.name, "Fetching providers at ${providerRepo.value}")
+
                 // 1. Fetch provider list (names) from remote
                 val providerListJson = URL("${currentRepoUrl}/providers.json").readText()
                 val providerNameResponse =
@@ -272,13 +268,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadProvidersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
             _providerDao.getAllProviders().collect { entities ->
-                _providers.value = entities.map { it.toProviderItem() }
+                providers.value = entities.map { it.toProviderItem() }
             }
         }
     }
 
     fun fetchInfoForProviders(providerIds: List<Int>) {
-        if (_providers.value.isEmpty() && providerIds.isNotEmpty()) {
+        if (providers.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
                 LogTags.MoveModel.name,
                 "Provider list is empty, attempting to load/fetch providers first."
@@ -287,8 +283,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             // This call might need to be smarter, perhaps waiting for providers.
             // For now, let's assume providers will be loaded.
         }
-        val currentRepoUrl = providerRepo.value
-        if (currentRepoUrl.isEmpty() && providerIds.isNotEmpty()) {
+        if (providerRepo.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
                 LogTags.MoveModel.name,
                 "Repo URL is empty, cannot fetch new lines/stops data."
@@ -298,7 +293,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         providerIds.forEach { id ->
-            val provider = _providers.value.find { it.id == id }
+            val provider = providers.value.find { it.id == id }
             if (provider == null) {
                 Log.w(
                     LogTags.MoveModel.name,
@@ -318,13 +313,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 val needsRemoteFetch =
                     (cachedProviderEntity != null && provider.lastUpdated > (cachedProviderEntity.lastUpdated))
 
-                if (needsRemoteFetch && currentRepoUrl.isNotEmpty()) {
+                if (needsRemoteFetch && providerRepo.value.isNotEmpty()) {
                     Log.d(
                         LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchLinesForProvider(provider, currentRepoUrl)
-                    fetchStopsForProvider(provider, currentRepoUrl)
+                    fetchLinesForProvider(provider, providerRepo.value)
+                    fetchStopsForProvider(provider, providerRepo.value)
                 } else if (_stopDao.getStopsForProvider(provider.id)
                         .first()
                         .isEmpty()
@@ -333,8 +328,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchLinesForProvider(provider, currentRepoUrl)
-                    fetchStopsForProvider(provider, currentRepoUrl)
+                    fetchLinesForProvider(provider, providerRepo.value)
+                    fetchStopsForProvider(provider, providerRepo.value)
                 } else {
                     Log.d(
                         LogTags.MoveModel.name,
@@ -447,9 +442,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             clearLastStops()
             _stopsToLoad.removeAll(_stopsToLoad)
             // Nuke all temporary data
-            _providers.value = emptyList()
-            _lines.value = emptyList()
-            _stops.value = emptyList()
+            providers.value = emptyList()
+            lines.value = emptyList()
+            stops.value = emptyList()
             // Nuke all entries from database
             _providerDao.clearAllProviders()
             _lineDao.clearAllLines()
@@ -593,5 +588,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _userStore.saveOnboardingStatus(status)
         }
+    }
+
+    fun toggleChangelog() {
+        shouldShowChangelog.value = !shouldShowChangelog.value
     }
 }

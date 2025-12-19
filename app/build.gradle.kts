@@ -48,11 +48,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_18
-        targetCompatibility = JavaVersion.VERSION_18
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_18)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+            freeCompilerArgs.add("-Xexplicit-backing-fields")
+            freeCompilerArgs.add("-XXLanguage:+ExplicitBackingFields")
+        }
     }
 }
 

@@ -50,9 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,11 +79,14 @@ import io.github.azakidev.move.ui.listShape
 import io.github.azakidev.move.ui.components.LogoHero
 import io.github.azakidev.move.ui.components.RowButton
 import io.github.azakidev.move.ui.components.trailingButton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsPage(
-    providerRepo: MutableState<String>,
+    providerRepo: StateFlow<String>,
     backStack: NavBackStack<NavKey>,
     onProviderReset: (String) -> Unit,
     onboardingIsComplete: Boolean,
@@ -94,7 +95,7 @@ fun SettingsPage(
     onChangeLogShow: () -> Unit,
 ) {
     val state = rememberTextFieldState(
-        initialText = providerRepo.value,
+        initialText = providerRepo.collectAsState().value,
     )
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val gridCells =
@@ -204,7 +205,7 @@ fun SettingsPage(
 @Preview(device = PIXEL_FOLD, showSystemUi = true)
 @Preview(device = PIXEL_TABLET, showSystemUi = true)
 fun SettingsPagePreview() {
-    val providerRepo = remember { mutableStateOf("") }
+    val providerRepo = MutableStateFlow("").asStateFlow()
     val backStack = rememberNavBackStack(MainView)
     SettingsPage(
         providerRepo = providerRepo,
@@ -359,7 +360,7 @@ fun ResetSection(
 @Composable
 fun ProviderSection(
     state: TextFieldState,
-    providerRepo: MutableState<String>,
+    providerRepo: StateFlow<String>,
     onClick: (String) -> Unit,
     onBack: () -> Unit,
     onboardingIsComplete: Boolean
@@ -367,7 +368,7 @@ fun ProviderSection(
 
     val trailingIcon = trailingButton(
         textState = state.text.toString(),
-        defaultText = providerRepo.value,
+        defaultText = providerRepo.collectAsState().value,
         icon = Icons.Default.Save,
         onClick = {
             onClick(state.text.toString())

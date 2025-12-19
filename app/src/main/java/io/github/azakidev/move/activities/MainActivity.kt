@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
             val sheetModel = viewModel<SheetStopViewModel>()
 
             val blur by animateFloatAsState(
-                targetValue = if (sheetModel.showBottomSheet || model.shouldShowChangelog.value) 20f else 0f,
+                targetValue = if (sheetModel.showBottomSheet || model.shouldShowChangelog.collectAsState().value) 20f else 0f,
                 label = "Blur",
                 animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
             )
@@ -241,7 +241,7 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onChangeLogShow = {
                                                     backStack.removeLastOrNull()
-                                                    model.shouldShowChangelog.value = true
+                                                    model.toggleChangelog()
                                                 },
                                             )
                                         }
@@ -253,7 +253,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             false -> {
-                                model.shouldShowChangelog.value = false
+                                model.toggleChangelog()
                                 OnboardingPage(model)
                             }
                         }
@@ -385,14 +385,14 @@ fun AppNavigator(
         }
     }
 
-    if (model.shouldShowChangelog.value) {
+    if (model.shouldShowChangelog.collectAsState().value) {
         val nestedScroll = rememberNestedScrollInteropConnection()
         ModalBottomSheet(
             modifier = Modifier
                 .fillMaxHeight()
                 .nestedScroll(nestedScroll),
             onDismissRequest = {
-                model.shouldShowChangelog.value = !model.shouldShowChangelog.value
+                model.toggleChangelog()
             },
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             sheetState = sheetState,
