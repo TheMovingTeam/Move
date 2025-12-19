@@ -4,7 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,7 +70,8 @@ const val ZOOM: Double = 16.5
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(
-    ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
@@ -81,14 +86,12 @@ fun MapPage(
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
-    val camera =
-        rememberCameraState(
-            firstPosition =
-                CameraPosition(
-                    target = currentLocation?.location?.collectAsState()?.value?.position ?: Position(-0.490, 38.346),
-                    zoom = ZOOM
-                )
+    val camera = rememberCameraState(
+        firstPosition = CameraPosition(
+            target = currentLocation?.location?.collectAsState()?.value?.position
+                ?: Position(-0.490, 38.346), zoom = ZOOM
         )
+    )
 
     LaunchedEffect(Unit) {
         if (currentLocation == null) {
@@ -97,10 +100,11 @@ fun MapPage(
         coroutineScope.launch {
             delay(200)
             camera.animateTo(
-                finalPosition =
-                    camera.position.copy(
-                        target = currentLocation?.location?.value?.position ?: Position(-0.490, 38.346),
+                finalPosition = camera.position.copy(
+                    target = currentLocation?.location?.value?.position ?: Position(
+                        -0.490, 38.346
                     ),
+                ),
                 duration = 100.milliseconds,
             )
         }
@@ -111,27 +115,28 @@ fun MapPage(
 
     val inputField = @Composable {
         SearchInputField(
-            searchBarState,
-            textFieldState
+            searchBarState, textFieldState
         )
     }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val topSafe = WindowInsets.statusBars.getTop(LocalDensity.current).times(0.8f).dp
+
+    val topSafe = with(LocalDensity.current) {
+        WindowInsets.statusBars.getTop(this).toDp()
+    }
 
     val fill =
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
             Brush.verticalGradient(
                 listOf(
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.background
+                    MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background
                 )
             )
         } else {
             Brush.verticalGradient(
                 listOf(
-                    MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
-                    MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
                     Color.Transparent
                 )
             )
@@ -154,9 +159,9 @@ fun MapPage(
             Modifier.zIndex(1f)
         }
 
-    val geoProviders = model.providers.collectAsState().value
-        .filter { it.capabilities.contains(Capabilities.Geo) }
-        .map { it.id }
+    val geoProviders =
+        model.providers.collectAsState().value.filter { it.capabilities.contains(Capabilities.Geo) }
+            .map { it.id }
 
     Scaffold(
         topBar = {
@@ -188,15 +193,15 @@ fun MapPage(
                 onClick = {
                     coroutineScope.launch {
                         camera.animateTo(
-                            finalPosition =
-                                camera.position.copy(
-                                    target = currentLocation?.location?.value?.position ?: Position(-0.490, 38.346),
+                            finalPosition = camera.position.copy(
+                                target = currentLocation?.location?.value?.position ?: Position(
+                                    -0.490, 38.346
                                 ),
+                            ),
                             duration = 250.milliseconds,
                         )
                     }
-                }
-            ) {
+                }) {
                 Icon(
                     modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
                     imageVector = Icons.Filled.GpsFixed,
@@ -205,10 +210,16 @@ fun MapPage(
             }
         },
     ) { paddingValues ->
+        val verticalPadding = if (windowSizeClass.isWidthAtLeastBreakpoint(
+                WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+            )
+        ) topSafe
+        else topSafe.times(1.2f)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(topSafe)
+                .height(verticalPadding)
                 .zIndex(2f)
                 .background(
                     brush = fill
@@ -225,21 +236,20 @@ fun MapPage(
                     currentLocation = currentLocation
                 )
                 AllLines(
-                    model.lines.collectAsState().value,
-                    model.stops.collectAsState().value
+                    model.lines.collectAsState().value, model.stops.collectAsState().value
                 )
-                AllStops(
-                    model.stops.collectAsState().value
-                        .filter { it.provider in geoProviders }
-                        .filter { it.geoX != null && it.geoY != null }
-                )
-            }
-        )
+                AllStops(model.stops.collectAsState().value.filter { it.provider in geoProviders }
+                    .filter { it.geoX != null && it.geoY != null })
+            })
     }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
+@Preview(
+    device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape",
+    showSystemUi = true
+)
 @Preview(showSystemUi = true)
 fun MapPagePreview() {
     Scaffold(
@@ -266,8 +276,7 @@ fun MapPagePreview() {
                 shape = FloatingActionButtonDefaults.largeShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                onClick = { }
-            ) {
+                onClick = { }) {
                 Icon(
                     modifier = Modifier.size(FloatingActionButtonDefaults.MediumIconSize),
                     imageVector = Icons.Filled.GpsFixed,
@@ -282,23 +291,30 @@ fun MapPagePreview() {
             if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
                 Brush.verticalGradient(
                     listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.background
+                        MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background
                     )
                 )
             } else {
                 Brush.verticalGradient(
                     listOf(
-                        Color(0f, 0f, 0f, 0.8f),
-                        Color(0f, 0f, 0f, 0.5f),
-                        Color.Transparent
+                        Color(0f, 0f, 0f, 0.8f), Color(0f, 0f, 0f, 0.5f), Color.Transparent
                     )
                 )
             }
+        val size = with(LocalDensity.current) {
+            WindowInsets.statusBars.getTop(this).toDp()
+        }
+
+        val verticalPadding = if (windowSizeClass.isWidthAtLeastBreakpoint(
+                WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+            )
+        ) size.div(10)
+        else size.times(1.2f)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(WindowInsets.statusBars.getTop(LocalDensity.current).times(0.5f).dp)
+                .height(24.dp)
                 .zIndex(2f)
                 .background(brush = fill)
         ) {}

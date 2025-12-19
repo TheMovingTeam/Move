@@ -93,7 +93,7 @@ fun ProvidersList(
                         if (scrollBehavior != null) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
                     LazyColumn(
                         modifier = modifier
-                            .padding(top = PADDING.div(2).dp)
+                            .padding(bottom = PADDING.div(2).dp)
                             .padding(horizontal = PADDING.div(2).dp),
                         verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
                     ) {

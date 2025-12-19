@@ -97,7 +97,7 @@ fun ProvidersPage(
                 ),
         ) {
             ProvidersList(
-                providerRepo = model.providerRepo.value,
+                providerRepo = model.providerRepo.collectAsState().value,
                 providers = model.providers.collectAsState().value,
                 savedProviders = model.savedProviders.collectAsState().value,
                 onFavoriteClick = {
