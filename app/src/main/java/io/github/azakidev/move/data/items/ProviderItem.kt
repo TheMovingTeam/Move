@@ -28,6 +28,7 @@ enum class Capabilities {
     ComId,
     QrScan,
     Geo,
+    Unsafe
 }
 
 @Serializable
