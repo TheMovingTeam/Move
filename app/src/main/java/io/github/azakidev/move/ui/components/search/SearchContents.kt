@@ -1,58 +1,38 @@
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.search
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.Backspace
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.LocalOffer
 import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tag
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarState
-import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
@@ -61,6 +41,8 @@ import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.PADDING
+import io.github.azakidev.move.ui.components.common.LineRow
+import io.github.azakidev.move.ui.components.common.StopRow
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
 import kotlinx.coroutines.launch
@@ -292,102 +274,4 @@ fun SearchContents(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-@Preview
-fun SearchNoResults(
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(
-            space = PADDING.dp,
-            alignment = Alignment.CenterVertically
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(MaterialShapes.Cookie9Sided.toShape())
-                .background(
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ), contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .size(108.dp),
-                imageVector = Icons.Rounded.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        }
-        Text(
-            text = stringResource(R.string.noResults)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun SearchInputField(
-    searchBarState: SearchBarState, textFieldState: TextFieldState
-) {
-    val scope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
-
-    val trailingIcon = trailingButton(
-        textState = textFieldState.text.toString(),
-        icon = Icons.AutoMirrored.Rounded.Backspace,
-        onClick = {
-            textFieldState.clearText()
-        }
-    )
-
-    val isCollapsed =
-        (searchBarState.currentValue == SearchBarValue.Collapsed) && !searchBarState.isAnimating
-
-    SearchBarDefaults.InputField(
-        searchBarState = searchBarState,
-        textFieldState = textFieldState,
-        onSearch = { focusManager.clearFocus() },
-        placeholder = {
-            Text(stringResource(R.string.searchPlaceholder))
-        },
-        leadingIcon = {
-            AnimatedContent(
-                targetState = isCollapsed
-            ) { isCollapsed ->
-                when (isCollapsed) {
-                    true -> {
-                        Icon(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .padding(PADDING.div(2).dp),
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(id = R.string.search)
-                        )
-                    }
-
-                    false -> {
-                        IconButton(
-                            onClick = {
-                                scope.launch { searchBarState.animateToCollapsed() }
-                            }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        trailingIcon = trailingIcon
-    )
 }

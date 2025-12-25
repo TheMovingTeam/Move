@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.qr
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons

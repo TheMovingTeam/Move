@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.views
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -21,7 +20,11 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.PADDING
-import io.github.azakidev.move.ui.components.QrFAB
+import io.github.azakidev.move.ui.components.qr.QrFAB
+import io.github.azakidev.move.ui.pages.panes.HomePage
+import io.github.azakidev.move.ui.pages.panes.HomePagePreview
+import io.github.azakidev.move.ui.pages.panes.LinesPage
+import io.github.azakidev.move.ui.pages.panes.LinesPagePreview
 
 const val FAB_PADDING = 8
 

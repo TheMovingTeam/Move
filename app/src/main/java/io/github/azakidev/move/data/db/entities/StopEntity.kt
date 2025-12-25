@@ -26,8 +26,8 @@ data class StopEntity(
 
     val lines: List<Int>,
 
-    val geoX: Float?,
-    val geoY: Float?,
+    val geoX: Double?,
+    val geoY: Double?,
 
     val notifications: List<String>,
 )

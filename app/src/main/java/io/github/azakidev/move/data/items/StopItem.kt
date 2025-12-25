@@ -15,8 +15,8 @@ data class StopItem(
 
     val lines: List<Int> = emptyList(),
 
-    val geoX: Float? = null,
-    val geoY: Float? = null,
+    val geoX: Double? = null,
+    val geoY: Double? = null,
 
     val notifications: List<String> = emptyList()
 ) {

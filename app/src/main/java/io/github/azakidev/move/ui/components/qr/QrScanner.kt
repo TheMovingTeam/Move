@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.qr
 
 import android.content.Context
 import android.util.Log
@@ -105,7 +105,7 @@ class CameraPreviewViewModel(analyzerCallBack: (String) -> Unit) : ViewModel() {
 }
 
 @Composable
-fun QrScannerViewFinder(
+fun QrScanner(
     modifier: Modifier = Modifier,
     providers: List<ProviderItem>,
     callback: (Pair<Int, ProviderItem>) -> Unit,

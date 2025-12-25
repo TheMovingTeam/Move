@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.sheets
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -48,8 +48,8 @@ import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
-import io.github.azakidev.move.ui.components.LogoHero
-import io.github.azakidev.move.ui.components.RowButton
+import io.github.azakidev.move.ui.components.hero.LogoHero
+import io.github.azakidev.move.ui.components.common.RowButton
 
 @Composable
 @Preview

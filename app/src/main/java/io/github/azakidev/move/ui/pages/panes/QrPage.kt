@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -48,7 +48,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.toKey
-import io.github.azakidev.move.ui.components.QrScannerViewFinder
+import io.github.azakidev.move.ui.components.qr.QrScanner
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -97,7 +97,7 @@ fun QrPage(
                     val outlineSize = squareSize + 10f
                     val outlineColor = MaterialTheme.colorScheme.primary
 
-                    QrScannerViewFinder(
+                    QrScanner(
                         modifier = Modifier
                             .matchParentSize()
                             .drawWithContent {
@@ -224,7 +224,7 @@ fun QrPreview() {
             val outlineSize = squareSize + 10f
             val outlineColor = MaterialTheme.colorScheme.primary
 
-            QrScannerViewFinder(
+            QrScanner(
                 modifier = Modifier
                     .matchParentSize()
                     .drawWithContent {

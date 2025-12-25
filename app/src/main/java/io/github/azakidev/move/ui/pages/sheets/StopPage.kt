@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.sheets
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateIntAsState
@@ -72,11 +72,11 @@ import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
-import io.github.azakidev.move.ui.components.AllLines
-import io.github.azakidev.move.ui.components.EmblemShape
-import io.github.azakidev.move.ui.components.LocationIndicator
-import io.github.azakidev.move.ui.components.MapSurface
-import io.github.azakidev.move.ui.components.StopIndicator
+import io.github.azakidev.move.ui.components.map.AllLines
+import io.github.azakidev.move.ui.components.common.EmblemShape
+import io.github.azakidev.move.ui.components.map.LocationIndicator
+import io.github.azakidev.move.ui.components.map.MapSurface
+import io.github.azakidev.move.ui.components.map.StopIndicator
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
 import org.maplibre.compose.camera.CameraPosition
@@ -124,7 +124,7 @@ fun StopPage(
             .find { it.id == sheetModel.sheetStop.provider }
             ?: ProviderItem()
 
-    val url = "${model.providerRepo.value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
+    val url = "${model.providerRepo.collectAsState().value}/${provider.name}/res/stop/${sheetModel.sheetStop.id}.png"
 
     val lines = model.lines
         .collectAsState().value
@@ -590,8 +590,8 @@ fun StopMap(
                 firstPosition =
                     CameraPosition(
                         target = Position(
-                            latitude = stopItem.geoX.toDouble(),
-                            longitude = stopItem.geoY.toDouble()
+                            latitude = stopItem.geoX,
+                            longitude = stopItem.geoY
                         ),
                         zoom = 15.0
                     )
@@ -620,8 +620,8 @@ fun StopMap(
                     stops = stops
                 )
                 StopIndicator(
-                    stopItem.geoX.toDouble(),
-                    stopItem.geoY.toDouble()
+                    stopItem.geoX,
+                    stopItem.geoY
                 )
                 LocationIndicator(
                     currentLocation = currentLocation

@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -23,14 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.items.ProviderItem
-import io.github.azakidev.move.ui.components.ProvidersList
+import io.github.azakidev.move.ui.components.common.ProvidersList
 import java.util.Timer
 import kotlin.concurrent.schedule
 

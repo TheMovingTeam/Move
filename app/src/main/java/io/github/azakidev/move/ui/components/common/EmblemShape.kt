@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

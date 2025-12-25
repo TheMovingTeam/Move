@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -38,7 +38,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -53,10 +52,10 @@ import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.Settings
-import io.github.azakidev.move.ui.components.FavStopCarousel
-import io.github.azakidev.move.ui.components.FavStopCarouselPreview
-import io.github.azakidev.move.ui.components.QrFAB
-import io.github.azakidev.move.ui.components.StopRow
+import io.github.azakidev.move.ui.components.hero.FavStopCarousel
+import io.github.azakidev.move.ui.components.hero.FavStopCarouselPreview
+import io.github.azakidev.move.ui.components.qr.QrFAB
+import io.github.azakidev.move.ui.components.common.StopRow
 import io.github.azakidev.move.ui.listShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

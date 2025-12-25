@@ -590,7 +590,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun toggleChangelog() {
-        shouldShowChangelog.value = !shouldShowChangelog.value
+    fun toggleChangelog(
+        value: Boolean? = null
+    ) {
+        if (value == null) shouldShowChangelog.value = !shouldShowChangelog.value
+        else shouldShowChangelog.value = value
     }
 }

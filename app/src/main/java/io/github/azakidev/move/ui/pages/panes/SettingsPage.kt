@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
@@ -65,7 +65,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_FOLD
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -77,9 +76,9 @@ import io.github.azakidev.move.ui.Providers
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
-import io.github.azakidev.move.ui.components.LogoHero
-import io.github.azakidev.move.ui.components.RowButton
-import io.github.azakidev.move.ui.components.trailingButton
+import io.github.azakidev.move.ui.components.hero.LogoHero
+import io.github.azakidev.move.ui.components.common.RowButton
+import io.github.azakidev.move.ui.components.common.trailingButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

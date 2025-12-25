@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.hero
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -51,6 +51,7 @@ import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
+import io.github.azakidev.move.ui.components.common.EmblemShape
 import io.github.azakidev.move.ui.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +94,7 @@ fun FavStopCarousel(
                         model.providers.collectAsState().value.find { it.id == stopItem.id }
                             ?: ProviderItem()
                     val url =
-                        "${model.providerRepo.value}/${provider.name}/res/stop/${stopItem.id}.png"
+                        "${model.providerRepo.collectAsState().value}/${provider.name}/res/stop/${stopItem.id}.png"
                     HeroCarrouselItem(
                         modifier = Modifier
                             .height(HERO_HEIGHT.dp)
@@ -154,7 +155,7 @@ fun HeroCarrouselItem(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            MaterialTheme.colorScheme.surfaceContainerHigh
+                            MaterialTheme.colorScheme.background
                         )
                     )
                 )

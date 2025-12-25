@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
-package io.github.azakidev.move.ui.components
+package io.github.azakidev.move.ui.components.common
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -37,6 +37,43 @@ import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
+
+@Composable
+fun LineRow(
+    modifier: Modifier = Modifier,
+    stops: List<StopItem>,
+    lines: List<LineItem>,
+    lineItem: LineItem,
+    shape: Shape = MaterialTheme.shapes.large,
+    expanded: MutableState<Boolean>,
+    expandable: Boolean = true,
+    background: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    onClick: (StopItem) -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape = shape)
+            .background(color = background)
+            .clickable(
+                enabled = expandable,
+                onClick = {
+                    expanded.value = !expanded.value
+                }
+            ),
+    ) {
+        Column {
+            LineEntry(line = lineItem)
+            StopEntries(
+                stops = stops.filter { lineItem.stops.contains(it.id) && it.provider == lineItem.provider },
+                lines = lines,
+                lineItem = lineItem,
+                isExpanded = expanded.value,
+                onClick = onClick
+            )
+        }
+    }
+}
 
 @Composable
 fun LineEntry(line: LineItem) {
@@ -135,43 +172,6 @@ fun StopEntries(
     }
 }
 
-@Composable
-fun LineRow(
-    modifier: Modifier = Modifier,
-    stops: List<StopItem>,
-    lines: List<LineItem>,
-    lineItem: LineItem,
-    shape: Shape = MaterialTheme.shapes.large,
-    expanded: MutableState<Boolean>,
-    expandable: Boolean = true,
-    background: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    onClick: (StopItem) -> Unit
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape = shape)
-            .background(color = background)
-            .clickable(
-                enabled = expandable,
-                onClick = {
-                    expanded.value = !expanded.value
-                }
-            ),
-    ) {
-        Column {
-            LineEntry(line = lineItem)
-            StopEntries(
-                stops = stops.filter { lineItem.stops.contains(it.id) && it.provider == lineItem.provider },
-                lines = lines,
-                lineItem = lineItem,
-                isExpanded = expanded.value,
-                onClick = onClick
-            )
-        }
-    }
-}
-
 @Preview
 @Composable
 fun LineRowPreview() {
@@ -193,7 +193,7 @@ fun LineRowPreview() {
     val expanded = remember { mutableStateOf(true) }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(PADDING.div(2).dp)
     ) {
         LineRow(
             stops = stops,

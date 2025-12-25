@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +41,9 @@ import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.PADDING
-import io.github.azakidev.move.ui.components.LineRow
-import io.github.azakidev.move.ui.components.SearchContents
-import io.github.azakidev.move.ui.components.SearchInputField
+import io.github.azakidev.move.ui.components.common.LineRow
+import io.github.azakidev.move.ui.components.search.SearchContents
+import io.github.azakidev.move.ui.components.search.SearchInputField
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.listShape
 

@@ -1,11 +1,18 @@
 package io.github.azakidev.move.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastJoinToString
 import androidx.navigation3.runtime.NavKey
+import io.github.azakidev.move.R
 import kotlinx.serialization.Serializable
 import java.util.Locale
 import kotlin.streams.toList
@@ -109,4 +116,14 @@ fun String.fmtSearch(): String {
         .toList()
         .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
         .joinToString("")
+}
+
+enum class AppDestinations(
+    @param:StringRes val label: Int,
+    val icon: ImageVector,
+    @param:StringRes val contentDescription: Int
+) {
+    HOME(R.string.home, Icons.Rounded.Home, R.string.home),
+    LINES(R.string.lines, Icons.AutoMirrored.Rounded.ArrowForward, R.string.lines),
+    MAP(R.string.map, Icons.Rounded.LocationOn, R.string.map)
 }

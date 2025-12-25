@@ -1,13 +1,11 @@
-package io.github.azakidev.move.ui.pages
+package io.github.azakidev.move.ui.pages.panes
 
 import android.Manifest
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,13 +30,13 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,12 +50,12 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
-import io.github.azakidev.move.ui.components.AllLines
-import io.github.azakidev.move.ui.components.AllStops
-import io.github.azakidev.move.ui.components.LocationIndicator
-import io.github.azakidev.move.ui.components.MapSurface
-import io.github.azakidev.move.ui.components.SearchContents
-import io.github.azakidev.move.ui.components.SearchInputField
+import io.github.azakidev.move.ui.components.map.AllLines
+import io.github.azakidev.move.ui.components.map.AllStops
+import io.github.azakidev.move.ui.components.map.LocationIndicator
+import io.github.azakidev.move.ui.components.map.MapSurface
+import io.github.azakidev.move.ui.components.search.SearchContents
+import io.github.azakidev.move.ui.components.search.SearchInputField
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
@@ -142,22 +140,21 @@ fun MapPage(
             )
         }
 
-    val mapModifier =
+    val mapModifier = Modifier.zIndex(1f).then(
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
             if (windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)) {
                 Modifier
-                    .zIndex(1f)
                     .padding(top = topSafe)
                     .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 0.dp))
             } else {
                 Modifier
-                    .zIndex(1f)
                     .padding(top = topSafe)
                     .clip(RoundedCornerShape(12.dp, 12.dp, 0.dp, 0.dp))
             }
         } else {
-            Modifier.zIndex(1f)
+            Modifier
         }
+    )
 
     val geoProviders =
         model.providers.collectAsState().value.filter { it.capabilities.contains(Capabilities.Geo) }
@@ -238,9 +235,14 @@ fun MapPage(
                 AllLines(
                     model.lines.collectAsState().value, model.stops.collectAsState().value
                 )
-                AllStops(model.stops.collectAsState().value.filter { it.provider in geoProviders }
-                    .filter { it.geoX != null && it.geoY != null })
-            })
+                AllStops(
+                    stops = model.stops.collectAsState().value
+                        .filter { it.provider in geoProviders }
+                    .filter { it.geoX != null && it.geoY != null },
+                    sheetModel = sheetModel
+                )
+            }
+        )
     }
 }
 
@@ -304,7 +306,7 @@ fun MapPagePreview() {
             WindowInsets.statusBars.getTop(this).toDp()
         }
 
-        val verticalPadding = if (windowSizeClass.isWidthAtLeastBreakpoint(
+        if (windowSizeClass.isWidthAtLeastBreakpoint(
                 WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
             )
         ) size.div(10)
