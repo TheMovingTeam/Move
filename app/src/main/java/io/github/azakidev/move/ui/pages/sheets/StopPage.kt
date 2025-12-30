@@ -258,7 +258,7 @@ fun StopBanner(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            MaterialTheme.colorScheme.surfaceContainer
+                            MaterialTheme.colorScheme.background
                         )
                     )
                 ),

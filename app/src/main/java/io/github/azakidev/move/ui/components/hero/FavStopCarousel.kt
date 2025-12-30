@@ -90,11 +90,13 @@ fun FavStopCarousel(
                     contentPadding = PaddingValues(horizontal = PADDING.dp),
                 ) { i ->
                     val stopItem = sortedFavStops[i]
+
                     val provider =
-                        model.providers.collectAsState().value.find { it.id == stopItem.id }
+                        model.providers.collectAsState().value.find { it.id == stopItem.provider }
                             ?: ProviderItem()
-                    val url =
-                        "${model.providerRepo.collectAsState().value}/${provider.name}/res/stop/${stopItem.id}.png"
+
+                    val url = "${model.providerRepo.collectAsState().value}/${provider.name}/res/stop/${stopItem.id}.png"
+
                     HeroCarrouselItem(
                         modifier = Modifier
                             .height(HERO_HEIGHT.dp)
@@ -109,7 +111,7 @@ fun FavStopCarousel(
                                 }
                             ),
                         stopItem = stopItem,
-                        lineItems = model.lines.collectAsState().value,
+                        lineItems = model.lines.collectAsState().value.filter { it.provider == stopItem.provider },
                         imgUrl = url,
                         sheetModel = sheetModel
                     )
