@@ -216,14 +216,18 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 val freshProvidersFromRemote = mutableListOf<ProviderItem>()
 
                 // 3. Compare and decide which providers need full metadata fetching
+
+                var providerCount = 0
                 providerNameResponse.providers.forEach { providerName ->
                     try {
                         val providerMetadataJson =
                             URL("${currentRepoUrl}/${providerName}/metadata.json").readText()
+
                         val remoteProviderItem =
                             Json.decodeFromString<ProviderItem>(
                                 providerMetadataJson
-                            )
+                            ).copy(id = providerCount)
+                        providerCount++
 
                         val cachedProvider = cachedProviders.find { it.id == remoteProviderItem.id }
 

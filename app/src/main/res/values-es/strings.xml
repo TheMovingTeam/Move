@@ -93,6 +93,11 @@
             [BREAKING] Arregla interferencias en paradas recientes o favoritas.\n
             Puede que necesites borrar los datos de app manualmente si la migración automática falla.
         </item>
+        <item>
+            [BREAKING] Usa identificadores asignados localmente para los proveedores.\n
+            Puede que necesites borrar los datos de app manualmente si siguen mostrándose incorrectamente en la configuración.\n
+            No causará cambios en la funcionalidad.
+        </item>
         <item>Añade soporte para Llorente Bus</item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>

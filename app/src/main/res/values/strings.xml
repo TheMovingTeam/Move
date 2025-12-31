@@ -100,6 +100,11 @@
             [BREAKING] Fix interference in favourite or recent stops.\n
             You may need to delete all app data if automatic migration fails.
         </item>
+        <item>
+            [BREAKING] Use locally assigned IDs for providers.\n
+            You may need to delete all app data if it continues displaying incorrectly in the settings.\n
+            Functionality should be maintained.
+        </item>
         <item>Add support for Llorente Bus</item>
         <item>UI fixes and improvements</item>
     </string-array>

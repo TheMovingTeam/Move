@@ -8,12 +8,12 @@ data class ProviderItem(
     val name: String = "DummyProvider",
     val description: String = "",
 
-    val id: Int = 0,
+    val id: Int = -1,
     val versionMajor: Int = 0,
     val versionMinor: Int = 0,
 
     val lastUpdated: Int = 0,
-    val capabilities: List<Capabilities> = listOf(),
+    val capabilities: List<Capabilities> = emptyList(),
 
     val timeSource: String = "",
 

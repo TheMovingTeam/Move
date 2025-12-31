@@ -192,7 +192,6 @@ private fun createInsecureSslSocketFactory(trustManager: TrustManager): SSLSocke
 
 private fun createInsecureHostnameVerifier(): HostnameVerifier = HostnameVerifier { _, _ -> true }
 
-
 fun parseTimes(
     response: String, provider: ProviderItem, stopItem: StopItem, lines: List<LineItem>
 ): List<LineTime>? {
