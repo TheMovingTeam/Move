@@ -18,56 +18,56 @@ import kotlin.time.ExperimentalTime
 
 @Serializable
 @SerialName("Envelope")
-data class TMurciaResponse(
+data class SOAPResponse(
     @XmlIgnoreWhitespace(true)
-    val body: TMurciaBody
+    val body: SOAPBody
 )
 
 @Serializable
 @SerialName("Body")
-data class TMurciaBody(
+data class SOAPBody(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("GetStopMonitoringResponse", "http://tempuri.org/", "")
-    val response: TMurciaRequestResponse
+    val response: SOAPRequestResponse
 )
 
 @Serializable
-data class TMurciaRequestResponse(
+data class SOAPRequestResponse(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("GetStopMonitoringResult", "http://tempuri.org/", "")
-    val result: TMurciaRequestResult
+    val result: SOAPRequestResult
 )
 
 @Serializable
-data class TMurciaRequestResult(
+data class SOAPRequestResult(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("Answer", "", "")
-    val answer: TMurciaAnswer
+    val answer: SOAPAnswer
 )
 
 @Serializable
-data class TMurciaAnswer(
+data class SOAPAnswer(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("StopMonitoringDelivery", "http://www.siri.org.uk/siri", "")
-    val delivery: TMurciaDelivery
+    val delivery: SOAPDelivery
 )
 
 @Serializable
-data class TMurciaDelivery(
+data class SOAPDelivery(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("MonitoredStopVisit", "http://www.siri.org.uk/siri", "")
-    val estimates: List<TMurciaEstimate>
+    val estimates: List<SOAPEstimate>
 )
 
 @Serializable
-data class TMurciaEstimate(
+data class SOAPEstimate(
     @XmlIgnoreWhitespace(true)
     @XmlSerialName("MonitoredVehicleJourney", "http://www.siri.org.uk/siri", "")
-    val lineInfo: TMurciaLineInfo,
+    val lineInfo: SOAPLineInfo,
 )
 
 @Serializable
-data class TMurciaLineInfo(
+data class SOAPLineInfo(
     @XmlElement @XmlSerialName("LineRef", "http://www.siri.org.uk/siri", "") val emblem: String,
     @XmlElement @XmlSerialName(
         "DestinationName",
@@ -79,11 +79,11 @@ data class TMurciaLineInfo(
         "MonitoredCall",
         "http://www.siri.org.uk/siri",
         ""
-    ) val mc: TMurciaMonitoredCall,
+    ) val mc: SOAPMonitoredCall,
 )
 
 @Serializable
-data class TMurciaMonitoredCall(
+data class SOAPMonitoredCall(
     @XmlElement @XmlSerialName(
         "ExpectedArrivalTime",
         "http://www.siri.org.uk/siri",
@@ -97,7 +97,7 @@ data class TMurciaMonitoredCall(
 )
 
 @OptIn(ExperimentalTime::class)
-fun parseTMurcia(response: String): List<LineTime> {
+fun parseSOAP(response: String): List<LineTime> {
     val format = XML {
         defaultPolicy {
             pedantic = false
@@ -110,7 +110,7 @@ fun parseTMurcia(response: String): List<LineTime> {
         ""
     )
 
-    val estimates = format.decodeFromString<TMurciaResponse>(string)
+    val estimates = format.decodeFromString<SOAPResponse>(string)
         .body
         .response
         .result

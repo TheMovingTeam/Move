@@ -93,6 +93,7 @@
             [BREAKING] Arregla interferencias en paradas recientes o favoritas.\n
             Puede que necesites borrar los datos de app manualmente si la migración automática falla.
         </item>
+        <item>Añade soporte para Llorente Bus</item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>
 </resources>

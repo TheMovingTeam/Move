@@ -87,6 +87,8 @@ fun String.fmt(): String {
         .replace("'", "' ")
         .replace("\"", "")
         .replace("_", " ")
+        .replace("[", " ")
+        .replace("]", " ")
         .replace("avda", "av.")
         .replace("- obres", "( obres )")
         .replace("..", ".")
