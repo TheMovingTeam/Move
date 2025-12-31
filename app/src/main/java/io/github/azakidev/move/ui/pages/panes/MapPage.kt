@@ -2,7 +2,6 @@ package io.github.azakidev.move.ui.pages.panes
 
 import android.Manifest
 import android.annotation.SuppressLint
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,7 +29,6 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -140,21 +138,23 @@ fun MapPage(
             )
         }
 
-    val mapModifier = Modifier.zIndex(1f).then(
-        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-            if (windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)) {
-                Modifier
-                    .padding(top = topSafe)
-                    .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 0.dp))
+    val mapModifier = Modifier
+        .zIndex(1f)
+        .then(
+            if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                if (windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)) {
+                    Modifier
+                        .padding(top = topSafe)
+                        .clip(RoundedCornerShape(12.dp, 0.dp, 0.dp, 0.dp))
+                } else {
+                    Modifier
+                        .padding(top = topSafe)
+                        .clip(RoundedCornerShape(12.dp, 12.dp, 0.dp, 0.dp))
+                }
             } else {
                 Modifier
-                    .padding(top = topSafe)
-                    .clip(RoundedCornerShape(12.dp, 12.dp, 0.dp, 0.dp))
             }
-        } else {
-            Modifier
-        }
-    )
+        )
 
     val geoProviders =
         model.providers.collectAsState().value.filter { it.capabilities.contains(Capabilities.Geo) }
@@ -229,17 +229,21 @@ fun MapPage(
             cameraState = camera,
             hasCompass = true,
             content = {
-                LocationIndicator(
-                    currentLocation = currentLocation
-                )
                 AllLines(
-                    model.lines.collectAsState().value, model.stops.collectAsState().value
+                    model.lines.collectAsState().value
+                        .filter { it.provider in geoProviders },
+                    model.stops.collectAsState().value
+                        .filter { it.provider in geoProviders }
+                        .filter { it.geoX != null && it.geoY != null }
                 )
                 AllStops(
                     stops = model.stops.collectAsState().value
                         .filter { it.provider in geoProviders }
-                    .filter { it.geoX != null && it.geoY != null },
+                        .filter { it.geoX != null && it.geoY != null },
                     sheetModel = sheetModel
+                )
+                LocationIndicator(
+                    currentLocation = currentLocation
                 )
             }
         )
@@ -258,7 +262,7 @@ fun MapPagePreview() {
     val searchBarState = rememberSearchBarState()
 
     val inputField = @Composable { SearchInputField(searchBarState, textFieldState) }
-    
+
     Scaffold(
         topBar = {
             AppBarWithSearch(

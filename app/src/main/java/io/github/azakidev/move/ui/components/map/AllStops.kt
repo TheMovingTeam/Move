@@ -25,6 +25,7 @@ fun AllStops(
     stops: List<StopItem>,
     sheetModel: SheetStopViewModel
 ) {
+    if (stops.isEmpty()) return
     var geoJson = """{ "type": "FeatureCollection", "features": [ """
 
     stops.forEach {

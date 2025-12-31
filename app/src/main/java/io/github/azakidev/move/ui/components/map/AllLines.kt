@@ -27,12 +27,15 @@ fun AllLines(
     lines: List<LineItem>,
     stops: List<StopItem>
 ) {
+    if (lines.isEmpty()) return
     //TODO: Remove check when fully implemented
     if (!BuildConfig.DEBUG) return
     lines.forEach { line ->
         val rawStopLines =
             line.stops
                 .mapNotNull { stop -> stops.find { it.id == stop && it.provider == line.provider } }
+
+        if (rawStopLines.isEmpty()) return@forEach
 
         val sortedStopLines = mutableListOf<StopItem>()
         val unvisitedStops = rawStopLines.toMutableSet()
