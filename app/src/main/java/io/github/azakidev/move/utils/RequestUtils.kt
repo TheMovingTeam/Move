@@ -6,6 +6,7 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
 import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.data.items.ProviderListResponse
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
@@ -16,6 +17,7 @@ import io.github.azakidev.move.data.providers.parseSOAP
 import io.github.azakidev.move.data.providers.parseTMPMurcia
 import io.github.azakidev.move.data.providers.parseTranviaMurcia
 import io.github.azakidev.move.data.providers.parseVectaliaTimes
+import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,6 +30,72 @@ import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
+
+// Provider fetching
+fun fetchRemoteProviders(
+    currentRepoUrl: String,
+    cachedProviders: List<ProviderItem>
+): List<ProviderItem> {
+    val client = OkHttpClient()
+
+    val providerListRequest = Request.Builder()
+        .get()
+        .url("$currentRepoUrl/providers.json")
+        .build()
+
+    val providerListJson = client.newCall(providerListRequest).execute().body
+
+    if (providerListJson == null) {
+        Log.e(LogTags.Networking.name, "ProviderListJson is null, providers couldn't be fetched!")
+        return emptyList()
+    }
+
+    val providerNameResponse =
+        Json.decodeFromString<ProviderListResponse>(providerListJson.string())
+
+    var providerCount = 0
+    return providerNameResponse.providers.mapNotNull { providerName ->
+        try {
+            val providerMetadataRequest =
+                Request.Builder()
+                    .get()
+                    .url("${currentRepoUrl}/${providerName}/metadata.json")
+                    .build()
+
+            val providerMetadataJson = client.newCall(providerMetadataRequest).execute().body
+
+            if (providerMetadataJson == null) {
+                Log.e(
+                    LogTags.Networking.name,
+                    "ProviderMetadataJson is null, providers couldn't be fetched!"
+                )
+                return@mapNotNull null
+            }
+
+            val remoteProviderItem =
+                Json.decodeFromString<ProviderItem>(providerMetadataJson.string())
+                    .copy(id = providerCount)
+            providerCount++
+
+            val cachedProvider = cachedProviders.find { it.id == remoteProviderItem.id }
+
+            if (cachedProvider == null || remoteProviderItem.lastUpdated > cachedProvider.lastUpdated) {
+                // Needs fetching/updating or is new
+                remoteProviderItem
+            } else null
+
+        } catch (e: Exception) {
+            Log.e(
+                LogTags.Networking.name,
+                "Error fetching metadata for $providerName: ${e.localizedMessage}",
+                e
+            )
+            null
+        }
+    }
+}
+
+// Time requesting
 
 private const val SOAP_REQUEST = """
             <?xml version='1.0' encoding='utf-8'?>
@@ -72,7 +140,9 @@ fun fetchStopTime(provider: ProviderItem, stopItem: StopItem, lines: List<LineIt
         .replace("@comId", stopItem.comId.toString())
 
     val client =
-        OkHttpClient.Builder().trustSelfSignedCertsIfNeeded(provider).retryOnConnectionFailure(true)
+        OkHttpClient.Builder()
+            .trustSelfSignedCertsIfNeeded(provider)
+            .retryOnConnectionFailure(true)
             .build()
 
     try {
@@ -115,14 +185,14 @@ fun Request.Builder.formRequest(
     if (provider.name.contains("EMT Valencia")) { // EMT Valencia headers
         return this.header(
             "X-WSSE",
-            "UsernameToken Username=\"7gH8m45w7A\", " + "PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", " + "Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", " + "Created=\"1760182100\""
+            "UsernameToken Username=\"7gH8m45w7A\", PasswordDigest=\"NjA4ZTY3N2U3MzRiYTYyMmJhNjRlMDI0Y2Y5N2Q4NDJlZDM2ZTg1Nw==\", Nonce=\"NDFlMjdjMjMzODgxOGRiNDBkMGNiYjk0MGRhMWI4MTE=\", Created=\"1760182100\""
         ).get()
     }
 
     if (provider.name.contains("EMT Madrid")) {
         val token = fetchEMTMadridToken(client)
         val content =
-            "{\n" + "\"statistics\":\"\",\n" + "\"cultureInfo\":\"\",\n" + "\"Text_StopRequired_YN\":\"N\",\n" + "\"Text_EstimationsRequired_YN\":\"Y\",\n" + "\"Text_IncidencesRequired_YN\":\"N\",\n" + "\"DateTime_Referenced_Incidencies_YYYYMMDD\":\"20180823\"\n" + "}"
+            "{\n\"statistics\":\"\",\n\"cultureInfo\":\"\",\n\"Text_StopRequired_YN\":\"N\",\n\"Text_EstimationsRequired_YN\":\"Y\",\n\"Text_IncidencesRequired_YN\":\"N\",\n\"DateTime_Referenced_Incidencies_YYYYMMDD\":\"20180823\"\n}"
         return this.header(
             "accessToken", token
         ).post(

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LineItem (
     val id: Int = 0,
-    var provider: Int = 0,
+    val provider: Int = 0,
 
     val name: String = "DefaultLine",
     val emblem: String = "DL",

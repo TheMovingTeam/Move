@@ -9,7 +9,7 @@ import kotlinx.serialization.Transient
 data class StopItem(
     val id: Int = 0,
     val comId: Int? = null, // In case a provider uses a different ID internally
-    var provider: Int = 0,
+    val provider: Int = 0,
 
     val name: String = "DefaultStop",
 

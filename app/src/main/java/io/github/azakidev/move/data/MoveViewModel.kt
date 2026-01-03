@@ -22,6 +22,7 @@ import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
 import io.github.azakidev.move.data.items.toKey
+import io.github.azakidev.move.utils.fetchRemoteProviders
 import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 import java.net.URL
 import java.util.Timer
 import java.util.concurrent.LinkedBlockingDeque
@@ -53,7 +57,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         )
 
     val providers: StateFlow<List<ProviderItem>>
-        field =  MutableStateFlow(emptyList())
+        field = MutableStateFlow(emptyList())
 
     val lines: StateFlow<List<LineItem>>
         field = MutableStateFlow(emptyList())
@@ -203,50 +207,12 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             try {
-                Log.i(LogTags.MoveModel.name, "Fetching providers at ${providerRepo.value}")
+                Log.i(LogTags.MoveModel.name, "Fetching providers at $currentRepoUrl")
 
-                // 1. Fetch provider list (names) from remote
-                val providerListJson = URL("${currentRepoUrl}/providers.json").readText()
-                val providerNameResponse =
-                    Json.decodeFromString<ProviderListResponse>(providerListJson)
-
-                // 2. Get currently cached providers' metadata (ID and lastUpdated)
-                val cachedProviders = _providerDao.getAllProviders().first() // Get current snapshot
-
-                val freshProvidersFromRemote = mutableListOf<ProviderItem>()
-
-                // 3. Compare and decide which providers need full metadata fetching
-
-                var providerCount = 0
-                providerNameResponse.providers.forEach { providerName ->
-                    try {
-                        val providerMetadataJson =
-                            URL("${currentRepoUrl}/${providerName}/metadata.json").readText()
-
-                        val remoteProviderItem =
-                            Json.decodeFromString<ProviderItem>(
-                                providerMetadataJson
-                            ).copy(id = providerCount)
-                        providerCount++
-
-                        val cachedProvider = cachedProviders.find { it.id == remoteProviderItem.id }
-
-                        if (cachedProvider == null || remoteProviderItem.lastUpdated > cachedProvider.lastUpdated) {
-                            // Needs fetching/updating or is new
-                            freshProvidersFromRemote.add(remoteProviderItem)
-                        } else {
-                            // Cached version is up-to-date, add it to our list for UI (if not already there)
-                            // This step ensures that even if not fetched, saved providers are loaded from DB
-                            // _providers StateFlow should be updated with a mix of fresh and valid cached data.
-                        }
-                    } catch (e: Exception) {
-                        Log.e(
-                            LogTags.Networking.name,
-                            "Error fetching metadata for $providerName: ${e.localizedMessage}",
-                            e
-                        )
-                    }
-                }
+                val freshProvidersFromRemote = fetchRemoteProviders(
+                    currentRepoUrl,
+                    _providerDao.getAllProviders().first().map { it.toProviderItem() }
+                )
 
                 if (freshProvidersFromRemote.isNotEmpty()) {
                     _providerDao.insertProviders(freshProvidersFromRemote.map { it.toProviderEntity() })
@@ -296,6 +262,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
+        val client = OkHttpClient()
+
         providerIds.forEach { id ->
             val provider = providers.value.find { it.id == id }
             if (provider == null) {
@@ -306,9 +274,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 return@forEach
             }
 
-            // Get the cached provider entity to check its lastUpdated timestamp
-            // This is useful if fetchProviders decided not to re-fetch this provider's metadata
             viewModelScope.launch(Dispatchers.IO) {
+                // Get the cached provider entity to check its lastUpdated timestamp
+                // This is useful if fetchProviders decided not to re-fetch this provider's metadata
                 val cachedProviderEntity = _providerDao.getProviderById(id)
 
                 // Fetch if:
@@ -322,8 +290,16 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchLinesForProvider(provider, providerRepo.value)
-                    fetchStopsForProvider(provider, providerRepo.value)
+                    fetchLinesForProvider(
+                        client,
+                        provider,
+                        providerRepo.value
+                    )
+                    fetchStopsForProvider(
+                        client,
+                        provider,
+                        providerRepo.value
+                    )
                 } else if (_stopDao.getStopsForProvider(provider.id)
                         .first()
                         .isEmpty()
@@ -332,8 +308,16 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         LogTags.MoveModel.name,
                         "Fetching lines/stops for provider ${provider.name} from remote."
                     )
-                    fetchLinesForProvider(provider, providerRepo.value)
-                    fetchStopsForProvider(provider, providerRepo.value)
+                    fetchLinesForProvider(
+                        client,
+                        provider,
+                        providerRepo.value
+                    )
+                    fetchStopsForProvider(
+                        client,
+                        provider,
+                        providerRepo.value
+                    )
                 } else {
                     Log.d(
                         LogTags.MoveModel.name,
@@ -345,46 +329,48 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun fetchLinesForProvider(
+        client: OkHttpClient,
         provider: ProviderItem,
-        repoUrl: String
+        currentRepoUrl: String
     ) {
-        try {
-            val linesJson = URL("$repoUrl/${provider.name}/lines.json").readText()
-            val response = Json.decodeFromString<LineResponse>(linesJson)
-            val fetchedLineItems = response.lines.map { it.apply { this.provider = provider.id } }
+        val linesRequest =
+            Request.Builder()
+                .get()
+                .url("${currentRepoUrl}/${provider.name}/lines.json")
+                .build()
 
-            val lineEntities = fetchedLineItems.map { it.toLineEntity() }
+        client.newCall(linesRequest).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+            val response = Json.decodeFromString<LineResponse>(response.body!!.string())
+
+            val fetchedLines = response.lines.map { it.copy(provider = provider.id).toLineEntity() }
+
             _lineDao.deleteLinesForProvider(provider.id)
-            _lineDao.insertLines(lineEntities)
-            // The Flow from lineDao will automatically update _lines.value
-        } catch (e: Exception) {
-            Log.e(
-                LogTags.MoveModel.name,
-                "Error fetching lines for ${provider.name}: ${e.localizedMessage}",
-                e
-            )
+            _lineDao.insertLines(fetchedLines)
         }
     }
 
     private suspend fun fetchStopsForProvider(
+        client: OkHttpClient,
         provider: ProviderItem,
-        repoUrl: String
+        currentRepoUrl: String
     ) {
-        try {
-            val stopsJson = URL("$repoUrl/${provider.name}/stops.json").readText()
-            val response = Json.decodeFromString<StopResponse>(stopsJson)
-            val fetchedStopItems = response.stops.map { it.apply { this.provider = provider.id } }
+        val stopsRequest =
+            Request.Builder()
+                .get()
+                .url("${currentRepoUrl}/${provider.name}/stops.json")
+                .build()
 
-            val stopEntities = fetchedStopItems.map { it.toStopEntity() }
+        client.newCall(stopsRequest).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+            val response = Json.decodeFromString<StopResponse>(response.body!!.string())
+
+            val fetchedStops = response.stops.map { it.copy(provider = provider.id).toStopEntity() }
+
             _stopDao.deleteStopsForProvider(provider.id)
-            _stopDao.insertStops(stopEntities)
-            // The Flow from stopDao will automatically update _stops.value
-        } catch (e: Exception) {
-            Log.e(
-                LogTags.MoveModel.name,
-                "Error fetching stops for ${provider.name}: ${e.localizedMessage}",
-                e
-            )
+            _stopDao.insertStops(fetchedStops)
         }
     }
 
