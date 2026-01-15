@@ -115,7 +115,7 @@ fun Onboarding(model: MoveViewModel) {
                                 .show()
                         }
                     },
-                    onboardingIsComplete = model.onboardingStatus.collectAsState().value,
+                    isOnboardingComplete = model.onboardingStatus.collectAsState().value,
                     onAppReset = {},
                     onOnboardingReset = {},
                     onChangeLogShow = {}

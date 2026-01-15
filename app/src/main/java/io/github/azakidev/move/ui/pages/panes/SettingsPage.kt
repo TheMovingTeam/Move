@@ -91,7 +91,7 @@ fun SettingsPage(
     providerRepo: StateFlow<String>,
     backStack: NavBackStack<NavKey>,
     onProviderReset: (String) -> Unit,
-    onboardingIsComplete: Boolean,
+    isOnboardingComplete: Boolean,
     onAppReset: () -> Unit,
     onOnboardingReset: () -> Unit,
     onChangeLogShow: () -> Unit,
@@ -174,7 +174,8 @@ fun SettingsPage(
             }
             item {
                 AboutSection(
-                    onChangeLogShow = onChangeLogShow
+                    onChangeLogShow = onChangeLogShow,
+                    isOnboardingComplete = isOnboardingComplete
                 )
             }
             item {
@@ -185,10 +186,10 @@ fun SettingsPage(
                     onBack = {
                         backStack.add(Providers)
                     },
-                    onboardingIsComplete
+                    isOnboardingComplete
                 )
             }
-            if (onboardingIsComplete) {
+            if (isOnboardingComplete) {
                 item {
                     ResetSection(
                         onAppReset = onAppReset,
@@ -216,7 +217,7 @@ fun SettingsPagePreview() {
         providerRepo = providerRepo,
         backStack = backStack,
         onProviderReset = {},
-        onboardingIsComplete = true,
+        isOnboardingComplete = true,
         onAppReset = {},
         onOnboardingReset = {},
         onChangeLogShow = {}
@@ -274,7 +275,8 @@ data class AboutElement(
 @Composable
 fun AboutSection(
     modifier: Modifier = Modifier,
-    onChangeLogShow: () -> Unit
+    onChangeLogShow: () -> Unit,
+    isOnboardingComplete: Boolean,
 ) {
     val elements = listOf(
         AboutElement(
@@ -294,6 +296,8 @@ fun AboutSection(
         ),
     )
 
+    val totalButtons = if (isOnboardingComplete) elements.count() + 1 else elements.count()
+
     val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
@@ -306,7 +310,7 @@ fun AboutSection(
         )
         elements.forEach {
             RowButton(
-                shape = listShape(elements.indexOf(it), elements.count() + 1, 24.dp, 4.dp),
+                shape = listShape(elements.indexOf(it), totalButtons),
                 icon = it.icon,
                 description = stringResource(it.description),
                 onClick = {
@@ -314,12 +318,14 @@ fun AboutSection(
                 }
             )
         }
-        RowButton(
-            shape = listShape(elements.count(), elements.count() + 1, 24.dp, 4.dp),
-            icon = Icons.Rounded.NewReleases,
-            description = stringResource(R.string.showChangeLog),
-            onClick = onChangeLogShow
-        )
+        if (isOnboardingComplete) {
+            RowButton(
+                shape = listShape(elements.count(), totalButtons),
+                icon = Icons.Rounded.NewReleases,
+                description = stringResource(R.string.showChangeLog),
+                onClick = onChangeLogShow
+            )
+        }
     }
 }
 
@@ -368,7 +374,7 @@ fun ProviderSection(
     providerRepo: StateFlow<String>,
     onClick: (String) -> Unit,
     onBack: () -> Unit,
-    onboardingIsComplete: Boolean
+    isOnboardingComplete: Boolean
 ) {
 
     val trailingIcon = trailingButton(
@@ -379,6 +385,8 @@ fun ProviderSection(
             onClick(state.text.toString())
         }
     )
+
+    val totalElements = if (isOnboardingComplete) 2 else 1
 
     Text(
         modifier = Modifier.padding(horizontal = PADDING.dp, vertical = PADDING.div(2).dp),
@@ -391,7 +399,7 @@ fun ProviderSection(
         Column(
             modifier = Modifier
                 .padding(horizontal = PADDING.div(2).dp)
-                .clip(shape = listShape(0, 2, 24.dp, 4.dp))
+                .clip(shape = listShape(0, totalElements, 24.dp, 4.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Row(
@@ -436,12 +444,12 @@ fun ProviderSection(
                 trailingIcon = trailingIcon
             )
         }
-        if (onboardingIsComplete) {
+        if (isOnboardingComplete) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = PADDING.div(2).dp)
-                    .clip(shape = listShape(1, 2, 24.dp, 4.dp))
+                    .clip(shape = listShape(1, totalElements, 24.dp, 4.dp))
                     .clickable(
                         onClick = onBack
                     )

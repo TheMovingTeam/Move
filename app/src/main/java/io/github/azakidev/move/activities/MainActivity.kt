@@ -206,7 +206,7 @@ class MainActivity : ComponentActivity() {
                                                             .show()
                                                     }
                                                 },
-                                                onboardingIsComplete = model.onboardingStatus.collectAsState().value,
+                                                isOnboardingComplete = model.onboardingStatus.collectAsState().value,
                                                 onAppReset = {
                                                     model.flushInfo()
                                                     model.saveOnboarding(false)
