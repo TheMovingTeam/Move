@@ -58,6 +58,9 @@ fun AppNavigator(
 
     val visibleDestinations =
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+            if (currentDestination.value == AppDestinations.LINES) {
+                currentDestination.value = AppDestinations.HOME
+            }
             presentDestinations.filterNot { it == AppDestinations.LINES }
         } else {
             presentDestinations

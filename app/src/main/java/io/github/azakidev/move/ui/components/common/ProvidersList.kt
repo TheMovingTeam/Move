@@ -10,8 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +61,7 @@ import io.github.azakidev.move.ui.listShape
 @Composable
 fun ProvidersList(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     providerRepo: String,
     providers: List<ProviderItem>,
     savedProviders: List<Int>,
@@ -93,9 +96,11 @@ fun ProvidersList(
                         if (scrollBehavior != null) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
                     LazyColumn(
                         modifier = modifier
+                            .consumeWindowInsets(paddingValues)
                             .padding(bottom = PADDING.div(2).dp)
                             .padding(horizontal = PADDING.div(2).dp),
-                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
+                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp),
+                        contentPadding = paddingValues
                     ) {
                         items(visibleProviders.count()) { i ->
                             val provider = visibleProviders.sortedBy { it.name }[i]
@@ -113,14 +118,6 @@ fun ProvidersList(
                                 savedProviders = savedProviders,
                                 providerRepo = providerRepo,
                                 onClick = { onFavoriteClick(provider.id) }
-                            )
-                        }
-
-                        item {
-                            Spacer(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(PADDING.dp)
                             )
                         }
                     }

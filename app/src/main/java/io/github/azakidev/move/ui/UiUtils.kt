@@ -1,13 +1,18 @@
 package io.github.azakidev.move.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastJoinToString
@@ -118,6 +123,21 @@ fun String.fmtSearch(): String {
         .toList()
         .filterNot { listOf('-', ' ', '(', ')', '.').contains(it) }
         .joinToString("")
+}
+
+@Composable
+fun PaddingValues.copy(
+    top: Dp = this.calculateTopPadding(),
+    start: Dp = this.calculateStartPadding(LocalLayoutDirection.current),
+    end: Dp = this.calculateEndPadding(LocalLayoutDirection.current),
+    bottom: Dp = this.calculateBottomPadding(),
+): PaddingValues {
+    return PaddingValues(
+        top = top,
+        start = start,
+        end = end,
+        bottom = bottom
+    )
 }
 
 enum class AppDestinations(

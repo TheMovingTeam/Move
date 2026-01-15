@@ -86,30 +86,20 @@ fun ProvidersPage(
                 }
             )
         }) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                    bottom = 0.dp
-                ),
-        ) {
-            ProvidersList(
-                providerRepo = model.providerRepo.collectAsState().value,
-                providers = model.providers.collectAsState().value,
-                savedProviders = model.savedProviders.collectAsState().value,
-                onFavoriteClick = {
-                    if (it !in model.savedProviders.value) {
-                        model.addSavedProvider(it)
-                    } else {
-                        model.removeSavedProvider(it)
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        }
+        ProvidersList(
+            paddingValues = paddingValues,
+            providerRepo = model.providerRepo.collectAsState().value,
+            providers = model.providers.collectAsState().value,
+            savedProviders = model.savedProviders.collectAsState().value,
+            onFavoriteClick = {
+                if (it !in model.savedProviders.value) {
+                    model.addSavedProvider(it)
+                } else {
+                    model.removeSavedProvider(it)
+                }
+            },
+            scrollBehavior = scrollBehavior
+        )
     }
 }
 

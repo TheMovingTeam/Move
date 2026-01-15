@@ -3,6 +3,7 @@ package io.github.azakidev.move.ui.pages.views
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -21,6 +22,7 @@ import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.qr.QrFAB
+import io.github.azakidev.move.ui.copy
 import io.github.azakidev.move.ui.pages.panes.HomePage
 import io.github.azakidev.move.ui.pages.panes.HomePagePreview
 import io.github.azakidev.move.ui.pages.panes.LinesPage
@@ -45,23 +47,21 @@ fun LargeScreenHome(
     ) { paddingValues ->
         Row(
             modifier = Modifier.padding(
-                top = 0.dp,
-                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                bottom = 0.dp
+                paddingValues.copy(
+                    top = 0.dp,
+                    bottom = 0.dp
+                )
             )
         ) {
             HomePage(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = PADDING.div(2).dp),
+                    .weight(1f),
                 fabShouldAppear = false,
                 model = model, sheetModel = sheetModel, backStack = backStack
             )
             LinesPage(
                 modifier = Modifier
                     .weight(1f),
-                appBarCanScroll = false,
                 model = model, sheetModel = sheetModel
             )
         }

@@ -5,8 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,6 +58,7 @@ import io.github.azakidev.move.ui.components.hero.FavStopCarousel
 import io.github.azakidev.move.ui.components.hero.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.qr.QrFAB
 import io.github.azakidev.move.ui.components.common.StopRow
+import io.github.azakidev.move.ui.copy
 import io.github.azakidev.move.ui.listShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -151,15 +154,11 @@ fun HomePageView(
             }
         },
         content = { paddingValues ->
-            Box(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        top = paddingValues.calculateTopPadding(),
-                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                        bottom = 0.dp
-                    )
+                    .consumeWindowInsets(paddingValues)
+                    .padding(top = paddingValues.calculateTopPadding())
                     .clip(
                         shape = RoundedCornerShape(
                             30.dp,
@@ -169,70 +168,70 @@ fun HomePageView(
                         )
                     )
                     .background(MaterialTheme.colorScheme.surfaceContainer),
+                verticalArrangement = Arrangement.spacedBy(PADDING.dp),
+                contentPadding = PaddingValues(
+                    top = PADDING.dp,
+                    start = PADDING.dp,
+                    end = PADDING.dp,
+                    bottom = PADDING.div(4).dp
+                )
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(top = PADDING.dp)
-                        .padding(horizontal = PADDING.dp),
-                    verticalArrangement = Arrangement.spacedBy(PADDING.dp)
-                ) {
-                    item {
-                        Text(
-                            modifier = sectionTitleModifier,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.secondary,
-                            text = stringResource(id = R.string.favouriteStops),
-                        )
-                    }
-                    item {
-                        favStopCarrousel()
-                    }
-                    item {
-                        Text(
-                            modifier = sectionTitleModifier,
-                            text = stringResource(id = R.string.recentStops),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
-                    item {
-                        AnimatedContent(lastStops.count()) { count ->
-                            when (count) {
-                                0 -> {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(HERO_HEIGHT.dp)
-                                            .fillMaxWidth()
-                                            .clip(MaterialTheme.shapes.extraLarge)
-                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.noRecentStops),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
+                item {
+                    Text(
+                        modifier = sectionTitleModifier,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary,
+                        text = stringResource(id = R.string.favouriteStops),
+                    )
+                }
+                item {
+                    favStopCarrousel()
+                }
+                item {
+                    Text(
+                        modifier = sectionTitleModifier,
+                        text = stringResource(id = R.string.recentStops),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+                item {
+                    AnimatedContent(lastStops.count()) { count ->
+                        when (count) {
+                            0 -> {
+                                Box(
+                                    modifier = Modifier
+                                        .height(HERO_HEIGHT.dp)
+                                        .fillMaxWidth()
+                                        .clip(MaterialTheme.shapes.extraLarge)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.noRecentStops),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                 }
+                            }
 
-                                else -> {
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
-                                    ) {
-                                        lastStops.forEach { stopItem ->
-                                            val shape = listShape(
-                                                lastStops.indexOf(stopItem),
-                                                lastStops.count()
-                                            )
-                                            StopRow(
-                                                shape = shape,
-                                                stopItem = stopItem,
-                                                lines = lines,
-                                                onClick = { onRecentOpen(stopItem) }
-                                            )
-                                        }
+                            else -> {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
+                                ) {
+                                    lastStops.forEach { stopItem ->
+                                        val shape = listShape(
+                                            lastStops.indexOf(stopItem),
+                                            lastStops.count()
+                                        )
+                                        StopRow(
+                                            shape = shape,
+                                            stopItem = stopItem,
+                                            lines = lines,
+                                            onClick = { onRecentOpen(stopItem) }
+                                        )
                                     }
                                 }
                             }

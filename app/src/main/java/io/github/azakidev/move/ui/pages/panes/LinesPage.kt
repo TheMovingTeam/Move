@@ -3,9 +3,9 @@ package io.github.azakidev.move.ui.pages.panes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -21,6 +21,7 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,7 +53,6 @@ fun LinesPage(
     modifier: Modifier = Modifier,
     model: MoveViewModel,
     sheetModel: SheetStopViewModel,
-    appBarCanScroll: Boolean = true,
 ) {
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
@@ -65,11 +64,7 @@ fun LinesPage(
         )
     }
 
-    val scrollBehavior = if (appBarCanScroll) {
-        SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
-    } else {
-        null
-    }
+    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
 
     Scaffold(
         modifier = modifier,
@@ -95,21 +90,12 @@ fun LinesPage(
             }
         },
     ) { paddingValues ->
-        val modifier = if (scrollBehavior != null) {
-            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-        } else {
-            Modifier
-        }
         if (model.lines.collectAsState().value.count() != 0) {
             LineList(
-                modifier = modifier
-                    .padding(
-                        top = paddingValues.calculateTopPadding(),
-                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                        bottom = 0.dp
-                    )
+                modifier = Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .background(MaterialTheme.colorScheme.background),
+                paddingValues = paddingValues,
                 lineItems = model.lines.collectAsState().value,
                 stopItems = model.stops.collectAsState().value,
                 onClick = { stopItem ->
@@ -130,14 +116,17 @@ fun LinesPage(
 @Composable
 fun LineList(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     lineItems: List<LineItem>,
     stopItems: List<StopItem>,
     onClick: (StopItem) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
+            .consumeWindowInsets(paddingValues)
             .fillMaxHeight()
             .padding(horizontal = PADDING.times(0.75).dp),
+        contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp),
     ) {
         items(lineItems.count()) {
@@ -223,7 +212,7 @@ fun LinesPagePreview(
         },
     ) { paddingValues ->
         LineList(
-            modifier = Modifier.padding(paddingValues),
+            paddingValues = paddingValues,
             lineItems = lineItems,
             stopItems = emptyList(),
             onClick = {}
