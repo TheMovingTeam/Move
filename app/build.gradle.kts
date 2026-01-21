@@ -1,8 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.ksp)
@@ -51,12 +50,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-            freeCompilerArgs.add("-Xexplicit-backing-fields")
-            freeCompilerArgs.add("-XXLanguage:+ExplicitBackingFields")
-        }
+}
+
+kotlin {
+    compilerOptions {
+        languageVersion = KotlinVersion.KOTLIN_2_3
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+        freeCompilerArgs.add("-XXLanguage:+ExplicitBackingFields")
     }
 }
 

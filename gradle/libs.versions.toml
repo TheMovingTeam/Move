@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "9.0.0"
 xmlutil = "0.91.3"
 kotlin = "2.3.0"
 ksp = "2.3.4"
@@ -11,7 +11,7 @@ navigation3 = "1.0.0"
 materialIcons = "1.7.8"
 lifecycleViewmodelCompose = "2.10.0"
 animation = "1.10.1"
-kotlinxSerializationJson = "1.9.0"
+kotlinxSerializationJson = "1.10.0"
 coreSplashscreen = "1.2.0"
 coil = "3.3.0"
 datastore = "1.2.0"
@@ -98,7 +98,6 @@ androidx-glance-preview = { group = "androidx.glance", name = "glance-preview", 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
