@@ -38,7 +38,8 @@ fun AllStops(
                     },
                     "properties": {
                         "stopId": ${it.id},
-                        "providerId": ${it.provider}
+                        "providerId": ${it.provider},
+                        "stopName": "${it.name}"
                     }
                 }
             """.trimIndent()

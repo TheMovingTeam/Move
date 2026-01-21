@@ -25,7 +25,8 @@ data class LineEntity(
     val emblem: String,
     val color: String?,
 
-    val stops: List<Int>
+    val stops: List<Int>,
+    val path: String?
     )
 
 // Helper to convert to and from LineItem
@@ -36,7 +37,8 @@ fun LineEntity.toLineItem(): LineItem {
         emblem = this.emblem,
         color = this.color,
         provider = this.providerId,
-        stops = this.stops
+        stops = this.stops,
+        path = this.path
     )
 }
 
@@ -47,6 +49,7 @@ fun LineItem.toLineEntity(): LineEntity {
         emblem = this.emblem,
         color = this.color,
         providerId = this.provider,
-        stops = this.stops
+        stops = this.stops,
+        path = this.path
     )
 }

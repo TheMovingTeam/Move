@@ -40,6 +40,15 @@ internal data object Providers : NavKey
 @Serializable
 internal data object QrScanner : NavKey
 
+enum class AppDestinations(
+    @param:StringRes val label: Int,
+    val icon: ImageVector,
+    @param:StringRes val contentDescription: Int
+) {
+    HOME(R.string.home, Icons.Rounded.Home, R.string.home),
+    LINES(R.string.lines, Icons.AutoMirrored.Rounded.ArrowForward, R.string.lines),
+    MAP(R.string.map, Icons.Rounded.LocationOn, R.string.map)
+}
 
 fun listShape(
     count: Int,
@@ -138,14 +147,4 @@ fun PaddingValues.copy(
         end = end,
         bottom = bottom
     )
-}
-
-enum class AppDestinations(
-    @param:StringRes val label: Int,
-    val icon: ImageVector,
-    @param:StringRes val contentDescription: Int
-) {
-    HOME(R.string.home, Icons.Rounded.Home, R.string.home),
-    LINES(R.string.lines, Icons.AutoMirrored.Rounded.ArrowForward, R.string.lines),
-    MAP(R.string.map, Icons.Rounded.LocationOn, R.string.map)
 }
