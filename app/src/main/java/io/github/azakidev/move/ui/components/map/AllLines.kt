@@ -19,9 +19,9 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.MaplibreComposable
 import kotlin.collections.forEach
+import kotlin.math.abs
 import kotlin.math.pow
 
-const val GEN_PATH = true
 const val INTERPOLATED_SEGMENTS = 7
 
 @Composable
@@ -84,14 +84,86 @@ fun AllLines(
 fun generatePath(
     stops: List<StopItem>
 ): String? {
-
-    if (!GEN_PATH) return null
+    // TODO: Remove when good
+    if (!BuildConfig.DEBUG) return null
     if (stops.isEmpty()) return null
 
-    val sortedStopLines = mutableListOf<StopItem>()
-    val unvisitedStops = stops.toMutableSet()
+    val sortedStopLines = stops.sortByDistance()
 
-    var currentStop = stops.first()
+    if (sortedStopLines.size < 2) return null // Need at least two points for a line
+
+    val pathCoordinates = mutableListOf<Pair<Double, Double>>()
+
+    // Generate Catmull-Rom spline points
+    for (i in 0 until sortedStopLines.size - 1) {
+        val p1 = sortedStopLines[i]
+        val p2 = sortedStopLines[i + 1]
+
+        val p0 = if (i == 0) p1 else sortedStopLines[i - 1]
+        val p3 = if (i == sortedStopLines.size - 2) p2 else sortedStopLines[i + 2]
+
+        // Add the start point of the segment
+        pathCoordinates.add(Pair(p1.geoY!!, p1.geoX!!))
+
+        var shouldInterpolate = true
+
+        // Check for collinearity if there's a preceding point distinct from p1
+        if (i > 0) {
+            val x0 = p0.geoX!!
+            val y0 = p0.geoY!!
+            val x1 = p1.geoX
+            val y1 = p1.geoY
+            val x2 = p2.geoX!!
+            val y2 = p2.geoY!!
+
+            // Check for collinearity using cross product (p1-p0) x (p2-p1) == 0
+            val crossProduct = (y1 - y0) * (x2 - x1) - (x1 - x0) * (y2 - y1)
+
+            // Use a larger epsilon as a threshold
+            if (abs(crossProduct) < 1.75e-6) {
+                shouldInterpolate = false
+            }
+        }
+
+        if (shouldInterpolate) {
+            // Add interpolated points for the segment from p1 to p2 using Catmull-Rom
+            for (j in 1..INTERPOLATED_SEGMENTS) {
+                val t = j.toDouble() / (INTERPOLATED_SEGMENTS + 1).toDouble()
+                pathCoordinates.add(catmullRomPoint(p0, p1, p2, p3, t))
+            }
+        }
+    }
+
+    // Add the last original stop point (P2 of the very last segment)
+    if (sortedStopLines.isNotEmpty()) {
+        pathCoordinates.add(Pair(sortedStopLines.last().geoY!!, sortedStopLines.last().geoX!!))
+    }
+
+    var posArray = ""
+    pathCoordinates.forEachIndexed { index, coordinate ->
+        posArray += "[${coordinate.first}, ${coordinate.second}]"
+        if (index != pathCoordinates.lastIndex) {
+            posArray += ","
+        }
+    }
+
+    return """
+             {
+                "type": "Feature",
+                "geometry": {
+                   "type": "LineString",
+                   "coordinates": [
+                       $posArray
+                   ]
+                }
+            }""".trimIndent()
+}
+
+fun List<StopItem>.sortByDistance(): List<StopItem> {
+    val sortedStopLines = mutableListOf<StopItem>()
+    val unvisitedStops = this.toMutableSet()
+
+    var currentStop = this.first()
 
     sortedStopLines.add(currentStop)
     unvisitedStops.remove(currentStop)
@@ -124,51 +196,7 @@ fun generatePath(
         }
     }
 
-    if (sortedStopLines.size < 2) return null // Need at least two points for a line
-
-    val pathCoordinates = mutableListOf<Pair<Double, Double>>()
-
-    // Generate Catmull-Rom spline points
-    for (i in 0 until sortedStopLines.size - 1) {
-        val p1 = sortedStopLines[i]
-        val p2 = sortedStopLines[i + 1]
-
-        val p0 = if (i == 0) p1 else sortedStopLines[i - 1]
-        val p3 = if (i == sortedStopLines.size - 2) p2 else sortedStopLines[i + 2]
-
-        // Add the start point of the segment
-        pathCoordinates.add(Pair(p1.geoY!!, p1.geoX!!))
-
-        // Add interpolated points for the segment from p1 to p2
-        for (j in 1..INTERPOLATED_SEGMENTS) {
-            val t = j.toDouble() / (INTERPOLATED_SEGMENTS + 1).toDouble()
-            pathCoordinates.add(catmullRomPoint(p0, p1, p2, p3, t))
-        }
-    }
-
-    // Add the last original stop point (P2 of the very last segment)
-    if (sortedStopLines.isNotEmpty()) {
-        pathCoordinates.add(Pair(sortedStopLines.last().geoY!!, sortedStopLines.last().geoX!!))
-    }
-
-    var posArray = ""
-    pathCoordinates.forEachIndexed { index, coordinate ->
-        posArray += "[${coordinate.first}, ${coordinate.second}]"
-        if (index != pathCoordinates.lastIndex) {
-            posArray += ","
-        }
-    }
-
-    return """
-             {
-                "type": "Feature",
-                "geometry": {
-                   "type": "LineString",
-                   "coordinates": [
-                       $posArray
-                   ]
-                }
-            }""".trimIndent()
+    return sortedStopLines.toList()
 }
 
 // Helper function for Catmull-Rom interpolation
@@ -186,7 +214,7 @@ fun catmullRomPoint(p0: StopItem, p1: StopItem, p2: StopItem, p3: StopItem, t: D
             (2 * p1.geoY!!) +
                     (-p0.geoY!! + p2.geoY!!) * t +
                     (2 * p0.geoY - 5 * p1.geoY + 4 * p2.geoY - p3.geoY!!) * t2 +
-                    (-p0.geoY + 3 * p1.geoY - 3 * p2.geoY + p3.geoY!!) * t3
+                    (-p0.geoY + 3 * p1.geoY - 3 * p2.geoY + p3.geoY) * t3
             )
     return Pair(y, x) // geoJSON expects [longitude, latitude], which is [geoY, geoX]
 }
