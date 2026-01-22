@@ -339,15 +339,19 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 .url("${currentRepoUrl}/${provider.name}/lines.json")
                 .build()
 
-        client.newCall(linesRequest).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        try {
+            client.newCall(linesRequest).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-            val response = Json.decodeFromString<LineResponse>(response.body!!.string())
+                val response = Json.decodeFromString<LineResponse>(response.body!!.string())
 
-            val fetchedLines = response.lines.map { it.copy(provider = provider.id).toLineEntity() }
+                val fetchedLines = response.lines.map { it.copy(provider = provider.id).toLineEntity() }
 
-            _lineDao.deleteLinesForProvider(provider.id)
-            _lineDao.insertLines(fetchedLines)
+                _lineDao.deleteLinesForProvider(provider.id)
+                _lineDao.insertLines(fetchedLines)
+            }
+        } catch (e: IOException) {
+            Log.e(LogTags.Networking.name, e.message, e)
         }
     }
 
@@ -362,15 +366,19 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 .url("${currentRepoUrl}/${provider.name}/stops.json")
                 .build()
 
-        client.newCall(stopsRequest).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        try {
+            client.newCall(stopsRequest).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-            val response = Json.decodeFromString<StopResponse>(response.body!!.string())
+                val response = Json.decodeFromString<StopResponse>(response.body!!.string())
 
-            val fetchedStops = response.stops.map { it.copy(provider = provider.id).toStopEntity() }
+                val fetchedStops = response.stops.map { it.copy(provider = provider.id).toStopEntity() }
 
-            _stopDao.deleteStopsForProvider(provider.id)
-            _stopDao.insertStops(fetchedStops)
+                _stopDao.deleteStopsForProvider(provider.id)
+                _stopDao.insertStops(fetchedStops)
+            }
+        } catch (e: IOException) {
+            Log.e(LogTags.Networking.name, e.message, e)
         }
     }
 
