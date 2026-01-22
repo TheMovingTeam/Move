@@ -3,16 +3,14 @@ package io.github.azakidev.move.ui.pages.panes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +25,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringArrayResource
@@ -47,14 +44,14 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.toKey
-import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.MainView
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.Settings
-import io.github.azakidev.move.ui.components.hero.FavStopCarousel
-import io.github.azakidev.move.ui.components.hero.FavStopCarouselPreview
+import io.github.azakidev.move.ui.components.favStops.FavStopCarousel
+import io.github.azakidev.move.ui.components.favStops.FavStopCarouselPreview
 import io.github.azakidev.move.ui.components.qr.QrFAB
 import io.github.azakidev.move.ui.components.common.StopRow
+import io.github.azakidev.move.ui.components.common.EmptyCard
 import io.github.azakidev.move.ui.listShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -75,7 +72,7 @@ fun HomePage(
         }
         .reversed()
 
-    HomePageView(
+    HomePageContent(
         modifier = modifier,
         backStack = backStack,
         lastStops = lastStops,
@@ -92,7 +89,7 @@ fun HomePage(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomePageView(
+fun HomePageContent(
     modifier: Modifier = Modifier,
     backStack: NavBackStack<NavKey>,
     lastStops: List<StopItem>,
@@ -120,6 +117,10 @@ fun HomePageView(
                     Text(
                         text = greeting,
                         maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            MaterialTheme.typography.displaySmallEmphasized.fontSize.times(0.4),
+                            MaterialTheme.typography.displaySmallEmphasized.fontSize
+                        ),
                         overflow = TextOverflow.Ellipsis,
                         fontFamily = fredokaFontFamily,
                         style = MaterialTheme.typography.displaySmallEmphasized,
@@ -197,20 +198,7 @@ fun HomePageView(
                     AnimatedContent(lastStops.count()) { count ->
                         when (count) {
                             0 -> {
-                                Box(
-                                    modifier = Modifier
-                                        .height(HERO_HEIGHT.dp)
-                                        .fillMaxWidth()
-                                        .clip(MaterialTheme.shapes.extraLarge)
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.noRecentStops),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
+                                EmptyCard(stringResource(R.string.noRecentStops))
                             }
 
                             else -> {
@@ -265,7 +253,7 @@ fun HomePagePreview(
         LineItem(id = 2, emblem = "TST"),
         LineItem(id = 3, emblem = "LONG"),
     )
-    HomePageView(
+    HomePageContent(
         modifier = modifier,
         backStack = backStack,
         lastStops = lastStops,

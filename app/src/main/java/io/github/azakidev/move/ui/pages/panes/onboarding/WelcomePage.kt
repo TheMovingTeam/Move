@@ -58,7 +58,7 @@ import androidx.compose.ui.zIndex
 import androidx.window.core.layout.WindowSizeClass
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.PADDING
-import io.github.azakidev.move.ui.components.hero.LogoHero
+import io.github.azakidev.move.ui.components.common.LogoHero
 import java.util.Timer
 import kotlin.concurrent.schedule
 

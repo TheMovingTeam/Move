@@ -74,6 +74,7 @@ import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.map.AllLines
 import io.github.azakidev.move.ui.components.common.EmblemShape
+import io.github.azakidev.move.ui.components.common.EmptyCard
 import io.github.azakidev.move.ui.components.map.LocationIndicator
 import io.github.azakidev.move.ui.components.map.MapSurface
 import io.github.azakidev.move.ui.components.map.StopIndicator
@@ -377,16 +378,7 @@ fun StopTimes(
             }
 
             emptyList<LineTime>() -> {
-                Box(
-                    modifier = Modifier
-                        .height(150.dp)
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.noTimes))
-                }
+                EmptyCard(stringResource(R.string.noTimes))
             }
 
             else -> {
@@ -535,20 +527,7 @@ fun StopNotifications(
     ) { count ->
         when (count) {
             0 -> {
-                Box(
-                    modifier = Modifier
-                        .height(HERO_HEIGHT.dp)
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.noAlerts),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                EmptyCard(stringResource(R.string.noAlerts))
             }
 
             else -> {

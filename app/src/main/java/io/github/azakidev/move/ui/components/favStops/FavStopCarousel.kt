@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.components.hero
+package io.github.azakidev.move.ui.components.favStops
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -23,7 +23,6 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -52,6 +51,7 @@ import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.common.EmblemShape
+import io.github.azakidev.move.ui.components.common.EmptyCard
 import io.github.azakidev.move.ui.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +77,7 @@ fun FavStopCarousel(
     AnimatedContent(sortedFavStops.count()) { count ->
         when (count) {
             0 -> {
-                EmptyCarrousel()
+                EmptyCard(stringResource(R.string.noFavStops))
             }
 
             else -> {
@@ -229,25 +229,6 @@ fun HeroCarrouselItem(
                 }
             }
         }
-    }
-}
-
-@Composable
-@Preview
-fun EmptyCarrousel() {
-    Box(
-        modifier = Modifier
-            .height(HERO_HEIGHT.dp)
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.noFavStops),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 

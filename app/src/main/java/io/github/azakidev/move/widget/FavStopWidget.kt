@@ -198,30 +198,7 @@ class FavStopWidget : GlanceAppWidget() {
                         })
                 } else {
                     // Display a message if stop not found
-                    Box(
-                        modifier = GlanceModifier
-                            .fillMaxSize()
-                            .background(
-                                GlanceTheme.colors.background
-                            )
-                            .cornerRadius(CORNER_RADIUS.dp)
-                            .padding(PADDING.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (stopItem == null || isLoading.value) {
-                            Text(
-                                text = context.resources.getString(R.string.favStopWidgetLoading),
-                                style = TextStyle(color = GlanceTheme.colors.onBackground)
-                            )
-                        } else {
-                            Column {
-                                Text(
-                                    text = context.resources.getString(R.string.favStopWidgetError),
-                                    style = TextStyle(color = GlanceTheme.colors.onBackground)
-                                )
-                            }
-                        }
-                    }
+                    FavStopWidgetNeedsReconfigure(stopItem, isLoading.value)
                 }
             }
         }
@@ -613,6 +590,73 @@ fun FavStopWidgetPreview() {
                 lineTimes,
                 onRefresh = {}
             )
+        }
+    }
+}
+
+@Composable
+fun FavStopWidgetNeedsReconfigure(
+    stopItem: StopItem?,
+    isLoading: Boolean
+) {
+    val context = LocalContext.current
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(
+                GlanceTheme.colors.background
+            )
+            .cornerRadius(CORNER_RADIUS.dp)
+            .padding(PADDING.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (stopItem == null || isLoading) {
+            Column {
+                Text(
+                    text = context.resources.getString(R.string.favStopWidgetLoading),
+                    style = TextStyle(color = GlanceTheme.colors.onBackground)
+                )
+            }
+        } else {
+            Text(
+                text = context.resources.getString(R.string.favStopWidgetError),
+                style = TextStyle(
+                    color = GlanceTheme.colors.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            )
+        }
+    }
+}
+
+@Suppress("unused")
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Composable
+@Preview(widthDp = 400, heightDp = 200)
+@Preview(widthDp = 200, heightDp = 300)
+@Preview(widthDp = 200, heightDp = 200)
+fun FavStopWidgetNeedsReconfigurePreview() {
+    GlanceTheme {
+        Row (
+            modifier = GlanceModifier.background(Color.Black),
+        ) {
+            FavStopWidgetNeedsReconfigure(StopItem(), false)
+        }
+    }
+}
+
+@Suppress("unused")
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Composable
+@Preview(widthDp = 400, heightDp = 200)
+@Preview(widthDp = 200, heightDp = 300)
+@Preview(widthDp = 200, heightDp = 200)
+fun FavStopWidgetNeedsLoadingPreview() {
+    GlanceTheme {
+        Row (
+            modifier = GlanceModifier.background(Color.Black),
+        ) {
+            FavStopWidgetNeedsReconfigure(null, false)
         }
     }
 }

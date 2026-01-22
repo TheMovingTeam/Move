@@ -48,7 +48,7 @@ import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.listShape
-import io.github.azakidev.move.ui.components.hero.LogoHero
+import io.github.azakidev.move.ui.components.common.LogoHero
 import io.github.azakidev.move.ui.components.common.RowButton
 
 @Composable
