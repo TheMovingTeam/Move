@@ -51,7 +51,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     val providerRepo: StateFlow<String>
         field = MutableStateFlow(
-            if (BuildConfig.APPLICATION_ID.contains("debug")) // Initial fallback
+            if (BuildConfig.DEBUG) // Initial fallback
                 "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/testing"
             else "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
         )

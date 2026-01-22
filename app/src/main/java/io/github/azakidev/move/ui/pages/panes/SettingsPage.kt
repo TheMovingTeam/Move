@@ -418,7 +418,9 @@ fun ProviderSection(
                             replace(
                                 0,
                                 state.text.length,
-                                "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
+                                if (BuildConfig.DEBUG)
+                                    "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/testing"
+                                    else "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
                             )
                         }
                     }
