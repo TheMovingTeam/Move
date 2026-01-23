@@ -176,6 +176,7 @@ fun StopPage(
                         sheetModel = sheetModel,
                         lines = lines.fastFilter { it.stops.contains(sheetModel.sheetStop.id) },
                         stops = model.stops.collectAsState().value,
+                        providers = model.providers.collectAsState().value,
                         currentLocation = currentLocation
                     )
                 }
@@ -559,6 +560,7 @@ fun StopMap(
     sheetModel: SheetStopViewModel,
     lines: List<LineItem>,
     stops: List<StopItem>,
+    providers: List<ProviderItem>,
     currentLocation: AndroidLocationProvider?,
 ) {
     val stopItem = sheetModel.sheetStop
@@ -596,7 +598,8 @@ fun StopMap(
             ) {
                 AllLines(
                     lines = lines,
-                    stops = stops
+                    stops = stops,
+                    providers = providers
                 )
                 StopIndicator(
                     stopItem.geoX,

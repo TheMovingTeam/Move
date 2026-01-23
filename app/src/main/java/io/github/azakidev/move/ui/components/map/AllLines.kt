@@ -6,7 +6,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import io.github.azakidev.move.BuildConfig
+import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
+import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.exponential
@@ -28,7 +30,8 @@ const val INTERPOLATED_SEGMENTS = 7
 @MaplibreComposable
 fun AllLines(
     lines: List<LineItem>,
-    stops: List<StopItem>
+    stops: List<StopItem>,
+    providers: List<ProviderItem>
 ) {
     //TODO: Remove check when fully implemented
     if (!BuildConfig.DEBUG) return
@@ -40,8 +43,10 @@ fun AllLines(
             stops.find { it.id == stop && it.provider == line.provider }
         }
 
+        val provider = providers.find { it.id == line.provider }
+
         // Generate a path if none is present
-        val geoJson = line.path ?: generatePath(lineStops)
+        val geoJson = line.path ?: generatePath(lineStops, provider)
         if (geoJson == null) return@forEach
 
         val locationData = rememberGeoJsonSource(
@@ -79,14 +84,17 @@ fun AllLines(
 /**
  * Generate a rough geoJSON string path for a given [LineItem] for displaying in a map
  *
- * @param stops: The list of [StopItem] in that [LineItem]
+ * @param stops The list of [StopItem] in that [LineItem]
+ * @param provider The [ProviderItem] correspondent to the line being generated
  */
 fun generatePath(
-    stops: List<StopItem>
+    stops: List<StopItem>,
+    provider: ProviderItem?
 ): String? {
     // TODO: Remove when good
     if (!BuildConfig.DEBUG) return null
     if (stops.isEmpty()) return null
+    if (provider == null || !provider.capabilities.contains(Capabilities.GenPath)) return null
 
     val sortedStopLines = stops.sortByDistance()
 

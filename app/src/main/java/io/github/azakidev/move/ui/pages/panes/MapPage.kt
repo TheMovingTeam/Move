@@ -234,7 +234,8 @@ fun MapPage(
                         .filter { it.provider in geoProviders },
                     model.stops.collectAsState().value
                         .filter { it.provider in geoProviders }
-                        .filter { it.geoX != null && it.geoY != null }
+                        .filter { it.geoX != null && it.geoY != null },
+                    model.providers.collectAsState().value
                 )
                 AllStops(
                     stops = model.stops.collectAsState().value

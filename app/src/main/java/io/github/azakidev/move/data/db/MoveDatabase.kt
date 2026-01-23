@@ -16,7 +16,7 @@ import io.github.azakidev.move.data.db.entities.StopEntity
 
 @Database(
     entities = [ProviderEntity::class, LineEntity::class, StopEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -35,6 +35,13 @@ abstract class MoveDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE providers DROP COLUMN versionMajor")
+                db.execSQL("ALTER TABLE providers DROP COLUMN versionMinor")
+            }
+        }
+
         fun getDatabase(context: Context): MoveDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -42,6 +49,7 @@ abstract class MoveDatabase : RoomDatabase() {
                 )
                     // Add migrations if you change the schema later
                     .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance

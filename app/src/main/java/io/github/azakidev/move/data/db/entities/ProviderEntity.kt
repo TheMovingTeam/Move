@@ -10,8 +10,6 @@ data class ProviderEntity(
     @PrimaryKey val id: Int,
     val name: String,
     val description: String,
-    val versionMajor: Int,
-    val versionMinor: Int,
     val lastUpdated: Int, // Unix timestamp
     val capabilities: List<Capabilities>, // Or use a TypeConverter for List<Capabilities>
     val timeSource: String,
@@ -26,8 +24,6 @@ fun ProviderEntity.toProviderItem(): ProviderItem {
         id = this.id,
         name = this.name,
         description = this.description,
-        versionMajor = this.versionMajor,
-        versionMinor = this.versionMinor,
         lastUpdated = this.lastUpdated,
         capabilities = this.capabilities,
         timeSource = this.timeSource,
@@ -40,8 +36,6 @@ fun ProviderItem.toProviderEntity(): ProviderEntity {
         id = this.id,
         name = this.name,
         description = this.description,
-        versionMajor = this.versionMajor,
-        versionMinor = this.versionMinor,
         lastUpdated = this.lastUpdated,
         capabilities = this.capabilities,
         timeSource = this.timeSource,
