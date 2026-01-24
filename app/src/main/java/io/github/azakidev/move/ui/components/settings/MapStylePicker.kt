@@ -55,11 +55,6 @@ fun MapStylePicker(
                 animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
             )
 
-            val outlineWidth by animateDpAsState(
-                targetValue = if(style == currentMapStyle.value) 8.dp else if (style == savedMapStyle) 4.dp else 0.dp,
-                animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
-            )
-
             Column(
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.medium)

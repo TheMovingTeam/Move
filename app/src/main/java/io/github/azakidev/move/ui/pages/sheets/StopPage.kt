@@ -71,21 +71,13 @@ import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.toKey
-import io.github.azakidev.move.ui.HERO_HEIGHT
 import io.github.azakidev.move.ui.PADDING
-import io.github.azakidev.move.ui.components.map.AllLines
 import io.github.azakidev.move.ui.components.common.EmblemShape
 import io.github.azakidev.move.ui.components.common.EmptyCard
-import io.github.azakidev.move.ui.components.map.LocationIndicator
-import io.github.azakidev.move.ui.components.map.MapSurface
-import io.github.azakidev.move.ui.components.map.StopIndicator
 import io.github.azakidev.move.ui.components.map.StopMap
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
-import org.maplibre.compose.camera.CameraPosition
-import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.location.AndroidLocationProvider
-import org.maplibre.spatialk.geojson.Position
 
 @OptIn(
     ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class,
