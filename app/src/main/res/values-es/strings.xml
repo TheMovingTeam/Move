@@ -27,9 +27,11 @@
     <string name="resetDesc">Restaurar líneas, paradas y proveedores</string>
     <string name="resetOnboarding">Reiniciar presentación</string>
     <string name="qrScan">Escanear</string>
+    <string name="mapStylePickerTitle">Estílos del mapa</string>
     <string name="qrNotFound">URL no reconocída</string>
     <string name="noQrProviders">No se han encontrado proveedores que soporten códigos QR</string>
     <string name="noCameraPermission">No se ha otorgado permísos de cámara</string>
+    <string name="save">Guardar</string>
 
     <string name="times">Estimaciones</string>
     <string name="noTimes">No se han encontrado estimaciones</string>
@@ -98,6 +100,7 @@
             Puede que necesites borrar los datos de app manualmente si siguen mostrándose incorrectamente en la configuración.\n
             No causará cambios en la funcionalidad.
         </item>
+        <item>Añade un mapa para visualizar paradas y líneas</item>
         <item>Añade soporte para Llorente Bus</item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>

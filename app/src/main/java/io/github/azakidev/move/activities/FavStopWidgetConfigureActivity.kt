@@ -22,7 +22,7 @@ import io.github.azakidev.move.data.db.entities.toStopItem
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
-import io.github.azakidev.move.ui.pages.panes.SelectStopPage
+import io.github.azakidev.move.ui.pages.panes.widget.SelectStopPage
 import io.github.azakidev.move.ui.theme.MoveTheme
 import io.github.azakidev.move.widget.FavStopWidget
 import io.github.azakidev.move.widget.FavStopWidgetConfig

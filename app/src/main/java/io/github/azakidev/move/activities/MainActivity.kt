@@ -52,13 +52,15 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.ui.AppDestinations
 import io.github.azakidev.move.widget.FavStopWidgetReceiver
 import io.github.azakidev.move.ui.MainView
+import io.github.azakidev.move.ui.MapSettings
 import io.github.azakidev.move.ui.Providers
 import io.github.azakidev.move.ui.QrScanner
 import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.ui.pages.views.Onboarding
-import io.github.azakidev.move.ui.pages.panes.ProvidersPage
+import io.github.azakidev.move.ui.pages.panes.settings.ProvidersPage
 import io.github.azakidev.move.ui.pages.panes.QrPage
-import io.github.azakidev.move.ui.pages.panes.SettingsPage
+import io.github.azakidev.move.ui.pages.panes.settings.MapSelectPage
+import io.github.azakidev.move.ui.pages.panes.settings.SettingsPage
 import io.github.azakidev.move.ui.pages.views.AppNavigator
 import io.github.azakidev.move.ui.theme.MoveTheme
 import kotlinx.coroutines.Dispatchers
@@ -222,6 +224,14 @@ class MainActivity : ComponentActivity() {
                                         }
                                         entry<QrScanner> {
                                             QrPage(model, sheetModel, backStack)
+                                        }
+
+                                        entry<MapSettings> {
+                                            MapSelectPage(
+                                                model = model,
+                                                backStack = backStack,
+                                                currentLocation = currentLocation
+                                            )
                                         }
                                     },
                                 )

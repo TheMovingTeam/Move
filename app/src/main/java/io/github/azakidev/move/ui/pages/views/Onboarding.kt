@@ -20,7 +20,7 @@ import androidx.navigation3.ui.NavDisplay
 import io.github.azakidev.move.R
 import io.github.azakidev.move.ui.Settings
 import io.github.azakidev.move.data.MoveViewModel
-import io.github.azakidev.move.ui.pages.panes.SettingsPage
+import io.github.azakidev.move.ui.pages.panes.settings.SettingsPage
 import io.github.azakidev.move.ui.pages.panes.onboarding.FeaturePage
 import io.github.azakidev.move.ui.pages.panes.onboarding.ProviderPage
 import io.github.azakidev.move.ui.pages.panes.onboarding.WelcomePage

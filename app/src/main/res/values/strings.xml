@@ -5,6 +5,8 @@
     <string name="chooseProvider">Choose a least one provider</string>
     <string name="whatIsMove">What is Move?</string>
 
+
+    <!--    Navigation  -->
     <string name="home">Home</string>
     <string name="lines">Lines</string>
     <string name="map">Map</string>
@@ -18,11 +20,16 @@
     <string name="favouriteStops">Favourite stops</string>
     <string name="recentStops">Recent stops</string>
 
+    <string name="save">Save</string>
+
+    <!--    Missing text  -->
     <string name="noFavStops">No stops have been added to favourites</string>
     <string name="noRecentStops">No stops have been seen recently</string>
     <string name="noResults">No stops or lines found</string>
     <string name="noLines">No lines have been added</string>
 
+
+    <!--    Settings  -->
     <string name="bugReport">Report an issue</string>
     <string name="socialMedia">Follow Move</string>
 
@@ -34,10 +41,15 @@
     <string name="resetDesc">Reset lines, stops, and providers</string>
     <string name="resetOnboarding">Restart onboarding</string>
 
+    <string name="mapStylePickerTitle">Map styles</string>
+
+    <!--    QR  -->
     <string name="qrNotFound">URL not recognized</string>
     <string name="noQrProviders">No providers found with support for QR codes</string>
     <string name="noCameraPermission">The camera permission has not been granted</string>
 
+
+    <!--    Stop page  -->
     <string name="times">Estimations</string>
     <string name="noTimes">No estimations found</string>
     <string name="soon">Soon</string>
@@ -47,17 +59,20 @@
     <string name="noAlerts">There are no alerts for this stop</string>
     <string name="privacyPolicy">Privacy Policy</string>
 
+    <!--    Search  -->
     <string name="searchPlaceholder">Where to go…</string>
     <string name="stopNameFilter">Stop name</string>
     <string name="stopComIdFilter">Stop ID</string>
     <string name="lineNameFilter">Line name</string>
     <string name="lineEmblemFilter">Line emblem</string>
 
+    <!--    Changelog  -->
     <string name="showChangeLog">Show Changelog</string>
     <string name="changelogVersion">{app} has been updated to version {ver}!</string>
     <string name="changelogFlavor">Check out what\'s new</string>
     <string name="changelogHistory">Previous changelogs</string>
 
+    <!--    Widget  -->
     <string name="favStopWidgetAbout">Display information for one of your favourite stops</string>
 
     <string name="favStopWidgetSelectorTitle">Select a stop</string>
@@ -69,6 +84,7 @@
     <string name="nextUp">Next up</string>
     <string name="comingUp">Coming up</string>
 
+    <!--    Greetings   -->
     <string-array name="greetings">
         <item>Going somewhere?</item>
         <item>Let\'s go!</item>
@@ -89,12 +105,14 @@
         <item>You\'re good to go!</item>
         <item>And there\'s more!</item>
     </string-array>
+
     <string-array name="onboardingDescriptions">
         <item>Each transit service is called a provider, it holds all the information for that service.</item>
         <item>Adding a provider to favourites will automatically download all the information to your device.</item>
         <item>Once everything has been set up, you can search, save and check the estimations for every provider you have added in one place.</item>
         <item>If you like the app, please consider supporting the development with a donation after using it for a while. That way more features can be added to Move in the future.</item>
     </string-array>
+
     <string-array name="changelogItems">
         <item>
             [BREAKING] Fix interference in favourite or recent stops.\n
@@ -105,6 +123,7 @@
             You may need to delete all app data if it continues displaying incorrectly in the settings.\n
             Functionality should be maintained.
         </item>
+        <item>Add a map for visualizing stops and lines</item>
         <item>Add support for Llorente Bus</item>
         <item>UI fixes and improvements</item>
     </string-array>

@@ -66,6 +66,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
+import io.github.azakidev.move.data.items.MapStyle
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
@@ -78,6 +79,7 @@ import io.github.azakidev.move.ui.components.common.EmptyCard
 import io.github.azakidev.move.ui.components.map.LocationIndicator
 import io.github.azakidev.move.ui.components.map.MapSurface
 import io.github.azakidev.move.ui.components.map.StopIndicator
+import io.github.azakidev.move.ui.components.map.StopMap
 import io.github.azakidev.move.ui.fmt
 import io.github.azakidev.move.ui.listShape
 import org.maplibre.compose.camera.CameraPosition
@@ -172,11 +174,13 @@ fun StopPage(
                     )
                 }
                 if (provider.capabilities.contains(Capabilities.Geo)) {
+                    val style = MapStyle.entries.find { model.mapStyle.collectAsState().value == it.name } ?: MapStyle.Liberty
                     StopMap(
                         sheetModel = sheetModel,
                         lines = lines.fastFilter { it.stops.contains(sheetModel.sheetStop.id) },
                         stops = model.stops.collectAsState().value,
                         providers = model.providers.collectAsState().value,
+                        style = style,
                         currentLocation = currentLocation
                     )
                 }
@@ -549,65 +553,6 @@ fun StopNotifications(
                         count++
                     }
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun StopMap(
-    sheetModel: SheetStopViewModel,
-    lines: List<LineItem>,
-    stops: List<StopItem>,
-    providers: List<ProviderItem>,
-    currentLocation: AndroidLocationProvider?,
-) {
-    val stopItem = sheetModel.sheetStop
-
-    if (stopItem.geoX != null && stopItem.geoY != null) {
-        val camera =
-            rememberCameraState(
-                firstPosition =
-                    CameraPosition(
-                        target = Position(
-                            latitude = stopItem.geoX,
-                            longitude = stopItem.geoY
-                        ),
-                        zoom = 15.0
-                    )
-            )
-        Text(
-            modifier = Modifier.padding(top = PADDING.dp, bottom = PADDING.div(2).dp),
-            text = stringResource(id = R.string.map),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.secondary,
-        )
-        Box(
-            modifier = Modifier
-                .height(HERO_HEIGHT.dp)
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.large)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            contentAlignment = Alignment.Center
-        ) {
-            MapSurface(
-                cameraState = camera,
-                interactable = false
-            ) {
-                AllLines(
-                    lines = lines,
-                    stops = stops,
-                    providers = providers
-                )
-                StopIndicator(
-                    stopItem.geoX,
-                    stopItem.geoY
-                )
-                LocationIndicator(
-                    currentLocation = currentLocation
-                )
             }
         }
     }

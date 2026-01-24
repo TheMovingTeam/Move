@@ -30,15 +30,14 @@ const val HERO_HEIGHT = 208
 // App locations
 @Serializable
 internal data object MainView : NavKey
-
 @Serializable
 internal data object Settings : NavKey
-
 @Serializable
 internal data object Providers : NavKey
-
 @Serializable
 internal data object QrScanner : NavKey
+@Serializable
+internal data object MapSettings: NavKey
 
 enum class AppDestinations(
     @param:StringRes val label: Int,

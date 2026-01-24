@@ -1,4 +1,4 @@
-package io.github.azakidev.move.ui.pages.panes
+package io.github.azakidev.move.ui.pages.panes.widget
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

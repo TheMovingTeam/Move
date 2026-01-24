@@ -46,6 +46,7 @@ import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
+import io.github.azakidev.move.data.items.MapStyle
 import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.fmtSearch
 import io.github.azakidev.move.ui.components.map.AllLines
@@ -88,6 +89,8 @@ fun MapPage(
                 ?: Position(-0.490, 38.346), zoom = ZOOM
         )
     )
+
+    val style = MapStyle.entries.find { model.mapStyle.collectAsState().value == it.name } ?: MapStyle.Liberty
 
     LaunchedEffect(Unit) {
         if (currentLocation == null) {
@@ -228,6 +231,7 @@ fun MapPage(
             paddingValues = paddingValues,
             cameraState = camera,
             hasCompass = true,
+            style = style,
             content = {
                 AllLines(
                     model.lines.collectAsState().value

@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import io.github.azakidev.move.data.items.MapStyle
 import io.github.azakidev.move.data.items.StopKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,6 +26,7 @@ class UserStore(private val context: Context) {
         val SAVED_PROVIDERS_IDS = stringSetPreferencesKey("saved_providers_ids")
         val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         val LAST_OPENED_VERSION_CODE = intPreferencesKey("last_opened_version_code")
+        val MAP_STYLE = stringPreferencesKey("map_style")
     }
 
     // Default URL if nothing is saved yet
@@ -68,9 +70,6 @@ class UserStore(private val context: Context) {
             }
         }
 
-    /*
-        stopPairs is a list of pairs where the first digit is the stopId and the second is the providerId
-     */
     suspend fun saveFavouriteStops(stopKeys: List<StopKey>) {
         val stringSet = stopKeys.map { "${it.stopId},${it.providerId}" }.toSet()
         context.dataStore.edit { preferences ->
@@ -81,7 +80,7 @@ class UserStore(private val context: Context) {
     // Favourite Stops
     val lastStopsFlow: Flow<List<StopKey>> = context.dataStore.data
         .map { preferences ->
-            // Read as Set<String>, then convert to List<Int>
+            // Read as Set<String>, then convert to List<StopKey>
             // Provide an empty set as default if not found
             (preferences[PreferencesKeys.LAST_STOPS_IDS] ?: emptySet()).map { pair ->
                 val intPair = pair.split(",").mapNotNull{ digit -> digit.toIntOrNull() }
@@ -99,8 +98,6 @@ class UserStore(private val context: Context) {
     // Onboarding status
     val onboardingFlow: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            // Read as Set<String>, then convert to List<Int>
-            // Provide an empty set as default if not found
             (preferences[PreferencesKeys.HAS_COMPLETED_ONBOARDING] ?: false)
         }
 
@@ -119,6 +116,17 @@ class UserStore(private val context: Context) {
     suspend fun saveLastOpenedVersionCode(versionCode: Int) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_OPENED_VERSION_CODE] = versionCode
+        }
+    }
+
+    val mapStyle: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.MAP_STYLE] ?: "Liberty"
+        }
+
+    suspend fun saveMapStyle(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MAP_STYLE] = name
         }
     }
 }

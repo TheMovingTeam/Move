@@ -16,6 +16,7 @@ import io.github.azakidev.move.data.db.entities.toStopItem
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineResponse
+import io.github.azakidev.move.data.items.MapStyle
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.ProviderListResponse
 import io.github.azakidev.move.data.items.StopItem
@@ -103,6 +104,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         )
 
     private val _stopsToLoad: MutableList<StopKey> = mutableListOf()
+
+    val mapStyle: StateFlow<String> = _userStore.mapStyle
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "Liberty"
+        )
 
     init {
         // Collect provider repo value
@@ -593,5 +601,11 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         if (value == null) shouldShowChangelog.value = !shouldShowChangelog.value
         else shouldShowChangelog.value = value
+    }
+
+    fun saveMapStyle(mapStyle: MapStyle) {
+        viewModelScope.launch {
+            _userStore.saveMapStyle(mapStyle.name)
+        }
     }
 }
