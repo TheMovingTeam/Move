@@ -17,7 +17,6 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.MaplibreComposable
-import kotlin.collections.forEach
 
 @Composable
 @MaplibreComposable
@@ -26,30 +25,24 @@ fun AllStops(
     sheetModel: SheetStopViewModel
 ) {
     if (stops.isEmpty()) return
-    var geoJson = """{ "type": "FeatureCollection", "features": [ """
 
-    stops.forEach {
-        geoJson += """
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [${it.geoY}, ${it.geoX}]
-                    },
-                    "properties": {
-                        "stopId": ${it.id},
-                        "providerId": ${it.provider},
-                        "stopName": "${it.name}"
-                    }
+    val sections = stops.joinToString {
+        """
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [${it.geoY}, ${it.geoX}]
+                },
+                "properties": {
+                    "stopId": ${it.id},
+                    "providerId": ${it.provider}
                 }
-            """.trimIndent()
-
-        if (it != stops.last()) {
-            geoJson += ", \n"
-        }
+            }
+        """.trimIndent()
     }
 
-    geoJson = "${geoJson.removeSuffix(",")} ] }"
+    val geoJson = "{\"type\":\"FeatureCollection\",\"features\":[ ${sections.removeSuffix(",")} ] }"
 
     val locationData = rememberGeoJsonSource(
         GeoJsonData.JsonString(geoJson)

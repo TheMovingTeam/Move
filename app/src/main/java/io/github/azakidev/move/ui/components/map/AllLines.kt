@@ -1,5 +1,6 @@
 package io.github.azakidev.move.ui.components.map
 
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -10,6 +11,7 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
+import io.github.azakidev.move.utils.LogTags
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.interpolate
@@ -66,7 +68,6 @@ fun AllLines(
             color = const(color),
             cap = const(LineCap.Round),
             join = const(LineJoin.Round),
-            roundLimit = const(1.5f),
             width =
                 interpolate(
                     type = exponential(1.2f),
