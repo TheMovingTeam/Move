@@ -139,11 +139,7 @@ fun fetchStopTime(provider: ProviderItem, stopItem: StopItem, lines: List<LineIt
     val url = provider.timeSource.replace("@stop", stopItem.id.toString())
         .replace("@comId", stopItem.comId.toString())
 
-    val client =
-        OkHttpClient.Builder()
-            .trustSelfSignedCertsIfNeeded(provider)
-            .retryOnConnectionFailure(true)
-            .build()
+    val client = createOkHTTPClient(provider)
 
     try {
         val requestBuilt =
@@ -224,17 +220,19 @@ fun Request.Builder.formRequest(
     return this.get() // If none match, don't add any headers
 }
 
-fun OkHttpClient.Builder.trustSelfSignedCertsIfNeeded(provider: ProviderItem): OkHttpClient.Builder {
-
-    if (provider.name != "Tranvía de Murcia" || !provider.capabilities.contains(Capabilities.Unsafe)) {
-        return this
-    } else {
+fun createOkHTTPClient(provider: ProviderItem): OkHttpClient {
+    if (provider.capabilities.contains(Capabilities.Unsafe)) {
+        val builder = OkHttpClient.Builder()
         val trustManager = createInsecureTrustManager()
         val sslSocketFactory = createInsecureSslSocketFactory(trustManager)
 
-        val insecureClient = this.sslSocketFactory(sslSocketFactory, trustManager)
+        val insecureClient = builder.sslSocketFactory(sslSocketFactory, trustManager)
             .hostnameVerifier(createInsecureHostnameVerifier())
+            .build()
         return insecureClient
+
+    } else {
+        return OkHttpClient()
     }
 }
 
