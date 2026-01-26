@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.azakidev.move.data.db.entities.StopEntity
+import io.github.azakidev.move.data.items.StopKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,6 +21,9 @@ interface StopDao {
 
     @Query("SELECT * FROM stops WHERE id = :id")
     suspend fun getStopById(id: Int): StopEntity?
+
+    @Query("SELECT * FROM stops WHERE id = :id AND providerId = :provider")
+    suspend fun getStopByKey(id: Int, provider: Int): StopEntity?
 
     @Query("SELECT * FROM stops WHERE providerId IN (:providerIds)")
     fun getStopsForProviders(providerIds: List<Int>): Flow<List<StopEntity>>

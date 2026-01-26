@@ -137,7 +137,7 @@ class FavStopWidget : GlanceAppWidget() {
                     val stopEntity = MoveDatabase
                         .getDatabase(context)
                         .stopDao()
-                        .getStopById(stopId)
+                        .getStopByKey(stopId, providerId)
 
                     val lineEntities = MoveDatabase
                         .getDatabase(context)
