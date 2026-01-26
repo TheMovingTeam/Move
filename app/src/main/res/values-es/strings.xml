@@ -16,9 +16,12 @@
     <string name="noResults">No se ha encontrado ningún resultado</string>
     <string name="noLines">No se ha añadido ninguna línea</string>
     <string name="settings">Ajustes</string>
+
     <string name="about">Sobre la app</string>
     <string name="bugReport">Reportar un problema</string>
     <string name="socialMedia">Seguir a Move</string>
+    <string name="support">Apoya el desarrollo de Move</string>
+
     <string name="providerSource">Fuente de proveedores</string>
     <string name="providerInvalid">La URL no corresponde a ninguna fuente válida</string>
     <string name="providerTitle">Proveedores</string>

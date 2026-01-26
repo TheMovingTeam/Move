@@ -18,6 +18,16 @@ import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.util.MaplibreComposable
 
+/**
+ * A surface filling the max size available to its container displaying a map.
+ *
+ * @param modifier A [Modifier] for the map
+ * @param paddingValues The optional insets on the container, used to inset the ornaments of the map
+ * @param hasCompass Whether or not the map should display a compass component
+ * @param interactable Whether or not the map should have it's gestures enabled
+ * @param style The [MapStyle] of the map, falling back to Liberty
+ * @param content The contents displayed on the map, mainly used for lines or stops
+ */
 @Composable
 fun MapSurface(
     modifier: Modifier = Modifier,
@@ -34,7 +44,6 @@ fun MapSurface(
         is String -> BaseStyle.Uri(style.url)
         is Int -> {
             val json = LocalResources.current.openRawResource(style.url).bufferedReader().readText()
-            println("Input style: $json")
             BaseStyle.Json(json)
         }
         else -> throw IllegalArgumentException("Unsupported type")

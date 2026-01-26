@@ -32,6 +32,7 @@
     <!--    Settings  -->
     <string name="bugReport">Report an issue</string>
     <string name="socialMedia">Follow Move</string>
+    <string name="support">Support Move</string>
 
     <string name="providerSource">Provider source</string>
     <string name="providerInvalid">URL is not a valid source</string>

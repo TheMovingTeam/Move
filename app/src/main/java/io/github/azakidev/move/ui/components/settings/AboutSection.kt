@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AlternateEmail
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NewReleases
 import androidx.compose.material3.MaterialTheme
@@ -22,11 +23,32 @@ import io.github.azakidev.move.ui.PADDING
 import io.github.azakidev.move.ui.components.common.RowButton
 import io.github.azakidev.move.ui.listShape
 
-data class AboutElement(
+enum class AboutElement(
     val icon: ImageVector,
     @param:StringRes val description: Int,
     val link: String
-)
+) {
+    Bug(
+        icon = Icons.Rounded.BugReport,
+        description = R.string.bugReport,
+        link = "mailto:support@movetransit.app"
+    ),
+    Follow(
+        icon = Icons.Rounded.AlternateEmail,
+        description = R.string.socialMedia,
+        link = "https://twitter.com/movetransit"
+    ),
+    Patreon(
+        icon = Icons.Rounded.Favorite,
+        description = R.string.support,
+        link = "https://patreon.com/movetransit"
+    ),
+    Privacy(
+        icon = Icons.Rounded.Info,
+        description = R.string.privacyPolicy,
+        link = "https://movetransit.app/privacy/"
+    )
+}
 
 @Composable
 fun AboutSection(
@@ -34,27 +56,9 @@ fun AboutSection(
     onChangeLogShow: () -> Unit,
     isOnboardingComplete: Boolean,
 ) {
-    val elements = listOf(
-        AboutElement(
-            icon = Icons.Rounded.BugReport,
-            description = R.string.bugReport,
-            link = "mailto:support@movetransit.app"
-        ),
-        AboutElement(
-            icon = Icons.Rounded.AlternateEmail,
-            description = R.string.socialMedia,
-            link = "https://twitter.com/movetransit"
-        ),
-        AboutElement(
-            icon = Icons.Rounded.Info,
-            description = R.string.privacyPolicy,
-            link = "https://movetransit.app/privacy/"
-        ),
-    )
-
-    val totalButtons = if (isOnboardingComplete) elements.count() + 1 else elements.count()
-
     val uriHandler = LocalUriHandler.current
+    val totalButtons = if (isOnboardingComplete) AboutElement.entries.count() + 1 else AboutElement.entries.count()
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(PADDING.div(4).dp)
@@ -64,9 +68,9 @@ fun AboutSection(
             text = stringResource(R.string.about),
             style = MaterialTheme.typography.titleMedium
         )
-        elements.forEach {
+        AboutElement.entries.forEach {
             RowButton(
-                shape = listShape(elements.indexOf(it), totalButtons),
+                shape = listShape(AboutElement.entries.indexOf(it), totalButtons),
                 icon = it.icon,
                 description = stringResource(it.description),
                 onClick = {
@@ -76,7 +80,7 @@ fun AboutSection(
         }
         if (isOnboardingComplete) {
             RowButton(
-                shape = listShape(elements.count(), totalButtons),
+                shape = listShape(AboutElement.entries.count(), totalButtons),
                 icon = Icons.Rounded.NewReleases,
                 description = stringResource(R.string.showChangeLog),
                 onClick = onChangeLogShow
