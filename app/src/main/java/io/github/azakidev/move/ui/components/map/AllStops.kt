@@ -2,9 +2,11 @@ package io.github.azakidev.move.ui.components.map
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.dp
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
@@ -52,12 +54,16 @@ fun AllStops(
         id = "All stops",
         source = locationData,
         placement = const(SymbolPlacement.Point),
+
         iconImage = image(
             value = rememberVectorPainter(Icons.Rounded.LocationOn),
             drawAsSdf = true,
         ),
         iconAnchor = const(SymbolAnchor.Bottom),
         iconColor = const(colorResource(R.color.purple_brand)),
+        iconHaloColor = const(MaterialTheme.colorScheme.background),
+        iconHaloBlur = const(5.dp),
+
         onClick = {
             if (it.isNotEmpty()) {
                 val firstStop = it.first()
@@ -68,7 +74,10 @@ fun AllStops(
                     val providerId = props["providerId"]
 
                     if (stopId != null && providerId != null) {
-                        val stop = stops.find { stop -> stop.id == stopId.toString().toInt() && stop.provider == providerId.toString().toInt()}
+                        val stop = stops.find { stop ->
+                            stop.id == stopId.toString()
+                                .toInt() && stop.provider == providerId.toString().toInt()
+                        }
                         if (stop != null) {
                             sheetModel.sheetStop = stop
                             sheetModel.showBottomSheet = true

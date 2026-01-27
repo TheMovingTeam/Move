@@ -85,7 +85,7 @@
         </item>
         <item>
             [BREAKING] Data format changes to accommodate the new map functionality and avoid future breaking changes.\n
-            You may need to clear app data if doesn't display correctly.
+            You may need to clear app data if doesn\'t display correctly.
         </item>
         <item>Add a map for visualizing stops and lines</item>
         <item>Add support for Llorente Bus</item>

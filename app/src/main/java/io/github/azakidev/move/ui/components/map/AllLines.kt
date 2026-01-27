@@ -1,6 +1,5 @@
 package io.github.azakidev.move.ui.components.map
 
-import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -11,14 +10,15 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
-import io.github.azakidev.move.utils.LogTags
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.interpolate
 import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
+import org.maplibre.compose.expressions.value.SymbolPlacement
 import org.maplibre.compose.layers.LineLayer
+import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.MaplibreComposable

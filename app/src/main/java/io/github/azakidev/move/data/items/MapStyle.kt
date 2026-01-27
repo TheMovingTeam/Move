@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import io.github.azakidev.move.R
 
-
 enum class MapStyle(
     val color: Brush,
     val url: Any
