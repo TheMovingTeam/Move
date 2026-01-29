@@ -92,12 +92,9 @@ fun ChangelogPage() {
                 size = 108,
                 shapeAngle = shapeAngle.value.toInt()
             )
-            val appVersion =
-                if (BuildConfig.DEBUG) BuildConfig.VERSION_NAME + "_BETA"
-                else BuildConfig.VERSION_NAME
             val titleString = stringResource(R.string.changelogVersion)
                 .replace("{app}", stringResource(R.string.app_name))
-                .replace("{ver}", appVersion)
+                .replace("{ver}", BuildConfig.VERSION_NAME)
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = titleString,

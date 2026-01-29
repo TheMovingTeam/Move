@@ -48,9 +48,7 @@ fun LogoSection(
             size = 128,
             shapeAngle = shapeAngle.value.toInt()
         )
-        val appName =
-            if (BuildConfig.DEBUG) stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME + "_BETA"
-            else stringResource(R.string.app_name) + " " + BuildConfig.VERSION_NAME
+        val appName = "${stringResource(R.string.app_name)} ${BuildConfig.VERSION_NAME}"
 
         val fredokaFontFamily = FontFamily(
             Font(R.font.fredoka_medium, FontWeight.Medium),

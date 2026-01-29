@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
-import io.github.azakidev.move.BuildConfig
 import io.github.azakidev.move.data.MoveViewModel
 import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.toKey
@@ -51,81 +50,68 @@ fun AppNavigator(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
-    //TODO: Remove check when Map page is finished
-    val presentDestinations =
-        if (BuildConfig.DEBUG) AppDestinations.entries
-        else AppDestinations.entries.filterNot { it == AppDestinations.MAP }
-
     val visibleDestinations =
         if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
             if (currentDestination.value == AppDestinations.LINES) {
                 currentDestination.value = AppDestinations.HOME
             }
-            presentDestinations.filterNot { it == AppDestinations.LINES }
+            AppDestinations.entries.filterNot { it == AppDestinations.LINES }
         } else {
-            presentDestinations
+            AppDestinations.entries
         }
 
-    //TODO: Remove check when Map page is finished
-    if (
-        visibleDestinations.count() == 1 &&
-        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
-    ) {
-        LargeScreenHome(model, sheetModel, backStack)
-    } else {
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                visibleDestinations.forEach {
-                    item(
-                        icon = {
-                            Icon(
-                                imageVector = it.icon,
-                                contentDescription = stringResource(it.contentDescription)
-                            )
-                        },
-                        label = { Text(stringResource(it.label)) },
-                        selected = it == currentDestination.value,
-                        onClick = { currentDestination.value = it }
-                    )
-                }
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            visibleDestinations.forEach {
+                item(
+                    icon = {
+                        Icon(
+                            imageVector = it.icon,
+                            contentDescription = stringResource(it.contentDescription)
+                        )
+                    },
+                    label = { Text(stringResource(it.label)) },
+                    selected = it == currentDestination.value,
+                    onClick = { currentDestination.value = it }
+                )
             }
-        ) {
-            AnimatedContent(
-                targetState = currentDestination,
-                transitionSpec = {
-                    fadeIn(
-                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                    ) togetherWith fadeOut(
-                        animationSpec = MotionScheme.expressive().defaultEffectsSpec()
-                    )
-                }
-            ) { currentDestination ->
-                when (currentDestination.value) {
-                    AppDestinations.HOME -> {
-                        if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
-                            LargeScreenHome(model, sheetModel, backStack)
-                        } else {
-                            HomePage(
-                                modifier = Modifier.padding(bottom = 0.dp),
-                                model = model,
-                                sheetModel = sheetModel,
-                                backStack = backStack
-                            )
-                        }
+        }
+    ) {
+        AnimatedContent(
+            targetState = currentDestination,
+            transitionSpec = {
+                fadeIn(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                ) togetherWith fadeOut(
+                    animationSpec = MotionScheme.expressive().defaultEffectsSpec()
+                )
+            }
+        ) { currentDestination ->
+            when (currentDestination.value) {
+                AppDestinations.HOME -> {
+                    if (windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
+                        LargeScreenHome(model, sheetModel, backStack)
+                    } else {
+                        HomePage(
+                            modifier = Modifier.padding(bottom = 0.dp),
+                            model = model,
+                            sheetModel = sheetModel,
+                            backStack = backStack
+                        )
                     }
-
-                    AppDestinations.LINES -> LinesPage(
-                        modifier = Modifier.padding(bottom = 0.dp),
-                        model = model,
-                        sheetModel = sheetModel
-                    )
-
-                    AppDestinations.MAP -> MapPage(
-                        model = model,
-                        sheetModel = sheetModel,
-                        currentLocation = currentLocation
-                    )
                 }
+
+                AppDestinations.LINES -> LinesPage(
+                    modifier = Modifier.padding(bottom = 0.dp),
+                    model = model,
+                    sheetModel = sheetModel
+                )
+
+                AppDestinations.MAP -> MapPage(
+                    model = model,
+                    sheetModel = sheetModel,
+                    currentLocation = currentLocation
+                )
             }
         }
     }

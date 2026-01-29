@@ -35,8 +35,6 @@ fun AllLines(
     stops: List<StopItem>,
     providers: List<ProviderItem>
 ) {
-    //TODO: Remove check when fully implemented
-    if (!BuildConfig.DEBUG) return
     // Return if no lines are found
     if (lines.isEmpty()) return
 
@@ -92,8 +90,6 @@ fun generatePath(
     stops: List<StopItem>,
     provider: ProviderItem?
 ): String? {
-    // TODO: Remove when good
-    if (!BuildConfig.DEBUG) return null
     if (stops.isEmpty()) return null
     if (provider == null || !provider.capabilities.contains(Capabilities.GenPath)) return null
 
