@@ -49,6 +49,7 @@ import io.github.azakidev.move.data.SheetStopViewModel
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.ui.components.qr.QrScanner
+import io.github.azakidev.move.ui.copy
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -223,6 +224,7 @@ fun QrPreview() {
             val squareSize = 750f
             val outlineSize = squareSize + 10f
             val outlineColor = MaterialTheme.colorScheme.primary
+            val overlayColor = MaterialTheme.colorScheme.background
 
             QrScanner(
                 modifier = Modifier
@@ -230,7 +232,7 @@ fun QrPreview() {
                     .drawWithContent {
                         drawContent()
                         drawRect(
-                            color = Color.Black.copy(alpha = 0.8f),
+                            color = overlayColor.copy(alpha = 0.8f),
                             size = size,
                         )
                         drawRoundRect(

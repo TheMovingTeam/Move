@@ -32,6 +32,7 @@ import com.google.mlkit.vision.common.InputImage
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.ProviderItem
+import io.github.azakidev.move.utils.LogTags
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,9 +58,8 @@ class BarcodeAnalyser(
                         callback(barcode.rawValue ?: "")
                     }
                 }
-            }.addOnFailureListener {
-                // Task failed with an exception
-                // ...
+            }.addOnFailureListener { e ->
+                Log.i(LogTags.QR.name, "Barcode scanning failed:", e)
             }
         }
         imageProxy.close()

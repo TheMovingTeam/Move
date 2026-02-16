@@ -13,6 +13,8 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontobfuscate
+
 # ML Kit for Barcode Scanning
 -keep class com.google.mlkit.** { *; }
 -dontwarn com.google.mlkit.**

@@ -53,6 +53,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/fav_stop_widget_info" />
         </receiver>
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
