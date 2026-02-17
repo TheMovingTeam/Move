@@ -94,21 +94,7 @@
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
     <string-array name="changelogItems">
-        <item>
-            [BREAKING] Arregla interferencias en paradas recientes o favoritas.\n
-            Puede que necesites borrar los datos de app manualmente si la migración automática falla.
-        </item>
-        <item>
-            [BREAKING] Usa identificadores asignados localmente para los proveedores.\n
-            Puede que necesites borrar los datos de app manualmente si siguen mostrándose incorrectamente en la configuración.\n
-            No causa cambios en la funcionalidad.
-        </item>
-        <item>
-            [BREAKING] Cambios en el formato de datos para acomodar las nuevas capacidades del mapa y para evitar cambios rompedores en el futuro.\n
-            Puede que necesites borrar los datos de app manualmente si siguen mostrándose incorrectamente en la configuración.
-        </item>
-        <item>Añade un mapa para visualizar paradas y líneas</item>
-        <item>Añade soporte para Llorente Bus</item>
+        <item>Arregla el escáner QR, roto en la versión anterior.</item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>
 </resources>

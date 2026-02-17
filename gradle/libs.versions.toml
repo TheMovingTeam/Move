@@ -24,7 +24,6 @@ gson = "2.13.2"
 datastore = "1.2.0"
 room = "2.8.4"
 camera = "1.5.3"
-#barcodeScanning = "17.3.0"
 playServicesMlkitBarcodeScanning = "18.3.1"
 accompanistPermissions = "0.37.3"
 playServicesLocation = "21.3.0"
@@ -86,7 +85,6 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
 androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "camera" }
-#barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcodeScanning" }
 play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version.ref = "playServicesMlkitBarcodeScanning" }
 # Permissions
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
