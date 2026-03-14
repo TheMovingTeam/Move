@@ -24,8 +24,8 @@ android {
         applicationId = "io.github.azakidev.move"
         minSdk = 28
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.0-rc2"
+        versionCode = 16
+        versionName = "1.0-rc3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.azakidev.move.BuildConfig
-import io.github.azakidev.move.utils.LogTags
 import io.github.azakidev.move.data.db.MoveDatabase
 import io.github.azakidev.move.data.db.entities.toLineEntity
 import io.github.azakidev.move.data.db.entities.toLineItem
@@ -18,11 +17,11 @@ import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineResponse
 import io.github.azakidev.move.data.items.MapStyle
 import io.github.azakidev.move.data.items.ProviderItem
-import io.github.azakidev.move.data.items.ProviderListResponse
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
 import io.github.azakidev.move.data.items.toKey
+import io.github.azakidev.move.utils.LogTags
 import io.github.azakidev.move.utils.fetchRemoteProviders
 import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
@@ -36,11 +35,8 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
-import java.net.URL
 import java.util.Timer
-import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.schedule
-import kotlin.concurrent.thread
 
 class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _database = MoveDatabase.getDatabase(application.applicationContext)
@@ -180,7 +176,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             Timer().schedule(delay = 500, period = 500, action = {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     _lastOpenedVersionCode.collect { ver ->
                         val currentVersion = BuildConfig.VERSION_CODE
                         // ver should be:
@@ -189,7 +185,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         // The previous version number if the app has been updated
                         if (ver != -1) {
                             _userStore.saveLastOpenedVersionCode(currentVersion)
-                            if (currentVersion > ver) {
+                            if (ver < 16) {
+                                migrateProviders() // Flush incorrect providers
+                            }
+                            if (ver < currentVersion) {
                                 shouldShowChangelog.value = true
                             }
                             this@schedule.cancel()
@@ -201,6 +200,42 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    suspend fun migrateProviders() {
+        val oldSavedProviders = savedProviders.value
+        val oldProviders = providers.value
+        if (oldSavedProviders.isNotEmpty()) {
+            // Migrate old data
+            val savedFavStops = favouriteStops.value.mapNotNull { key ->
+                val savedProvider = oldProviders.find { it.id == key.providerId }
+                if (savedProvider != null) {
+                    StopKey(key.stopId, savedProvider.name.hashCode()) // New key
+                } else {
+                    null // Clearly something went wrong here
+                }
+            }
+            val savedLastStops = lastStops.value.mapNotNull { key ->
+                val savedProvider = oldProviders.find { it.id == key.providerId }
+                if (savedProvider != null) {
+                    StopKey(key.stopId, savedProvider.name.hashCode()) // New key
+                } else {
+                    null // Clearly something went wrong here
+                }
+            }
+            // Flush and refetch
+            // Clear old info
+            savedFavStops.forEach { removeFavStop(it) }
+            clearLastStops()
+            _lineDao.clearAllLines()
+            _stopDao.clearAllStops()
+            // Update the IDs and refresh the info
+            oldProviders.forEach{ _providerDao.replaceProviderId(it.id, it.name.hashCode()) }
+            fetchProviders()
+            // Readd the info
+            savedFavStops.forEach { addFavStop(it) }
+            savedLastStops.forEach { saveLastStop(it) }
+        }
+    }
+
     fun fetchProviders() {
         viewModelScope.launch(Dispatchers.IO) {
             val currentRepoUrl = providerRepo.value
@@ -209,8 +244,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     LogTags.MoveModel.name,
                     "Provider repo URL is empty, cannot fetch providers."
                 )
-                // Optionally load from DB if repo URL is not set but you have cached providers
-                loadProvidersFromDb()
                 return@launch
             }
 
@@ -226,19 +259,13 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     _providerDao.insertProviders(freshProvidersFromRemote.map { it.toProviderEntity() })
                 }
 
-                loadProvidersFromDb()
-
-                fetchInfoForProviders(
-                    savedProviders.value
-                )
+                fetchInfoForProviders(savedProviders.value)
 
             } catch (e: Exception) {
                 Log.e(
                     LogTags.MoveModel.name,
                     "Error fetching providers list: ${e.localizedMessage}", e
                 )
-                // Fallback to loading from DB if network fails
-                loadProvidersFromDb()
             }
         }
     }
@@ -353,7 +380,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 val response = Json.decodeFromString<LineResponse>(response.body!!.string())
 
-                val fetchedLines = response.lines.map { it.copy(provider = provider.id).toLineEntity() }
+                val fetchedLines =
+                    response.lines.map { it.copy(provider = provider.id).toLineEntity() }
 
                 _lineDao.deleteLinesForProvider(provider.id)
                 _lineDao.insertLines(fetchedLines)
@@ -380,7 +408,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 val response = Json.decodeFromString<StopResponse>(response.body!!.string())
 
-                val fetchedStops = response.stops.map { it.copy(provider = provider.id).toStopEntity() }
+                val fetchedStops =
+                    response.stops.map { it.copy(provider = provider.id).toStopEntity() }
 
                 _stopDao.deleteStopsForProvider(provider.id)
                 _stopDao.insertStops(fetchedStops)
@@ -403,7 +432,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     // When a saved provider is removed, also remove its lines and stops from the DB
     fun removeSavedProvider(providerId: Int) {
-
         val stopsToStopLoading =
             _stopsToLoad.filter { it.providerId == providerId }
 
@@ -439,12 +467,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     fun flushInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             // Nuke all user settings
-            favouriteStops.value.map {
-                removeFavStop(it)
-            }
-            savedProviders.value.map {
-                removeSavedProvider(it)
-            }
+            favouriteStops.value.forEach { removeFavStop(it) }
+            savedProviders.value.forEach { removeSavedProvider(it) }
             clearLastStops()
             _stopsToLoad.removeAll(_stopsToLoad)
             // Nuke all temporary data
@@ -500,26 +524,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             _userStore.saveLastStops(emptyList())
         }
-    }
-
-    fun tryRepo(url: String): Boolean {
-        val isValid = LinkedBlockingDeque<Boolean>()
-        thread {
-            try {
-                val providerListJson = URL("${url}/providers.json").readText()
-                Json.decodeFromString<ProviderListResponse>(providerListJson)
-                isValid.add(true)
-            } catch (e: Exception) {
-                Log.e(
-                    LogTags.MoveModel.name,
-                    "The repo at $url could not be verified: ${e.message}",
-                    e
-                )
-                isValid.add(false)
-                return@thread
-            }
-        }
-        return isValid.take()
     }
 
     fun saveRepo(url: String) {

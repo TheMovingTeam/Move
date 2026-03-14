@@ -6,7 +6,7 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
 import io.github.azakidev.move.data.items.ProviderItem
-import io.github.azakidev.move.data.items.ProviderListResponse
+import io.github.azakidev.move.data.items.ProviderRepo
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.providers.fetchEMTMadridToken
 import io.github.azakidev.move.data.providers.parseEMTMadrid
@@ -23,15 +23,38 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.platform.Platform
+import java.net.URL
 import java.security.cert.X509Certificate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.LinkedBlockingDeque
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
+import kotlin.concurrent.thread
 
 // Provider fetching
+fun tryRepo(url: String): Boolean {
+    val isValid = LinkedBlockingDeque<Boolean>()
+    thread {
+        try {
+            val providerListJson = URL("${url}/providers.json").readText()
+            Json.decodeFromString<ProviderRepo>(providerListJson)
+            isValid.add(true)
+        } catch (e: Exception) {
+            Log.e(
+                LogTags.MoveModel.name,
+                "The repo at $url could not be verified: ${e.message}",
+                e
+            )
+            isValid.add(false)
+            return@thread
+        }
+    }
+    return isValid.take()
+}
+
 fun fetchRemoteProviders(
     currentRepoUrl: String,
     cachedProviders: List<ProviderItem>
@@ -51,9 +74,8 @@ fun fetchRemoteProviders(
     }
 
     val providerNameResponse =
-        Json.decodeFromString<ProviderListResponse>(providerListJson.string())
+        Json.decodeFromString<ProviderRepo>(providerListJson.string())
 
-    var providerCount = 0
     return providerNameResponse.providers.mapNotNull { providerName ->
         try {
             val providerMetadataRequest =
@@ -74,14 +96,12 @@ fun fetchRemoteProviders(
 
             val remoteProviderItem =
                 Json.decodeFromString<ProviderItem>(providerMetadataJson.string())
-                    .copy(id = providerCount)
-            providerCount++
 
             val cachedProvider = cachedProviders.find { it.id == remoteProviderItem.id }
 
             if (cachedProvider == null || remoteProviderItem.lastUpdated > cachedProvider.lastUpdated) {
                 // Needs fetching/updating or is new
-                remoteProviderItem
+                remoteProviderItem.copy(id = remoteProviderItem.name.hashCode())
             } else null
 
         } catch (e: Exception) {

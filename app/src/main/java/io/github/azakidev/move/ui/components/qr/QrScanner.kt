@@ -42,12 +42,13 @@ import java.util.concurrent.Executors
 class BarcodeAnalyser(
     val callback: (String) -> Unit
 ) : ImageAnalysis.Analyzer {
+    private val options =
+        BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
+
+    private val scanner = BarcodeScanning.getClient(options)
+
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        val options =
-            BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
-
-        val scanner = BarcodeScanning.getClient(options)
         val mediaImage = imageProxy.image
         mediaImage?.let {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
@@ -67,13 +68,11 @@ class BarcodeAnalyser(
 }
 
 class CameraPreviewViewModel(analyzerCallBack: (String) -> Unit) : ViewModel() {
-
     private val executor = Executors.newSingleThreadExecutor()
 
     // Used to set up a link between the Camera and your UI.
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
-
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
             _surfaceRequest.update { newSurfaceRequest }
@@ -88,7 +87,6 @@ class CameraPreviewViewModel(analyzerCallBack: (String) -> Unit) : ViewModel() {
         })
     }
 
-
     suspend fun bindToCamera(appContext: Context, lifecycleOwner: LifecycleOwner) {
         val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
         processCameraProvider.bindToLifecycle(
@@ -100,7 +98,11 @@ class CameraPreviewViewModel(analyzerCallBack: (String) -> Unit) : ViewModel() {
         )
 
         // Cancellation signals we're done with the camera
-        try { awaitCancellation() } finally { processCameraProvider.unbindAll() }
+        try {
+            awaitCancellation()
+        } finally {
+            processCameraProvider.unbindAll()
+        }
     }
 }
 
@@ -126,8 +128,7 @@ fun QrScanner(
                     Log.e("WARNING", "URL not recognized", e)
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
-            }
-        )
+            })
     }
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
@@ -137,8 +138,7 @@ fun QrScanner(
 
     surfaceRequest?.let { request ->
         CameraXViewfinder(
-            surfaceRequest = request,
-            modifier = modifier
+            surfaceRequest = request, modifier = modifier
         )
     }
 }
@@ -151,7 +151,6 @@ fun parseQr(
     val filter = qrUrls.filter { url.contains(it) }
     val provider = providers.find { it.qrFormat.contains(filter.first()) } ?: ProviderItem()
     return Pair(
-        url.replace(filter.first(), "").toInt(),
-        provider
+        url.replace(filter.first(), "").toInt(), provider
     )
 }

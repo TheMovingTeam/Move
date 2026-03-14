@@ -29,8 +29,3 @@ enum class Capabilities {
     GenPath,
     Unsafe
 }
-
-@Serializable
-data class ProviderListResponse(
-    val providers: List<String>
-)

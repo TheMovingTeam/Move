@@ -63,6 +63,7 @@ import io.github.azakidev.move.ui.pages.panes.settings.MapSelectPage
 import io.github.azakidev.move.ui.pages.panes.settings.SettingsPage
 import io.github.azakidev.move.ui.pages.views.AppNavigator
 import io.github.azakidev.move.ui.theme.MoveTheme
+import io.github.azakidev.move.utils.tryRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.maplibre.compose.location.AndroidLocationProvider
@@ -195,7 +196,7 @@ class MainActivity : ComponentActivity() {
                                                 model.providerRepo,
                                                 backStack,
                                                 onProviderReset = { url ->
-                                                    if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
+                                                    if (URLUtil.isValidUrl(url) && tryRepo(url)) {
                                                         model.saveRepo(url)
                                                         model.flushInfo()
                                                     } else {

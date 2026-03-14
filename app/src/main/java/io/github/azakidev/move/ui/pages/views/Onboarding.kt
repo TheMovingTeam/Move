@@ -24,6 +24,7 @@ import io.github.azakidev.move.ui.pages.panes.settings.SettingsPage
 import io.github.azakidev.move.ui.pages.panes.onboarding.FeaturePage
 import io.github.azakidev.move.ui.pages.panes.onboarding.ProviderPage
 import io.github.azakidev.move.ui.pages.panes.onboarding.WelcomePage
+import io.github.azakidev.move.utils.tryRepo
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -102,7 +103,7 @@ fun Onboarding(model: MoveViewModel) {
                     model.providerRepo,
                     backStack,
                     onProviderReset = { url ->
-                        if (URLUtil.isValidUrl(url) && model.tryRepo(url)) {
+                        if (URLUtil.isValidUrl(url) && tryRepo(url)) {
                             model.saveRepo(url)
                             model.flushInfo()
                         } else {

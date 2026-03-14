@@ -11,15 +11,13 @@ data class ProviderEntity(
     val name: String,
     val description: String,
     val lastUpdated: Int, // Unix timestamp
-    val capabilities: List<Capabilities>, // Or use a TypeConverter for List<Capabilities>
+    val capabilities: List<Capabilities>,
     val timeSource: String,
     val qrFormat: String
 )
 
 // Helper function to convert to and from ProviderItem (consider moving to a mapper class)
 fun ProviderEntity.toProviderItem(): ProviderItem {
-    // Implement conversion, including parsing capabilities string back to List<Capabilities>
-    // and reconstructing TimeFormat
     return ProviderItem(
         id = this.id,
         name = this.name,
