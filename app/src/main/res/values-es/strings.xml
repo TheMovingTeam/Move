@@ -94,8 +94,8 @@
         <item>Si te gusta la app, por favor considera apoyar el desarrollo con una donación después de usarla durante un rato. Así más funciones podrán ser añadidas a Move en el futuro.</item>
     </string-array>
     <string-array name="changelogItems">
-        <item>Se modificó la representación interna de los proveedores y se agregó una migración desde los modelos anteriores.</item>
-        <item>Se ha añadido un botón para navegar rápidamente a una parada seleccionada en Google Maps.</item>
+        <item>Se modificó la representación interna de los proveedores y se agregó una migración desde los modelos anteriores</item>
+        <item>Se ha añadido un botón para navegar rápidamente a una parada seleccionada en Google Maps</item>
         <item>Mejora y arreglos de interfaz</item>
     </string-array>
 </resources>
