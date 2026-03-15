@@ -300,7 +300,7 @@ fun StopBanner(
                         .padding(horizontal = PADDING.times(0.75).dp, vertical = PADDING.dp)
                         .size(45.dp),
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = MaterialTheme.colorScheme.tertiaryFixed
                     ),
                     onClick = onNavigationClick
                 ) {
@@ -308,7 +308,7 @@ fun StopBanner(
                         modifier = Modifier.rotate(45f),
                         imageVector = Icons.Rounded.Navigation,
                         contentDescription = "Go to stop",
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = MaterialTheme.colorScheme.onTertiaryFixed
                     )
                 }
                 IconButton(

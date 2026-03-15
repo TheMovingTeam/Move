@@ -184,7 +184,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         // The previous version number if the app has been updated
                         if (ver != -1) {
                             _userStore.saveLastOpenedVersionCode(currentVersion)
-                            if (ver < 16 && ver != 1) {
+                            if (ver < 16) {
                                 migrateProviders() // Flush incorrect providers
                             }
                             if (ver < currentVersion) {
