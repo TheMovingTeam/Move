@@ -12,6 +12,7 @@ import io.github.azakidev.move.data.items.StopItem
         entity = ProviderEntity::class,
         parentColumns = ["id"],
         childColumns = ["providerId"],
+        onUpdate = ForeignKey.CASCADE,
         onDelete = ForeignKey.CASCADE
     )],
     indices = [Index(value = ["providerId"]), Index(value = ["id", "providerId"], unique = true)]

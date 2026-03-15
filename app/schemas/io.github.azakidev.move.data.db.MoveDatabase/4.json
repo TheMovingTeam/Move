@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 3,
-    "identityHash": "8924f7c85bd9a4efb3fc12a56a5978e7",
+    "version": 4,
+    "identityHash": "557783fb942d88bde41c7cf86f1a7379",
     "entities": [
       {
         "tableName": "providers",
@@ -152,7 +152,7 @@
       },
       {
         "tableName": "stops",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` INTEGER NOT NULL, `comId` INTEGER, `providerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `lines` TEXT NOT NULL, `geoX` REAL, `geoY` REAL, `notifications` TEXT NOT NULL, FOREIGN KEY(`providerId`) REFERENCES `providers`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` INTEGER NOT NULL, `comId` INTEGER, `providerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `lines` TEXT NOT NULL, `geoX` REAL, `geoY` REAL, `notifications` TEXT NOT NULL, FOREIGN KEY(`providerId`) REFERENCES `providers`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "localId",
@@ -237,7 +237,7 @@
           {
             "table": "providers",
             "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
+            "onUpdate": "CASCADE",
             "columns": [
               "providerId"
             ],
@@ -250,7 +250,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8924f7c85bd9a4efb3fc12a56a5978e7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '557783fb942d88bde41c7cf86f1a7379')"
     ]
   }
 }

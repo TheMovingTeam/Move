@@ -12,7 +12,8 @@ import io.github.azakidev.move.data.items.LineItem
         entity = ProviderEntity::class,
         parentColumns = ["id"],
         childColumns = ["providerId"],
-        onDelete = ForeignKey.CASCADE // If a provider is deleted, its lines are also deleted
+        onUpdate = ForeignKey.CASCADE,
+        onDelete = ForeignKey.CASCADE
     )],
     indices = [Index(value = ["providerId"]), Index(value = ["id", "providerId"], unique = true)]
 )

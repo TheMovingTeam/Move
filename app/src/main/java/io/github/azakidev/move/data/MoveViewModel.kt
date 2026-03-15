@@ -22,6 +22,7 @@ import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.utils.LogTags
+import io.github.azakidev.move.utils.fetchProviderList
 import io.github.azakidev.move.utils.fetchRemoteProviders
 import io.github.azakidev.move.utils.fetchStopTime
 import kotlinx.coroutines.Dispatchers
@@ -123,6 +124,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     if (providers.value.isEmpty() && providerRepo.value.isNotEmpty()) {
                         fetchProviders() // This will load from DB or fetch if necessary
                     }
+
                     // Wait for providers to be available if they were just fetched
                     providers.first { it.isNotEmpty() || providerRepo.value.isEmpty() }
 
@@ -171,9 +173,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Initiate stop fetching
-        startFetchLoop()
-
         viewModelScope.launch {
             Timer().schedule(delay = 500, period = 500, action = {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -185,7 +184,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                         // The previous version number if the app has been updated
                         if (ver != -1) {
                             _userStore.saveLastOpenedVersionCode(currentVersion)
-                            if (ver < 16) {
+                            if (ver < 16 && ver != 1) {
                                 migrateProviders() // Flush incorrect providers
                             }
                             if (ver < currentVersion) {
@@ -197,42 +196,46 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
             }).run()
+
+            // Initiate stop fetching
+            startFetchLoop()
         }
     }
 
-    suspend fun migrateProviders() {
-        val oldSavedProviders = savedProviders.value
-        val oldProviders = providers.value
-        if (oldSavedProviders.isNotEmpty()) {
-            // Migrate old data
-            val savedFavStops = favouriteStops.value.mapNotNull { key ->
-                val savedProvider = oldProviders.find { it.id == key.providerId }
-                if (savedProvider != null) {
-                    StopKey(key.stopId, savedProvider.name.hashCode()) // New key
-                } else {
-                    null // Clearly something went wrong here
+    fun migrateProviders() {
+        val oldSavedProviders = savedProviders.value.toMutableList()
+        val providerList = fetchProviderList(providerRepo.value)
+        val oldFavStops = favouriteStops.value
+        val oldLastStops = lastStops.value
+
+        val newFavStops = mutableListOf<StopKey>()
+        val newLastStops = mutableListOf<StopKey>()
+
+        val newSavedProviders = oldSavedProviders.map { index ->
+            val providerName = providerList.getOrNull(index)
+            val hashCode = providerName.hashCode()
+
+            if (providerName != null) {
+                oldFavStops.filter { it.providerId == index }.forEach {
+                    newFavStops += StopKey(it.stopId, hashCode)
+                }
+
+                oldLastStops.filter { it.providerId == index }.forEach {
+                    newLastStops += StopKey(it.stopId, hashCode)
                 }
             }
-            val savedLastStops = lastStops.value.mapNotNull { key ->
-                val savedProvider = oldProviders.find { it.id == key.providerId }
-                if (savedProvider != null) {
-                    StopKey(key.stopId, savedProvider.name.hashCode()) // New key
-                } else {
-                    null // Clearly something went wrong here
-                }
+
+            hashCode
+        }
+
+        // Update the info in DB and DataStore
+        viewModelScope.launch(Dispatchers.IO) {
+            providers.value.forEach {
+                _providerDao.replaceProviderId(it.id, it.name.hashCode())
             }
-            // Flush and refetch
-            // Clear old info
-            savedFavStops.forEach { removeFavStop(it) }
-            clearLastStops()
-            _lineDao.clearAllLines()
-            _stopDao.clearAllStops()
-            // Update the IDs and refresh the info
-            oldProviders.forEach{ _providerDao.replaceProviderId(it.id, it.name.hashCode()) }
-            fetchProviders()
-            // Readd the info
-            savedFavStops.forEach { addFavStop(it) }
-            savedLastStops.forEach { saveLastStop(it) }
+            _userStore.saveSavedProviders(newSavedProviders)
+            _userStore.saveFavouriteStops(newFavStops)
+            _userStore.saveLastStops(newLastStops)
         }
     }
 
@@ -447,10 +450,10 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
             _userStore.saveLastStops(lastStopsToKeep)
         }
 
-        viewModelScope.launch(Dispatchers.IO) { // Perform DB ops on IO dispatcher
+        viewModelScope.launch(Dispatchers.IO) {
             val currentSaved = savedProviders.value.toMutableList()
             if (currentSaved.remove(providerId)) {
-                _userStore.saveSavedProviders(currentSaved) // Update DataStore
+                _userStore.saveSavedProviders(currentSaved)
 
                 // Remove related data from local database
                 _lineDao.deleteLinesForProvider(providerId)

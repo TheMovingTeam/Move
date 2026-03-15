@@ -55,6 +55,29 @@ fun tryRepo(url: String): Boolean {
     return isValid.take()
 }
 
+fun fetchProviderList(
+    currentRepoUrl: String,
+): List<String> {
+    val client = OkHttpClient()
+
+    val providerListRequest = Request.Builder()
+        .get()
+        .url("$currentRepoUrl/providers.json")
+        .build()
+
+    val providerListJson = client.newCall(providerListRequest).execute().body
+
+    if (providerListJson == null) {
+        Log.e(LogTags.Networking.name, "ProviderListJson is null, providers couldn't be fetched!")
+        return emptyList()
+    }
+
+    val providerNameResponse =
+        Json.decodeFromString<ProviderRepo>(providerListJson.string())
+
+    return providerNameResponse.providers
+}
+
 fun fetchRemoteProviders(
     currentRepoUrl: String,
     cachedProviders: List<ProviderItem>
