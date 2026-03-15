@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -41,11 +42,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -113,6 +116,12 @@ fun StopPage(
         }
     }
 
+    val uriHandler = LocalUriHandler.current
+
+    val onNavigationClick = {
+        uriHandler.openUri("https://www.google.com/maps/dir/?api=1&destination=${sheetModel.sheetStop.geoX},${sheetModel.sheetStop.geoY}&travelmode=walking")
+    }
+
     val provider =
         model.providers
             .collectAsState().value
@@ -146,7 +155,8 @@ fun StopPage(
                 sheetModel = sheetModel,
                 favStops = model.favouriteStops.collectAsState().value,
                 shape = RoundedCornerShape(cornerRadius.value),
-                onClick = onClick
+                onClick = onClick,
+                onNavigationClick = onNavigationClick
             )
             Column(
                 modifier = Modifier.padding(PADDING.dp),
@@ -231,6 +241,7 @@ fun StopBanner(
     favStops: List<StopKey>,
     shape: Shape,
     onClick: () -> Unit,
+    onNavigationClick: () -> Unit,
     sheetModel: SheetStopViewModel
 ) {
     Box(
@@ -278,46 +289,68 @@ fun StopBanner(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            IconButton(
+            Column (
                 modifier = Modifier
-                    .padding(horizontal = PADDING.times(0.75).dp, vertical = PADDING.dp)
-                    .size(55.dp)
                     .align(Alignment.BottomEnd),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                shape = shape,
-                onClick = onClick
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy((-15).dp)
             ) {
-                AnimatedContent(
-                    targetState = sheetModel.sheetStop.toKey() in favStops,
-                    transitionSpec = {
-                        fadeIn(
-                            animationSpec = MotionScheme.expressive().fastEffectsSpec()
-                        ) + scaleIn(
-                            animationSpec = MotionScheme.expressive().fastSpatialSpec()
-                        ) togetherWith fadeOut(
-                            animationSpec = MotionScheme.expressive().fastEffectsSpec()
-                        ) + scaleOut(
-                            animationSpec = MotionScheme.expressive().fastSpatialSpec()
-                        )
-                    }
-                ) { state ->
-                    when (state) {
-                        true -> {
-                            Icon(
-                                imageVector = Icons.Rounded.Favorite,
-                                contentDescription = "Remove favourite stop",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                IconButton(
+                    modifier = Modifier
+                        .padding(horizontal = PADDING.times(0.75).dp, vertical = PADDING.dp)
+                        .size(45.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    onClick = onNavigationClick
+                ) {
+                    Icon(
+                        modifier = Modifier.rotate(45f),
+                        imageVector = Icons.Rounded.Navigation,
+                        contentDescription = "Go to stop",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                IconButton(
+                    modifier = Modifier
+                        .padding(horizontal = PADDING.times(0.75).dp, vertical = PADDING.dp)
+                        .size(55.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = shape,
+                    onClick = onClick
+                ) {
+                    AnimatedContent(
+                        targetState = sheetModel.sheetStop.toKey() in favStops,
+                        transitionSpec = {
+                            fadeIn(
+                                animationSpec = MotionScheme.expressive().fastEffectsSpec()
+                            ) + scaleIn(
+                                animationSpec = MotionScheme.expressive().fastSpatialSpec()
+                            ) togetherWith fadeOut(
+                                animationSpec = MotionScheme.expressive().fastEffectsSpec()
+                            ) + scaleOut(
+                                animationSpec = MotionScheme.expressive().fastSpatialSpec()
                             )
                         }
+                    ) { state ->
+                        when (state) {
+                            true -> {
+                                Icon(
+                                    imageVector = Icons.Rounded.Favorite,
+                                    contentDescription = "Remove favourite stop",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
 
-                        false -> {
-                            Icon(
-                                imageVector = Icons.Rounded.FavoriteBorder,
-                                contentDescription = "Save favourite stop",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                            false -> {
+                                Icon(
+                                    imageVector = Icons.Rounded.FavoriteBorder,
+                                    contentDescription = "Save favourite stop",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
                     }
                 }
@@ -338,6 +371,7 @@ fun StopBannerPreview() {
         favStops = listOf(),
         shape = RoundedCornerShape(25),
         onClick = {},
+        onNavigationClick = {},
         sheetModel = sheetModel,
     )
 }
