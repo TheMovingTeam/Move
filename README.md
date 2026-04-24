@@ -18,7 +18,7 @@ believe that public transportation is the best way to get around in a city and i
 
 ## How can I support the development of Move?
 You may support the main developer, Azakidev/FatDawlf by donating to them,
-sponsoring the project, or joining the Move Patreon to show continuous support.
+sponsoring the project, or using my [Paypal link](https://paypal.me/Akirahasstuff).
 
 If money is not abundant to you, adding translations or doing exploratory work
 to implement new providers into the app by prodding around at their data format
