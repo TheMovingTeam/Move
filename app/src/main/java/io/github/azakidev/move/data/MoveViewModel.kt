@@ -48,11 +48,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
     private val _userStore = UserStore(application.applicationContext)
 
     val providerRepo: StateFlow<String>
-        field = MutableStateFlow(
-            if (BuildConfig.DEBUG) // Initial fallback
-                "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/testing"
-            else "https://raw.githubusercontent.com/TheMovingTeam/Providers/refs/heads/main"
-        )
+        field = MutableStateFlow("")
 
     val providers: StateFlow<List<ProviderItem>>
         field = MutableStateFlow(emptyList())
@@ -106,7 +102,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = "Liberty"
+            initialValue = ""
         )
 
     init {
@@ -116,13 +112,21 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                 providerRepo.value = savedUrl
             }
         }
+
+        // Load up providers from the DB to avoid double fetches
+        viewModelScope.launch(Dispatchers.IO) {
+            _providerDao.getAllProviders().collect { entities ->
+                providers.value = entities.map { it.toProviderItem() }
+            }
+        }
+
         // Set up data from DB
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             savedProviders.collect { savedProviderIds ->
                 if (savedProviderIds.isNotEmpty()) {
                     // Load providers if not already loaded, then lines/stops
                     if (providers.value.isEmpty() && providerRepo.value.isNotEmpty()) {
-                        fetchProviders() // This will load from DB or fetch if necessary
+                        fetchProviders()
                     }
 
                     // Wait for providers to be available if they were just fetched
@@ -140,52 +144,26 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                             stops.value = stopEntities.map { it.toStopItem() }
                         }
                     }
-                    // Trigger a check/fetch for these saved providers
-                    fetchInfoForProviders(savedProviderIds)
                 }
             }
         }
 
-        // Initial load of providers from DB when ViewModel is created
-        loadProvidersFromDb()
-
-        // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
-        // This ensures it's migrated properly
         viewModelScope.launch {
-            val migratedFavStops = _userStore.favouriteStopsFlow.first().mapNotNull {
-                if (it.stopId == it.providerId) {
-                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
-                } else it
-            }
-
-            if (migratedFavStops.isNotEmpty() && migratedFavStops != favouriteStops) {
-                _userStore.saveFavouriteStops(migratedFavStops)
-            }
-
-            val migratedLastStops = _userStore.lastStopsFlow.first().mapNotNull {
-                if (it.stopId == it.providerId) {
-                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
-                } else it
-            }
-
-            if (migratedLastStops.isNotEmpty() && migratedLastStops != lastStops) {
-                _userStore.saveLastStops(migratedLastStops)
-            }
-        }
-
-        viewModelScope.launch {
-            Timer().schedule(delay = 500, period = 500, action = {
+            Timer().schedule(delay = 1000, period = 500, action = {
                 viewModelScope.launch(Dispatchers.IO) {
                     _lastOpenedVersionCode.collect { ver ->
                         val currentVersion = BuildConfig.VERSION_CODE
                         // ver should be:
-                        // -1 before it's properly collected
+                        // -1 before it's collected
                         // 0 if the app hasn't been opened before
-                        // The previous version number if the app has been updated
+                        // The previous version number if the app has been updated since last opened
                         if (ver != -1) {
                             _userStore.saveLastOpenedVersionCode(currentVersion)
                             if (ver < 16) {
-                                migrateProviders() // Flush incorrect providers
+                                // Migrate to stop keys if still using the old system
+                                migrateStopKeys()
+                                // Migrate providers to hash based IDs
+                                migrateProviders()
                             }
                             if (ver < currentVersion) {
                                 shouldShowChangelog.value = true
@@ -202,7 +180,41 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // When migrating from the old singular Int version, the 1st and second value will always be the same because there's no "," to separate them
+    // This ensures it's migrated properly
+    fun migrateStopKeys() {
+        viewModelScope.launch {
+            val migratedFavStops = _userStore.favouriteStopsFlow.first().mapNotNull {
+                if (it.stopId == it.providerId) {
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            if (migratedFavStops.isNotEmpty() && !migratedFavStops.zip(favouriteStops.value)
+                    .all { (a, b) -> a.stopId == b.stopId && a.providerId == b.providerId }
+            ) {
+                Log.d(LogTags.MoveModel.name, "Migrating fav stops to StopKeys")
+                _userStore.saveFavouriteStops(migratedFavStops)
+            }
+
+            val migratedLastStops = _userStore.lastStopsFlow.first().mapNotNull {
+                if (it.stopId == it.providerId) {
+                    stops.value.find { stopItem -> stopItem.id == it.stopId }?.toKey()
+                } else it
+            }
+
+            if (migratedLastStops.isNotEmpty() && !migratedLastStops.zip(lastStops.value)
+                    .all { (a, b) -> a.stopId == b.stopId && a.providerId == b.providerId }
+            ) {
+                Log.d(LogTags.MoveModel.name, "Migrating last stops to StopKeys")
+                _userStore.saveLastStops(migratedLastStops)
+            }
+        }
+    }
+
     fun migrateProviders() {
+        Log.d(LogTags.MoveModel.name, "Migrating providers")
+
         val oldSavedProviders = savedProviders.value.toMutableList()
         val providerList = fetchProviderList(providerRepo.value)
         val oldFavStops = favouriteStops.value
@@ -273,14 +285,6 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun loadProvidersFromDb() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _providerDao.getAllProviders().collect { entities ->
-                providers.value = entities.map { it.toProviderItem() }
-            }
-        }
-    }
-
     fun fetchInfoForProviders(providerIds: List<Int>) {
         if (providers.value.isEmpty() && providerIds.isNotEmpty()) {
             Log.w(
@@ -309,6 +313,8 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
                     LogTags.MoveModel.name,
                     "Provider with ID $id not found in current list for fetching info."
                 )
+                // Clear it from the DB if it can't be found
+                viewModelScope.launch { _providerDao.deleteProviderById(id) }
                 return@forEach
             }
 
@@ -561,7 +567,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
         _stopsToLoad += favouriteStops.value
         // Start the timer
         Timer().schedule(
-            delay = 1000,
+            delay = 2500,
             period = 15000,
             action = {
                 Log.d(
