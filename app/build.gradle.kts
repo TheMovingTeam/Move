@@ -20,6 +20,16 @@ android {
         generateLocaleConfig = true
     }
 
+    splits {
+        abi {
+            isEnable = true
+
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
@@ -28,8 +38,8 @@ android {
         applicationId = "io.github.azakidev.move"
         minSdk = 28
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.0"
+        versionCode = 18
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")

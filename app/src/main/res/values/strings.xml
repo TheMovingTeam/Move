@@ -74,8 +74,9 @@
     <string name="changelogHistory">Previous changelogs</string>
 
     <string-array name="changelogItems">
-        <item>Changed internal representation of providers and added a migration from the older models</item>
-        <item>Added a button to quickly navigate to a selected stop in Google Maps</item>
+        <item>Add support for per-app languages.</item>
+        <item>Specified region of Spanish translation.</item>
+        <item>Added Polish translation.</item>
         <item>UI fixes and improvements</item>
     </string-array>
 
