@@ -16,6 +16,10 @@ android {
         compose = true
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
