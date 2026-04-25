@@ -2,7 +2,7 @@
     <string name="app_name" translatable="false">Move</string>
     <string name="welcomeTo">Welcome to</string>
     <string name="start">Cool! Let\'s get started</string>
-    <string name="chooseProvider">Choose a least one provider</string>
+    <string name="chooseProvider">Choose at least one provider</string>
     <string name="whatIsMove">What is Move?</string>
 
 
