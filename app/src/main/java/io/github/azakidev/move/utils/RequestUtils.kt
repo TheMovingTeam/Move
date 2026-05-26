@@ -5,6 +5,7 @@ import android.util.Log
 import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineTime
+import io.github.azakidev.move.data.items.ProviderGroup
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.ProviderRepo
 import io.github.azakidev.move.data.items.StopItem
@@ -76,6 +77,29 @@ fun fetchProviderList(
         Json.decodeFromString<ProviderRepo>(providerListJson.string())
 
     return providerNameResponse.providers
+}
+
+fun fetchProviderGroups(
+    currentRepoUrl: String,
+): List<ProviderGroup> {
+    val client = OkHttpClient()
+
+    val providerListRequest = Request.Builder()
+        .get()
+        .url("$currentRepoUrl/providers.json")
+        .build()
+
+    val providerListJson = client.newCall(providerListRequest).execute().body
+
+    if (providerListJson == null) {
+        Log.e(LogTags.Networking.name, "ProviderListJson is null, providers couldn't be fetched!")
+        return emptyList()
+    }
+
+    val providerListResponse =
+        Json.decodeFromString<ProviderRepo>(providerListJson.string())
+
+    return providerListResponse.groups
 }
 
 fun fetchRemoteProviders(

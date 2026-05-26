@@ -24,6 +24,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import io.github.azakidev.move.R
 import io.github.azakidev.move.data.MoveViewModel
+import io.github.azakidev.move.data.items.ProviderGroup
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.ui.components.common.ProvidersList
 import java.util.Timer
@@ -86,15 +87,17 @@ fun ProvidersPage(
             paddingValues = paddingValues,
             providerRepo = model.providerRepo.collectAsState().value,
             providers = model.providers.collectAsState().value,
+            providerGroups = model.providerGroups.collectAsState().value,
             savedProviders = model.savedProviders.collectAsState().value,
-            onFavoriteClick = {
+            scrollBehavior = scrollBehavior,
+            onFavoriteProviderClick = {
                 if (it !in model.savedProviders.value) {
                     model.addSavedProvider(it)
                 } else {
                     model.removeSavedProvider(it)
                 }
             },
-            scrollBehavior = scrollBehavior
+            onFavoriteGroupClick = {} // TODO
         )
     }
 }
@@ -115,6 +118,15 @@ fun ProvidersPagePreview() {
             name = "A provider that happens to have a really long name that's kinda silly"
         )
     )
+    val providerGroup = ProviderGroup(
+        "Dummy group",
+        listOf(
+            "FictionalProvider",
+            "PossibleProvider",
+            "A provider that happens to have a really long name that's kinda silly"
+        )
+    )
+
     val savedProviders = emptyList<Int>()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
@@ -151,9 +163,11 @@ fun ProvidersPagePreview() {
             ProvidersList(
                 providerRepo = "",
                 providers = providers,
+                providerGroups = listOf(providerGroup),
                 savedProviders = savedProviders,
-                onFavoriteClick = {},
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                onFavoriteGroupClick = {},
+                onFavoriteProviderClick = {}
             )
         }
     }

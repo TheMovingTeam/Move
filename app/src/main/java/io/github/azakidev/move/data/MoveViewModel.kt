@@ -16,12 +16,14 @@ import io.github.azakidev.move.data.items.Capabilities
 import io.github.azakidev.move.data.items.LineItem
 import io.github.azakidev.move.data.items.LineResponse
 import io.github.azakidev.move.data.items.MapStyle
+import io.github.azakidev.move.data.items.ProviderGroup
 import io.github.azakidev.move.data.items.ProviderItem
 import io.github.azakidev.move.data.items.StopItem
 import io.github.azakidev.move.data.items.StopKey
 import io.github.azakidev.move.data.items.StopResponse
 import io.github.azakidev.move.data.items.toKey
 import io.github.azakidev.move.utils.LogTags
+import io.github.azakidev.move.utils.fetchProviderGroups
 import io.github.azakidev.move.utils.fetchProviderList
 import io.github.azakidev.move.utils.fetchRemoteProviders
 import io.github.azakidev.move.utils.fetchStopTime
@@ -49,6 +51,9 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
     val providerRepo: StateFlow<String>
         field = MutableStateFlow("")
+
+    val providerGroups: StateFlow<List<ProviderGroup>>
+        field = MutableStateFlow(emptyList())
 
     val providers: StateFlow<List<ProviderItem>>
         field = MutableStateFlow(emptyList())
@@ -276,6 +281,7 @@ class MoveViewModel(application: Application) : AndroidViewModel(application) {
 
                 fetchInfoForProviders(savedProviders.value)
 
+                this@MoveViewModel.providerGroups.value = fetchProviderGroups(currentRepoUrl)
             } catch (e: Exception) {
                 Log.e(
                     LogTags.MoveModel.name,

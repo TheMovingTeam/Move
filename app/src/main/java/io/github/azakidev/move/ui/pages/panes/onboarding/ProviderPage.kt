@@ -83,14 +83,16 @@ fun ProviderPage(
             ProvidersList(
                 providerRepo = model.providerRepo.collectAsState().value,
                 providers = model.providers.collectAsState().value,
+                providerGroups = model.providerGroups.collectAsState().value,
                 savedProviders = model.savedProviders.collectAsState().value,
-                onFavoriteClick = {
+                onFavoriteProviderClick = {
                     if (it !in model.savedProviders.value) {
                         model.addSavedProvider(it)
                     } else {
                         model.removeSavedProvider(it)
                     }
                 },
+                onFavoriteGroupClick = { } // TODO
             )
         }
     )
